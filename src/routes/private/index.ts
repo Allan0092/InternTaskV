@@ -1,0 +1,13 @@
+import "dotenv/config";
+import jwt from "koa-jwt";
+import Router from "koa-router";
+import adminRouter from "./adminRoute.js";
+
+const privateRouter = new Router({ prefix: "/private" });
+
+privateRouter.use(jwt({ secret: process.env.SECRET_KEY ?? "some-secret-key" }));
+
+// Admin Router
+privateRouter.use(adminRouter.routes());
+
+export default privateRouter;

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc && nodemon dist/src/index.js",
+    "dev": "nodemon --exec \"tsx watch src/index.ts\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,19 +14,25 @@
   "type": "module",
   "devDependencies": {
     "@types/koa": "^3.0.1",
+    "@types/koa__cors": "^5.0.1",
+    "@types/koa-cors": "^0.0.6",
     "@types/node": "^25.2.3",
+    "@types/pg": "^8.16.0",
     "nodemon": "^3.1.11",
     "prisma": "^7.4.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "@koa/multer": "^4.0.0",
+    "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^7.4.0",
     "@types/koa-bodyparser": "^4.3.13",
     "@types/koa-router": "^7.4.9",
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.4",
     "koa": "^3.1.1",
     "koa-bodyparser": "^4.4.1",
@@ -35,6 +41,7 @@
     "koa-router": "^14.0.0",
     "koa-static": "^5.0.0",
     "nodemailer": "^8.0.1",
+    "pg": "^8.18.0",
     "uuid": "^13.0.0",
     "yup": "^1.7.1"
   }

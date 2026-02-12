@@ -12,3 +12,48 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@map("user")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Int
+  description String
+  category    Category
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  userId Int
+
+  @@map("product")
+}
+
+enum Role {
+  USER
+  SELLER
+  ADMIN
+}
+
+enum Category {
+  ELECTRONICS
+  FASHION
+  HOME
+  TOYS
+  BOOKS
+  FOOD
+}
