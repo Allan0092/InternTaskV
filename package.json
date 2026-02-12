@@ -1,0 +1,41 @@
+{
+  "name": "interntaskv",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc && nodemon dist/src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/koa": "^3.0.1",
+    "@types/node": "^25.2.3",
+    "nodemon": "^3.1.11",
+    "prisma": "^7.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@koa/cors": "^5.0.0",
+    "@koa/multer": "^4.0.0",
+    "@prisma/client": "^7.4.0",
+    "@types/koa-bodyparser": "^4.3.13",
+    "@types/koa-router": "^7.4.9",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.4",
+    "koa": "^3.1.1",
+    "koa-bodyparser": "^4.4.1",
+    "koa-cors": "^0.0.16",
+    "koa-jwt": "^4.0.4",
+    "koa-router": "^14.0.0",
+    "koa-static": "^5.0.0",
+    "nodemailer": "^8.0.1",
+    "uuid": "^13.0.0",
+    "yup": "^1.7.1"
+  }
+}
