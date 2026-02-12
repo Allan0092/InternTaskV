@@ -1,42 +1,76 @@
 import bcrypt from "bcryptjs";
-import { Prisma } from "../generated/prisma/client.js";
+import { Prisma, Role } from "../generated/prisma/client.js";
 import { prisma } from "./prisma.js";
 
 const userData: Prisma.UserCreateInput[] = [
   {
+    email: "admin@email.com",
+    name: "Admin User",
+    password: "Admin@123",
+    role: Role.ADMIN,
+  },
+  {
     email: "user1@email.com",
     name: "User One",
     password: "User1@123",
+    role: Role.SELLER,
   },
   {
     email: "user2@email.com",
     name: "User Two",
     password: "User2@123",
+    role: Role.SELLER,
   },
   {
     email: "user3@email.com",
     name: "User Three",
     password: "User3@123",
+    role: Role.SELLER,
   },
   {
     email: "user4@email.com",
     name: "User Four",
     password: "User4@123",
+    role: Role.SELLER,
   },
   {
     email: "user5@email.com",
     name: "User Five",
     password: "User5@123",
+    role: Role.SELLER,
   },
   {
     email: "user6@email.com",
     name: "User Six",
     password: "User6@123",
+    role: Role.SELLER,
   },
   {
     email: "user7@email.com",
     name: "User Seven",
     password: "User7@123",
+    role: Role.SELLER,
+  },
+  {
+    email: "user8@email.com",
+    name: "User Eight",
+    password: "User8@123",
+    role: Role.USER,
+  },
+  {
+    email: "user9@email.com",
+    name: "User Nine",
+    password: "User9@123",
+  },
+  {
+    email: "user10@email.com",
+    name: "User Ten",
+    password: "User10@123",
+  },
+  {
+    email: "user11@email.com",
+    name: "User Eleven",
+    password: "User11@123",
   },
 ];
 
@@ -131,8 +165,13 @@ for (const user of userData) {
   const hashedPassword = await bcrypt.hash(user.password, 10);
   await prisma.user.upsert({
     where: { email: user.email },
-    update: {},
-    create: { email: user.email, name: user.name, password: hashedPassword },
+    update: { role: user.role },
+    create: {
+      email: user.email,
+      name: user.name,
+      password: hashedPassword,
+      role: user.role,
+    },
   });
   console.log(`Upserted user ${user.name}`);
 }
