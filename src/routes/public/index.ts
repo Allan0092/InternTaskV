@@ -1,4 +1,7 @@
-import { getAllProducts } from "@/controller/productController.js";
+import {
+  getAllProductsWithSeller,
+  getProductBySeller,
+} from "@/controller/productController.js";
 import { login, registerUser } from "@/controller/userController.js";
 import { validateBody } from "@/middleware/validate.js";
 import loginSchema from "@/validation/loginValidation.js";
@@ -12,6 +15,7 @@ publicRouter.post("/login", validateBody(loginSchema), login);
 publicRouter.post("/register", validateBody(registerSchema), registerUser);
 
 // Product
-publicRouter.get("/products", getAllProducts);
+publicRouter.get("/products", getAllProductsWithSeller);
+publicRouter.post("/products", getProductBySeller);
 
 export default publicRouter;

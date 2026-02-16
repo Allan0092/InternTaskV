@@ -1,3 +1,4 @@
+import { getAllProducts } from "@/controller/productController.js";
 import { getUsers } from "@/controller/userController.js";
 import "dotenv";
 import Router from "koa-router";
@@ -9,7 +10,7 @@ adminRouter.get("/users", getUsers);
 adminRouter.delete("/users/:id");
 
 // Products
-adminRouter.get("/products");
+adminRouter.get("/products", getAllProducts);
 adminRouter.delete("/products/:id");
 
 export default adminRouter;
