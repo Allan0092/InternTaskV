@@ -37,9 +37,13 @@ const validateRole = (role: string) => {
   return async (ctx: Context, next: Next) => {
     try {
       const { role: givenRole } = ctx.state.user;
-      if (role !== givenRole) throw new AppError("Role not authorized", 401);
-
-      await next();
+      if (givenRole === "ADMIN") {
+        await next();
+      } else if (role === givenRole) {
+        await next();
+      } else {
+        throw new AppError("Role not authorized", 401);
+      }
     } catch (e: Error | AppError | any) {
       ctx.response.status = e.status ?? 400;
       ctx.body = generateResponseBody({

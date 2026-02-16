@@ -17,4 +17,16 @@ const saveUser = async (userData: UserCreateInput) => {
   return user;
 };
 
-export { findAllUsers, findUserByEmail, saveUser };
+const removeUserbyId = async (id: number) => {
+  const user = await prisma.user.delete({ where: { id: id } });
+  return user;
+};
+
+// const updateUserbyEmail = async (email: string, data: {}) => {
+//   const user = await findUserByEmail(email)
+//   if (!user) throw new AppError("Email not found.")
+
+//   const updatedUser =
+// }
+
+export { findAllUsers, findUserByEmail, removeUserbyId, saveUser };
