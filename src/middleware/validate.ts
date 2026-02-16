@@ -1,3 +1,5 @@
+import { AppError } from "@/types/index.js";
+import { generateResponseBody } from "@/utils/index.js";
 import { Context, Next } from "koa";
 import * as yup from "yup";
 
@@ -31,4 +33,20 @@ const validateBody = <T extends yup.AnyObject>(schema: yup.ObjectSchema<T>) => {
   };
 };
 
-export { validateBody };
+const validateRole = (role: string) => {
+  return async (ctx: Context, next: Next) => {
+    try {
+      const { role: givenRole } = ctx.state.user;
+      if (role !== givenRole) throw new AppError("Role not authorized", 401);
+
+      await next();
+    } catch (e: Error | AppError | any) {
+      ctx.response.status = e.status ?? 400;
+      ctx.body = generateResponseBody({
+        message: e instanceof AppError ? e.message : "You are not authorised.",
+      });
+    }
+  };
+};
+
+export { validateBody, validateRole };

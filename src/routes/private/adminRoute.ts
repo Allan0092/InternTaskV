@@ -1,13 +1,15 @@
+import { getUsers } from "@/controller/userController.js";
+import "dotenv";
 import Router from "koa-router";
 
 const adminRouter = new Router({ prefix: "/admin" });
 
 // Users
-adminRouter.get("/admin/users");
-adminRouter.delete("/admin/users/:id");
+adminRouter.get("/users", getUsers);
+adminRouter.delete("/users/:id");
 
 // Products
-adminRouter.get("/admin/products");
-adminRouter.delete("/admin/products/:id");
+adminRouter.get("/products");
+adminRouter.delete("/products/:id");
 
 export default adminRouter;

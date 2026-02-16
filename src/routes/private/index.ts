@@ -1,3 +1,4 @@
+import { validateRole } from "@/middleware/validate.js";
 import "dotenv/config";
 import jwt from "koa-jwt";
 import Router from "koa-router";
@@ -8,6 +9,6 @@ const privateRouter = new Router({ prefix: "/private" });
 privateRouter.use(jwt({ secret: process.env.SECRET_KEY ?? "some-secret-key" }));
 
 // Admin Router
-privateRouter.use(adminRouter.routes());
+privateRouter.use(validateRole("ADMIN"), adminRouter.routes());
 
 export default privateRouter;
