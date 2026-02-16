@@ -1,6 +1,12 @@
 import * as yup from "yup";
 
 const registerSchema = yup.object().shape({
+  name: yup
+    .string()
+    .required()
+    .min(3, "Name must be atleast 3 characters")
+    .max(30, "Name must not be more than 30 characeters"),
+
   email: yup
     .string()
     .email("Please enter a valid email address")
@@ -21,6 +27,8 @@ const registerSchema = yup.object().shape({
     .string()
     .oneOf([yup.ref("password")], "Passwords must match")
     .required("Please confirm your password"),
+
+  role: yup.string().oneOf(["ADMIN", "SELLER", "USER"], "Invalid role."),
 });
 
 export default registerSchema;

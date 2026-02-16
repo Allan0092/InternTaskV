@@ -1,4 +1,6 @@
-import { findAllUsers, findUserByEmail } from "@/model/User.js";
+import { Role } from "@/generated/prisma/enums.js";
+import { findAllUsers, findUserByEmail, saveUser } from "@/model/User.js";
+import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import bcrypt from "bcryptjs";
 import "dotenv";
@@ -6,8 +8,15 @@ import jwt from "jsonwebtoken";
 import { Context } from "koa";
 
 const getUsers = async (ctx: Context) => {
-  const users = await findAllUsers();
-  ctx.body = generateResponseBody({ success: true, data: users });
+  try {
+    const users = await findAllUsers();
+    ctx.body = generateResponseBody({ success: true, data: users });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 500;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not fetch users.",
+    });
+  }
 };
 
 const login = async (ctx: Context) => {
@@ -18,13 +27,13 @@ const login = async (ctx: Context) => {
     };
 
     const user = await findUserByEmail(email);
-    if (!user) throw new Error("Email not found.");
+    if (!user) throw new AppError("Email not found.", 401);
 
     const passwordMatch: boolean = await bcrypt.compare(
       password,
       user.password,
     );
-    if (!passwordMatch) throw new Error("Password does not match.");
+    if (!passwordMatch) throw new AppError("Password does not match.", 401);
 
     const SECRET_KEY: string = process.env.SECRET_KEY ?? "my-secret-key";
     const token = jwt.sign(
@@ -38,16 +47,45 @@ const login = async (ctx: Context) => {
       message: "Login successful",
       data: { token: token },
     });
-  } catch (e: Error | any) {
-    ctx.response.status = 401;
-    ctx.body = generateResponseBody({ message: e.message });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not login",
+    });
   }
 };
 
 const registerUser = async (ctx: Context) => {
   try {
-  } catch (e: Error | any) {
-    ctx.body = generateResponseBody({ message: e.message });
+    const { name, email, password, role } = ctx.request.body as {
+      name: string;
+      email: string;
+      password: string;
+      role: Role;
+    };
+
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) throw new AppError("Email already exists");
+
+    const user = await saveUser({
+      name: name,
+      email: email,
+      password: password,
+      role: role,
+    });
+
+    if (!user) throw new Error();
+
+    ctx.response.status = 201;
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "User registered successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not register user",
+    });
   }
 };
-export { getUsers, login };
+export { getUsers, login, registerUser };

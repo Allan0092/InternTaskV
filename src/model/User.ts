@@ -12,8 +12,9 @@ const findUserByEmail = async (email: string): Promise<User | null> => {
   return user;
 };
 
-const saveUser = async (user: UserCreateInput) => {
-  await prisma.user.create({ data: user });
+const saveUser = async (userData: UserCreateInput) => {
+  const user = await prisma.user.create({ data: userData });
+  return user;
 };
 
 export { findAllUsers, findUserByEmail, saveUser };
