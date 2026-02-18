@@ -4,6 +4,7 @@ import Koa from "koa";
 import parser from "koa-bodyparser";
 import router from "./routes/index.js";
 import { logger, loggerMiddleware } from "./utils/logger.js";
+import { config } from "./validation/dotEnvValidation.js";
 
 const app = new Koa();
 
@@ -19,6 +20,6 @@ app.use((ctx) => {
   ctx.body = "hello world";
 });
 
-app.listen(process.env.SERVER_PORT);
-
-console.log(`Server running at http://localhost:${process.env.SERVER_PORT}`);
+app.listen(config.server_port, () => {
+  console.log(`Server running on port ${config.server_port}`);
+});
