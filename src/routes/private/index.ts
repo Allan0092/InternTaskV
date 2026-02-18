@@ -5,7 +5,7 @@ import Router from "koa-router";
 import adminRouter from "./adminRoute.js";
 import sellerRouter from "./sellerRoute.js";
 
-const privateRouter = new Router({ prefix: "/private" });
+const privateRouter = new Router();
 
 privateRouter.use(jwt({ secret: process.env.SECRET_KEY ?? "some-secret-key" }));
 

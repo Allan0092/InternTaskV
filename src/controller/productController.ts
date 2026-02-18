@@ -1,9 +1,15 @@
 import { Category } from "@/generated/prisma/enums.js";
-import { ProductCreateInput } from "@/generated/prisma/models.js";
+import {
+  ProductCreateInput,
+  ProductUpdateInput,
+} from "@/generated/prisma/models.js";
 import {
   createProduct,
   findAllProducts,
   findAllProductsWithSeller,
+  findAndDeleteProduct,
+  findAndDisableProduct,
+  findAndUpdateProduct,
   findProductsBySeller,
 } from "@/model/Product.js";
 import { findUserByEmail } from "@/model/User.js";
@@ -101,9 +107,68 @@ const addProduct = async (ctx: Context) => {
   }
 };
 
+const updateProduct = async (ctx: Context) => {
+  try {
+    const id: number = parseInt(ctx.params.id);
+    const productData: ProductUpdateInput = ctx.request
+      .body as ProductUpdateInput;
+
+    const product = await findAndUpdateProduct(id, productData);
+    if (!product) throw new AppError("Could not find product");
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "product updated successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      error:
+        e instanceof AppError ? e.message : "Could not update product details",
+    });
+  }
+};
+
+const adminDeleteProduct = async (ctx: Context) => {
+  try {
+    const id: number = parseInt(ctx.params.id);
+    const product = await findAndDeleteProduct(id);
+    if (!product) throw new AppError("Product not found.");
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "product deleted successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      error: e instanceof AppError ? e.message : "Could not delete product",
+    });
+  }
+};
+
+const softDeleteProduct = async (ctx: Context) => {
+  try {
+    const id: number = parseInt(ctx.params.id);
+    const product = await findAndDisableProduct(id);
+    if (!product) throw new AppError("Product not found.");
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "product deleted successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      error: e instanceof AppError ? e.message : "Could not delete product",
+    });
+  }
+};
+
 export {
   addProduct,
+  adminDeleteProduct,
   getAllProducts,
   getAllProductsWithSeller,
   getProductBySeller,
+  softDeleteProduct,
+  updateProduct,
 };
