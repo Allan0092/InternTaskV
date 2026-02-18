@@ -1,3 +1,4 @@
+import { findProductSeller } from "@/model/Product.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import { Context, Next } from "koa";
@@ -53,4 +54,26 @@ const validateRole = (role: string) => {
   };
 };
 
-export { validateBody, validateRole };
+const validateUser = async (ctx: Context, next: Next) => {
+  try {
+    const productId = parseInt(ctx.params.id);
+    const user = await findProductSeller(productId);
+    if (!user) throw new AppError("Seller of product not found.");
+
+    const { email: givenEmail } = ctx.state.user;
+    if (ctx.state.user.role === "ADMIN") {
+      await next();
+    } else if (user.email === givenEmail) {
+      await next();
+    } else {
+      throw new AppError("User not authorized for this action", 401);
+    }
+  } catch (e: Error | AppError | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      error: e instanceof AppError ? e.message : "You are not authorised.",
+    });
+  }
+};
+
+export { validateBody, validateRole, validateUser };

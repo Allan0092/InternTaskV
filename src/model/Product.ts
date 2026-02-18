@@ -1,4 +1,4 @@
-import { Category, Product } from "@/generated/prisma/client.js";
+import { Category, Product, User } from "@/generated/prisma/client.js";
 import {
   ProductCreateInput,
   ProductUpdateInput,
@@ -6,7 +6,10 @@ import {
 import { prisma } from "@/prisma/prisma.js";
 
 const findAllProducts = async (): Promise<Product[]> => {
-  const products = await prisma.product.findMany({ include: { user: true } });
+  const products = await prisma.product.findMany({
+    include: { user: true },
+    orderBy: { id: "asc" },
+  });
   return products;
 };
 
@@ -21,6 +24,7 @@ const findAllProductsWithSeller = async (): Promise<ProductUpdateInput[]> => {
   const products = await prisma.product.findMany({
     where: { deletedAt: null },
     include: { user: { select: { name: true } } },
+    orderBy: { id: "asc" },
   });
   return products.map((product) => ({
     ...product,
@@ -75,6 +79,16 @@ const findAndEnableProduct = async (productId: number) => {
   return product;
 };
 
+const findProductSeller = async (
+  productId: number,
+): Promise<User | undefined> => {
+  const user = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { user: true },
+  });
+  return user?.user;
+};
+
 export {
   createProduct,
   findAllProducts,
@@ -85,4 +99,5 @@ export {
   findAndUpdateProduct,
   findProductsByCategory,
   findProductsBySeller,
+  findProductSeller,
 };
