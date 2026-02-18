@@ -89,9 +89,23 @@ const findProductSeller = async (
   return user?.user;
 };
 
+const filterProductByCategory = async (category: Category) => {
+  const products = await prisma.product.findMany({
+    where: { category: category },
+  });
+  return products;
+};
+
+const findAllProductsByPagination = async (page: number = 1) => {
+  const products = await prisma.product.findMany({ skip: page * 10, take: 10 });
+  return products;
+};
+
 export {
   createProduct,
+  filterProductByCategory,
   findAllProducts,
+  findAllProductsByPagination,
   findAllProductsWithSeller,
   findAndDeleteProduct,
   findAndDisableProduct,

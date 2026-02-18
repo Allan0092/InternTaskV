@@ -6,10 +6,12 @@ import {
 import {
   createProduct,
   findAllProducts,
+  findAllProductsByPagination,
   findAllProductsWithSeller,
   findAndDeleteProduct,
   findAndDisableProduct,
   findAndUpdateProduct,
+  findProductsByCategory,
   findProductsBySeller,
 } from "@/model/Product.js";
 import { findUserByEmail } from "@/model/User.js";
@@ -163,12 +165,52 @@ const softDeleteProduct = async (ctx: Context) => {
   }
 };
 
+const getProductsByPage = async (ctx: Context) => {
+  try {
+    const pageNum = parseInt(ctx.params.page);
+    const products = await findAllProductsByPagination(pageNum);
+    if (!products) throw new Error();
+
+    ctx.body = generateResponseBody({
+      success: true,
+      data: products,
+      message: `Products from page ${pageNum} retrieved`,
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status;
+    ctx.body = generateResponseBody({
+      error: e instanceof AppError ? e.message : "Could not get products",
+    });
+  }
+};
+
+const getProductByCategory = async (ctx: Context) => {
+  try {
+    const category = ctx.params.category;
+    const products = await findProductsByCategory(category);
+
+    if (!products) throw new Error();
+
+    ctx.body = generateResponseBody({
+      data: products,
+      message: "Products retrieved successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status;
+    ctx.body = generateResponseBody({
+      error: e instanceof AppError ? e.message : "Could not get products",
+    });
+  }
+};
+
 export {
   addProduct,
   adminDeleteProduct,
   getAllProducts,
   getAllProductsWithSeller,
+  getProductByCategory,
   getProductBySeller,
+  getProductsByPage,
   softDeleteProduct,
   updateProduct,
 };
