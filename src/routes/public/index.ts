@@ -6,7 +6,7 @@ import {
   getProductsByRange,
 } from "@/controller/productController.js";
 import { login, registerUser } from "@/controller/userController.js";
-import { validateBody } from "@/middleware/validate.js";
+import { validateBody, validateQueryParams } from "@/middleware/validate.js";
 import loginSchema from "@/validation/loginValidation.js";
 import { priceRangeSchema } from "@/validation/priceRangeValidation.js";
 import registerSchema from "@/validation/registerValidation.js";
@@ -23,9 +23,9 @@ publicRouter.get("/products", getAllProductsWithSeller);
 publicRouter.post("/products", getProductBySeller);
 publicRouter.get("/products/:page", getProductsByPage);
 publicRouter.get("/products/category/:category", getProductByCategory);
-publicRouter.post(
-  "/products/price",
-  validateBody(priceRangeSchema),
+publicRouter.get(
+  "/products/search/price",
+  validateQueryParams(priceRangeSchema),
   getProductsByRange,
 );
 

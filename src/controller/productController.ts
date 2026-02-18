@@ -206,7 +206,8 @@ const getProductByCategory = async (ctx: Context) => {
 
 const getProductsByRange = async (ctx: Context) => {
   try {
-    const { min, max } = ctx.request.body as { min: number; max: number };
+    const min = Number(ctx.query.min);
+    const max = Number(ctx.query.max);
     const products = await findAllProductsWithSeller();
     const selectedProducts = products.filter((p) => {
       const price = Number(p.price);

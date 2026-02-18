@@ -4,6 +4,36 @@ import { generateResponseBody } from "@/utils/index.js";
 import { Context, Next } from "koa";
 import * as yup from "yup";
 
+const validateQueryParams = <T extends yup.AnyObject>(
+  schema: yup.ObjectSchema<T>,
+) => {
+  return async (ctx: Context, next: Next) => {
+    try {
+      const validated = await schema.validate(ctx.query, {
+        abortEarly: false,
+        stripUnknown: true,
+        strict: false,
+      });
+
+      ctx.request.body = validated;
+
+      await next();
+    } catch (err) {
+      if (err instanceof yup.ValidationError) {
+        ctx.status = 400;
+        ctx.body = generateResponseBody({
+          message: "Validation failed",
+          error: err.message,
+        });
+        return;
+      }
+
+      // Let global error handler catch real crashes
+      throw err;
+    }
+  };
+};
+
 const validateBody = <T extends yup.AnyObject>(schema: yup.ObjectSchema<T>) => {
   return async (ctx: Context, next: Next) => {
     try {
@@ -76,4 +106,4 @@ const validateUser = async (ctx: Context, next: Next) => {
   }
 };
 
-export { validateBody, validateRole, validateUser };
+export { validateBody, validateQueryParams, validateRole, validateUser };
