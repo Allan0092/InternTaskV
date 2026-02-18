@@ -34,9 +34,9 @@ const findAllProductsWithSeller = async (): Promise<ProductUpdateInput[]> => {
   }));
 };
 
-const findProductsBySeller = async (seller: string) => {
+const findProductsBySeller = async (id: number) => {
   const products = await prisma.product.findMany({
-    where: { user: { name: seller } },
+    where: { user: { id: id } },
   });
   return products;
 };
@@ -96,8 +96,14 @@ const filterProductByCategory = async (category: Category) => {
   return products;
 };
 
-const findAllProductsByPagination = async (page: number = 1) => {
-  const products = await prisma.product.findMany({ skip: page * 10, take: 10 });
+const findAllProductsByPagination = async (
+  page: number = 1,
+  limit: number = 10,
+) => {
+  const products = await prisma.product.findMany({
+    skip: page * limit,
+    take: limit,
+  });
   return products;
 };
 

@@ -38,7 +38,13 @@ const getAllProducts = async (ctx: Context) => {
 
 const getAllProductsWithSeller = async (ctx: Context) => {
   try {
-    const products = await findAllProductsWithSeller();
+    const page = Number(ctx.query.page ? ctx.query.page : 1);
+    const limit = Number(ctx.query.limit ? ctx.query.limit : 10);
+
+    if (Number.isNaN(page) || page < 1)
+      throw new AppError("Page number must be a positive integer");
+
+    const products = await findAllProductsByPagination(page, limit);
 
     ctx.body = generateResponseBody({
       success: true,
@@ -55,7 +61,7 @@ const getAllProductsWithSeller = async (ctx: Context) => {
 
 const getProductBySeller = async (ctx: Context) => {
   try {
-    const { seller } = ctx.request.body as { seller: string };
+    const seller = Number(ctx.params.id);
     const products = await findProductsBySeller(seller);
 
     ctx.body = generateResponseBody({
