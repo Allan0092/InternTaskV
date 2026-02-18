@@ -168,6 +168,7 @@ const softDeleteProduct = async (ctx: Context) => {
 const getProductsByPage = async (ctx: Context) => {
   try {
     const pageNum = parseInt(ctx.params.page);
+    if (!pageNum) throw new AppError("Enter valid page number.");
     const products = await findAllProductsByPagination(pageNum);
     if (!products) throw new Error();
 
@@ -177,7 +178,7 @@ const getProductsByPage = async (ctx: Context) => {
       message: `Products from page ${pageNum} retrieved`,
     });
   } catch (e: AppError | Error | any) {
-    ctx.response.status = e.status;
+    ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
       error: e instanceof AppError ? e.message : "Could not get products",
     });
@@ -203,6 +204,27 @@ const getProductByCategory = async (ctx: Context) => {
   }
 };
 
+const getProductsByRange = async (ctx: Context) => {
+  try {
+    const { min, max } = ctx.request.body as { min: number; max: number };
+    const products = await findAllProductsWithSeller();
+    const selectedProducts = products.filter((p) => {
+      const price = Number(p.price);
+      return price >= min && price <= max;
+    });
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Products retrieved successfully",
+      data: selectedProducts,
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      error: e instanceof AppError ? e.message : "Could not get products",
+    });
+  }
+};
+
 export {
   addProduct,
   adminDeleteProduct,
@@ -211,6 +233,7 @@ export {
   getProductByCategory,
   getProductBySeller,
   getProductsByPage,
+  getProductsByRange,
   softDeleteProduct,
   updateProduct,
 };
