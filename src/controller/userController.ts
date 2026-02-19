@@ -9,7 +9,10 @@ import { Context } from "koa";
 
 const getUsers = async (ctx: Context) => {
   try {
-    const users = await findAllUsers();
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limit ?? 10);
+
+    const users = await findAllUsers(page, limit);
     ctx.body = generateResponseBody({ success: true, data: users });
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 500;
@@ -67,10 +70,12 @@ const registerUser = async (ctx: Context) => {
     const existingUser = await findUserByEmail(email);
     if (existingUser) throw new AppError("Email already exists");
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await saveUser({
       name: name,
       email: email,
-      password: password,
+      password: hashedPassword,
       role: role,
     });
 

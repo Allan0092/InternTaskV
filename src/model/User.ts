@@ -2,8 +2,12 @@ import { User } from "@/generated/prisma/client.js";
 import { UserCreateInput } from "@/generated/prisma/models.js";
 import { prisma } from "@/prisma/prisma.js";
 
-const findAllUsers = async (): Promise<User[]> => {
-  const users = await prisma.user.findMany({ orderBy: { id: "asc" } });
+const findAllUsers = async (page = 1, limit = 10): Promise<User[]> => {
+  const users = await prisma.user.findMany({
+    orderBy: { id: "asc" },
+    take: limit,
+    skip: (page - 1) * limit,
+  });
   return users;
 };
 

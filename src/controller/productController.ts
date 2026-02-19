@@ -6,7 +6,6 @@ import {
 import {
   createProduct,
   findAllProducts,
-  findAllProductsByPagination,
   findAllProductsWithSeller,
   findAndDeleteProduct,
   findAndDisableProduct,
@@ -21,7 +20,10 @@ import { Context } from "koa";
 
 const getAllProducts = async (ctx: Context) => {
   try {
-    const products = await findAllProducts();
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limit ?? 10);
+
+    const products = await findAllProducts(page, limit);
 
     ctx.body = generateResponseBody({
       success: true,
@@ -44,7 +46,7 @@ const getAllProductsWithSeller = async (ctx: Context) => {
     if (Number.isNaN(page) || page < 1)
       throw new AppError("Page number must be a positive integer");
 
-    const products = await findAllProductsByPagination(page, limit);
+    const products = await findAllProducts(page, limit);
 
     ctx.body = generateResponseBody({
       success: true,
@@ -61,8 +63,10 @@ const getAllProductsWithSeller = async (ctx: Context) => {
 
 const getProductBySeller = async (ctx: Context) => {
   try {
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limti ?? 10);
     const seller = Number(ctx.params.id);
-    const products = await findProductsBySeller(seller);
+    const products = await findProductsBySeller(seller, page, limit);
 
     ctx.body = generateResponseBody({
       success: true,
@@ -171,30 +175,13 @@ const softDeleteProduct = async (ctx: Context) => {
   }
 };
 
-const getProductsByPage = async (ctx: Context) => {
-  try {
-    const pageNum = parseInt(ctx.params.page);
-    if (!pageNum) throw new AppError("Enter valid page number.");
-    const products = await findAllProductsByPagination(pageNum);
-    if (!products) throw new Error();
-
-    ctx.body = generateResponseBody({
-      success: true,
-      data: products,
-      message: `Products from page ${pageNum} retrieved`,
-    });
-  } catch (e: AppError | Error | any) {
-    ctx.response.status = e.status ?? 400;
-    ctx.body = generateResponseBody({
-      message: e instanceof AppError ? e.message : "Could not get products",
-    });
-  }
-};
-
 const getProductByCategory = async (ctx: Context) => {
   try {
     const category = ctx.params.category;
-    const products = await findProductsByCategory(category);
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limit ?? 10);
+
+    const products = await findProductsByCategory(category, page, limit);
 
     if (!products) throw new Error();
 
@@ -214,7 +201,10 @@ const getProductsByRange = async (ctx: Context) => {
   try {
     const min = Number(ctx.query.min);
     const max = Number(ctx.query.max);
-    const products = await findAllProductsWithSeller();
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limit ?? 10);
+
+    const products = await findAllProductsWithSeller(page, limit);
     const selectedProducts = products.filter((p) => {
       const price = Number(p.price);
       return price >= min && price <= max;
@@ -239,7 +229,6 @@ export {
   getAllProductsWithSeller,
   getProductByCategory,
   getProductBySeller,
-  getProductsByPage,
   getProductsByRange,
   softDeleteProduct,
   updateProduct,

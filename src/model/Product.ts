@@ -5,26 +5,40 @@ import {
 } from "@/generated/prisma/models.js";
 import { prisma } from "@/prisma/prisma.js";
 
-const findAllProducts = async (): Promise<Product[]> => {
+const findAllProducts = async (page = 1, limit = 10): Promise<Product[]> => {
   const products = await prisma.product.findMany({
     include: { user: true },
     orderBy: { id: "asc" },
+    skip: (page - 1) * limit,
+    take: limit,
+    where: { deletedAt: null },
   });
   return products;
 };
 
-const findProductsByCategory = async (category: Category) => {
+const findProductsByCategory = async (
+  category: Category,
+  page = 1,
+  limit = 10,
+) => {
   const products = await prisma.product.findMany({
-    where: { category: category },
+    where: { category: category, deletedAt: null },
+    skip: (page - 1) * limit,
+    take: limit,
   });
   return products;
 };
 
-const findAllProductsWithSeller = async (): Promise<ProductUpdateInput[]> => {
+const findAllProductsWithSeller = async (
+  page = 1,
+  limit = 10,
+): Promise<ProductUpdateInput[]> => {
   const products = await prisma.product.findMany({
     where: { deletedAt: null },
     include: { user: { select: { name: true } } },
     orderBy: { id: "asc" },
+    skip: (page - 1) * limit,
+    take: limit,
   });
   return products.map((product) => ({
     ...product,
@@ -34,9 +48,11 @@ const findAllProductsWithSeller = async (): Promise<ProductUpdateInput[]> => {
   }));
 };
 
-const findProductsBySeller = async (id: number) => {
+const findProductsBySeller = async (id: number, page = 1, limit = 10) => {
   const products = await prisma.product.findMany({
-    where: { user: { id: id } },
+    where: { user: { id: id }, deletedAt: null },
+    skip: (page - 1) * limit,
+    take: limit,
   });
   return products;
 };
@@ -89,30 +105,9 @@ const findProductSeller = async (
   return user?.user;
 };
 
-const filterProductByCategory = async (category: Category) => {
-  const products = await prisma.product.findMany({
-    where: { category: category },
-  });
-  return products;
-};
-
-const findAllProductsByPagination = async (
-  page: number = 1,
-  limit: number = 10,
-) => {
-  const products = await prisma.product.findMany({
-    skip: page * limit,
-    take: limit,
-    select: { deletedAt: undefined },
-  });
-  return products;
-};
-
 export {
   createProduct,
-  filterProductByCategory,
   findAllProducts,
-  findAllProductsByPagination,
   findAllProductsWithSeller,
   findAndDeleteProduct,
   findAndDisableProduct,
