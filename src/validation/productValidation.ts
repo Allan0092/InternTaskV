@@ -37,4 +37,30 @@ const updateProductSchema = yup.object().shape({
     ),
 });
 
-export { addProductSchema, updateProductSchema };
+const productCategorySchema = yup.object().shape({
+  category: yup
+    .string()
+    .required()
+    .oneOf(
+      Object.values(Category),
+      `Provided Category must be one of ${Object.values(Category)}`,
+    ),
+});
+
+const pageAndLimitSchema = yup.object().shape({
+  page: yup
+    .number()
+    .min(1, "Page number must be greater that 0")
+    .max(100, "page number must be less than 100"),
+  limit: yup
+    .number()
+    .min(1, "Page number must be greater that 0")
+    .max(20, "page number must be less than 100"),
+});
+
+export {
+  addProductSchema,
+  pageAndLimitSchema,
+  productCategorySchema,
+  updateProductSchema,
+};

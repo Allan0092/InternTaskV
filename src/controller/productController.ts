@@ -177,7 +177,9 @@ const softDeleteProduct = async (ctx: Context) => {
 
 const getProductByCategory = async (ctx: Context) => {
   try {
-    const category = ctx.params.category;
+    const category = ctx.query?.category as Category;
+    if (!category) throw new AppError("Category not found", 404);
+
     const page = Number(ctx.query.page ?? 1);
     const limit = Number(ctx.query.limit ?? 10);
 
@@ -190,7 +192,7 @@ const getProductByCategory = async (ctx: Context) => {
       message: "Products retrieved successfully.",
     });
   } catch (e: AppError | Error | any) {
-    ctx.response.status = e.status;
+    ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not get products",
     });
