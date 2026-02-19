@@ -28,7 +28,7 @@ const registerSchema = yup.object().shape({
     .oneOf([yup.ref("password")], "Passwords must match")
     .required("Please confirm your password"),
 
-  role: yup.string().oneOf(["ADMIN", "SELLER", "USER"], "Invalid role."),
+  role: yup.string().oneOf(["SELLER", "USER"], "Invalid role."),
 });
 
 export default registerSchema;

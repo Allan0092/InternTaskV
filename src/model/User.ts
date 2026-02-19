@@ -1,12 +1,16 @@
 import { User } from "@/generated/prisma/client.js";
-import { UserCreateInput } from "@/generated/prisma/models.js";
+import { UserCreateInput, UserUpdateInput } from "@/generated/prisma/models.js";
 import { prisma } from "@/prisma/prisma.js";
 
-const findAllUsers = async (page = 1, limit = 10): Promise<User[]> => {
+const findAllUsers = async (
+  page = 1,
+  limit = 10,
+): Promise<UserUpdateInput[]> => {
   const users = await prisma.user.findMany({
     orderBy: { id: "asc" },
     take: limit,
     skip: (page - 1) * limit,
+    omit: { password: true },
   });
   return users;
 };
