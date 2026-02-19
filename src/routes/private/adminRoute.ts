@@ -4,9 +4,10 @@ import {
 } from "@/controller/productController.js";
 import { getUsers } from "@/controller/userController.js";
 import "dotenv";
+import { Context } from "koa";
 import Router from "koa-router";
 
-const adminRouter = new Router({ prefix: "/admin" });
+const adminRouter = new Router<any, Context>({ prefix: "/admin" });
 
 // Users
 adminRouter.get("/users", getUsers);
