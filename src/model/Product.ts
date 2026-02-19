@@ -105,10 +105,31 @@ const findProductSeller = async (
   return user?.user;
 };
 
+const findAndAddPhoto = async (id: number, photos: string[]) => {
+  const currPhoto = await prisma.product.findUnique({
+    where: { id: id },
+    select: { picture: true },
+  });
+  if (
+    currPhoto?.picture.length === 1 &&
+    currPhoto?.picture[0] === "default.jpg"
+  ) {
+  } else {
+    currPhoto?.picture.forEach((p) => photos.push(p));
+  }
+  const product = await prisma.product.update({
+    where: { id: id },
+    data: { picture: photos },
+  });
+
+  return product;
+};
+
 export {
   createProduct,
   findAllProducts,
   findAllProductsWithSeller,
+  findAndAddPhoto,
   findAndDeleteProduct,
   findAndDisableProduct,
   findAndEnableProduct,

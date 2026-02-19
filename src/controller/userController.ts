@@ -30,13 +30,13 @@ const login = async (ctx: Context) => {
     };
 
     const user = await findUserByEmail(email);
-    if (!user) throw new AppError("Email not found.", 401);
+    if (!user) throw new AppError("Invalid Credentials", 401);
 
     const passwordMatch: boolean = await bcrypt.compare(
       password,
       user.password,
     );
-    if (!passwordMatch) throw new AppError("Password does not match.", 401);
+    if (!passwordMatch) throw new AppError("Invalid Credentials", 401);
 
     const SECRET_KEY: string = process.env.SECRET_KEY ?? "my-secret-key";
     const token = jwt.sign(

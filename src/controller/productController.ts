@@ -7,6 +7,7 @@ import {
   createProduct,
   findAllProducts,
   findAllProductsWithSeller,
+  findAndAddPhoto,
   findAndDeleteProduct,
   findAndDisableProduct,
   findAndUpdateProduct,
@@ -14,7 +15,7 @@ import {
   findProductsBySeller,
 } from "@/model/Product.js";
 import { findUserByEmail } from "@/model/User.js";
-import { AppError } from "@/types/index.js";
+import { AppError, CustomContext } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import { Context } from "koa";
 
@@ -40,11 +41,8 @@ const getAllProducts = async (ctx: Context) => {
 
 const getAllProductsWithSeller = async (ctx: Context) => {
   try {
-    const page = Number(ctx.query.page ? ctx.query.page : 1);
-    const limit = Number(ctx.query.limit ? ctx.query.limit : 10);
-
-    if (Number.isNaN(page) || page < 1)
-      throw new AppError("Page number must be a positive integer");
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limit ?? 10);
 
     const products = await findAllProducts(page, limit);
 
@@ -224,6 +222,34 @@ const getProductsByRange = async (ctx: Context) => {
   }
 };
 
+const uploadProductImages = async (ctx: Context & CustomContext) => {
+  try {
+    const user = ctx.state.user;
+    const productId = Number(ctx.query.id);
+    const files = ctx.files;
+    if (!files) throw new AppError("No photos provided.");
+
+    const photos: string[] = [];
+    if (files.photo) {
+      files.photo.forEach((p) => photos.push(p.filename));
+    }
+    console.log(photos);
+
+    const product = await findAndAddPhoto(productId, photos);
+
+    if (!product) throw new AppError("Product cannot be found.");
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "photos uploaded successfully",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not get products",
+    });
+  }
+};
+
 export {
   addProduct,
   adminDeleteProduct,
@@ -234,4 +260,5 @@ export {
   getProductsByRange,
   softDeleteProduct,
   updateProduct,
+  uploadProductImages,
 };
