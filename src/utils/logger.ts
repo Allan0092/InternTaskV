@@ -1,6 +1,7 @@
 import { Next } from "koa";
 import { Context } from "node:vm";
 import winston from "winston";
+import { generateResponseBody } from "./index.js";
 
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === "production" ? "info" : "debug",
@@ -65,7 +66,7 @@ const loggerMiddleware = async (ctx: Context, next: Next) => {
     // If no body was set and status is 404 → default 404
     if (ctx.status === 404 && !ctx.body) {
       ctx.status = 404;
-      ctx.body = { error: "Not Found" };
+      ctx.body = generateResponseBody({ message: "Not Found" });
     }
   } catch (err: any) {
     // Handle & log every error that happened during request
@@ -73,10 +74,10 @@ const loggerMiddleware = async (ctx: Context, next: Next) => {
     const message = err.message || "Internal Server Error";
 
     ctx.status = status;
-    ctx.body = {
-      error: message,
+    ctx.body = generateResponseBody({
+      message: message,
       ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
-    };
+    });
 
     // Log with useful context
     logger.error(`${status} - ${message}`, {

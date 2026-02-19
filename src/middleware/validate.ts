@@ -22,8 +22,7 @@ const validateQueryParams = <T extends yup.AnyObject>(
       if (err instanceof yup.ValidationError) {
         ctx.status = 400;
         ctx.body = generateResponseBody({
-          message: "Validation failed",
-          error: err.message,
+          message: err.message ?? "Validation failed",
         });
         return;
       }
@@ -51,7 +50,7 @@ const validateBody = <T extends yup.AnyObject>(schema: yup.ObjectSchema<T>) => {
       if (err instanceof yup.ValidationError) {
         ctx.status = 400;
         ctx.body = {
-          error: "Validation failed",
+          message: "Validation failed",
           details: err.errors, // array of messages
           // or more detailed: err.inner.map(e => ({ path: e.path, message: e.message }))
         };
@@ -101,7 +100,7 @@ const validateUser = async (ctx: Context, next: Next) => {
   } catch (e: Error | AppError | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "You are not authorised.",
+      message: e instanceof AppError ? e.message : "You are not authorised.",
     });
   }
 };

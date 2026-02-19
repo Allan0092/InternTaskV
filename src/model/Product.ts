@@ -103,6 +103,7 @@ const findAllProductsByPagination = async (
   const products = await prisma.product.findMany({
     skip: page * limit,
     take: limit,
+    select: { deletedAt: undefined },
   });
   return products;
 };

@@ -31,7 +31,7 @@ const getAllProducts = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 500;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "Could not load products",
+      message: e instanceof AppError ? e.message : "Could not load products",
     });
   }
 };
@@ -54,7 +54,7 @@ const getAllProductsWithSeller = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 500;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "Could not load products",
+      message: e instanceof AppError ? e.message : "Could not load products",
     });
   }
 };
@@ -72,7 +72,7 @@ const getProductBySeller = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 500;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "Could not fetch products",
+      message: e instanceof AppError ? e.message : "Could not fetch products",
     });
   }
 };
@@ -110,7 +110,7 @@ const addProduct = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "Product could not be added",
+      message: e instanceof AppError ? e.message : "Product could not be added",
     });
   }
 };
@@ -131,7 +131,7 @@ const updateProduct = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      error:
+      message:
         e instanceof AppError ? e.message : "Could not update product details",
     });
   }
@@ -149,7 +149,7 @@ const adminDeleteProduct = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "Could not delete product",
+      message: e instanceof AppError ? e.message : "Could not delete product",
     });
   }
 };
@@ -166,7 +166,7 @@ const softDeleteProduct = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "Could not delete product",
+      message: e instanceof AppError ? e.message : "Could not delete product",
     });
   }
 };
@@ -186,7 +186,7 @@ const getProductsByPage = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "Could not get products",
+      message: e instanceof AppError ? e.message : "Could not get products",
     });
   }
 };
@@ -205,7 +205,7 @@ const getProductByCategory = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "Could not get products",
+      message: e instanceof AppError ? e.message : "Could not get products",
     });
   }
 };
@@ -227,7 +227,7 @@ const getProductsByRange = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      error: e instanceof AppError ? e.message : "Could not get products",
+      message: e instanceof AppError ? e.message : "Could not get products",
     });
   }
 };
