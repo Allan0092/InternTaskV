@@ -85,7 +85,7 @@ const validateRole = (role: string) => {
 
 const validateUser = async (ctx: Context, next: Next) => {
   try {
-    const productId = parseInt(ctx.params.id);
+    const productId = parseInt(ctx.params.id ?? ctx.query.id);
     const user = await findProductSeller(productId);
     if (!user) throw new AppError("Seller of product not found.");
 
