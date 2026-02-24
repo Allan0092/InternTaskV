@@ -2,6 +2,7 @@ import {
   getAllProductsWithSeller,
   getProductByCategory,
   getProductBySeller,
+  getProductImage,
 } from "@/controller/productController.js";
 import { login, registerUser } from "@/controller/userController.js";
 import { validateBody, validateQueryParams } from "@/middleware/validate.js";
@@ -39,5 +40,6 @@ publicRouter.get(
   validateQueryParams(productCategorySchema),
   getProductByCategory,
 );
+publicRouter.get("/image", getProductImage);
 
 export default publicRouter;

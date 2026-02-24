@@ -16,7 +16,9 @@ import {
 import { findUserByEmail } from "@/model/User.js";
 import { AppError, CustomContext } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
+import fs from "fs/promises";
 import { Context } from "koa";
+import path from "node:path";
 
 const getAllProducts = async (ctx: Context) => {
   try {
@@ -241,11 +243,18 @@ const uploadProductImages = async (ctx: Context & CustomContext) => {
 
 const getProductImage = async (ctx: Context) => {
   try {
-    const id = ctx.query.id;
+    const name = ctx.query.name as string;
+    const filePath = path.join("public/uploads", name);
+    const buffer = await fs.readFile(filePath);
+
+    ctx.type = "image/jpg";
+    ctx.set("Content-Type", "image/jpeg");
+    ctx.body = buffer;
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      message: e instanceof AppError ? e.message : "Could not get products",
+      message:
+        e instanceof AppError ? e.message : "Could not get product image",
     });
   }
 };
@@ -257,6 +266,7 @@ export {
   getAllProductsWithSeller,
   getProductByCategory,
   getProductBySeller,
+  getProductImage,
   softDeleteProduct,
   updateProduct,
   uploadProductImages,
