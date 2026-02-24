@@ -15,7 +15,7 @@ import { Context } from "koa";
 import Router from "koa-router";
 
 const sellerRouter = new Router<any, Context & CustomContext>({
-  prefix: "/product",
+  prefix: "/products",
 });
 
 sellerRouter.post("/", validateBody(addProductSchema), addProduct);
@@ -29,8 +29,8 @@ sellerRouter.put(
 );
 
 // Upload Photos
-sellerRouter.post(
-  "/upload-files",
+sellerRouter.put(
+  "/:id/upload-images",
   validateUser,
   uploadPhoto.fields([{ name: "photo", maxCount: 12 }]),
   uploadProductImages,

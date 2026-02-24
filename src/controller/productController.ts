@@ -25,11 +25,17 @@ const getAllProducts = async (ctx: Context) => {
     const limit = Number(ctx.query.limit ?? 10);
 
     const products = await findAllProducts(page, limit);
+    const maxPages = Math.ceil(products.total / limit);
 
     ctx.body = generateResponseBody({
       success: true,
       message: "products retrieved successfully",
-      data: products,
+      data: {
+        products: products.products,
+        total: products.total,
+        page: page,
+        totalPages: maxPages,
+      },
     });
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 500;
@@ -45,11 +51,17 @@ const getAllProductsWithSeller = async (ctx: Context) => {
     const limit = Number(ctx.query.limit ?? 10);
 
     const products = await findAllProducts(page, limit);
+    const maxPages = Math.ceil(products.total / limit);
 
     ctx.body = generateResponseBody({
       success: true,
       message: "products retrieved successfully",
-      data: products,
+      data: {
+        products: products.products,
+        total: products.total,
+        page: page,
+        totalPages: maxPages,
+      },
     });
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 500;
@@ -224,8 +236,7 @@ const getProductsByRange = async (ctx: Context) => {
 
 const uploadProductImages = async (ctx: Context & CustomContext) => {
   try {
-    const user = ctx.state.user;
-    const productId = Number(ctx.query.id);
+    const productId = Number(ctx.params.id);
     const files = ctx.files;
     if (!files) throw new AppError("No photos provided.");
 

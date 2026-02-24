@@ -1,19 +1,20 @@
-import { Category, Product, User } from "@/generated/prisma/client.js";
+import { Category, User } from "@/generated/prisma/client.js";
 import {
   ProductCreateInput,
   ProductUpdateInput,
 } from "@/generated/prisma/models.js";
 import { prisma } from "@/prisma/prisma.js";
 
-const findAllProducts = async (page = 1, limit = 10): Promise<Product[]> => {
+const findAllProducts = async (page = 1, limit = 10) => {
+  const totalNum = await prisma.product.count();
   const products = await prisma.product.findMany({
-    include: { user: true },
+    include: { user: { select: { name: true } } },
     orderBy: { id: "asc" },
     skip: (page - 1) * limit,
     take: limit,
     where: { deletedAt: null },
   });
-  return products;
+  return { products: products, total: totalNum };
 };
 
 const findProductsByCategory = async (
