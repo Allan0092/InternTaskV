@@ -35,6 +35,7 @@ sellerRouter.put(
   uploadPhoto.fields([{ name: "photo", maxCount: 12 }]),
   uploadProductImages,
 );
+
 sellerRouter.delete("/:id", validateUser, softDeleteProduct);
 
 export default sellerRouter;

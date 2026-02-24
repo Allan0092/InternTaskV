@@ -6,7 +6,6 @@ import {
 import { login, registerUser } from "@/controller/userController.js";
 import { validateBody, validateQueryParams } from "@/middleware/validate.js";
 import loginSchema from "@/validation/loginValidation.js";
-import { priceRangeSchema } from "@/validation/priceRangeValidation.js";
 import {
   pageAndLimitSchema,
   productCategorySchema,
@@ -28,12 +27,15 @@ publicRouter.get(
   validateQueryParams(productCategorySchema),
   getAllProductsWithSeller,
 );
+
+// Get products sold by seller id
 publicRouter.get(
-  "/:id/products",
+  "/products/:id",
   validateQueryParams(pageAndLimitSchema),
-  validateQueryParams(priceRangeSchema),
   getProductBySeller,
 );
+
+// Get product image by providing image file name
 publicRouter.get("/image", getProductImage);
 
 export default publicRouter;
