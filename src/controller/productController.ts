@@ -54,8 +54,14 @@ const getAllProductsWithSeller = async (ctx: Context) => {
     const limit = Number(ctx.query.limit ?? 10);
     const min = Number(ctx.query.min ?? 0);
     const max = Number(ctx.query.max ?? Number.MAX_SAFE_INTEGER);
+    const category = ctx.query.category as Category;
+    let products;
 
-    const products = await findAllProducts(page, limit, min, max);
+    if (!category) {
+      products = await findAllProducts(page, limit, min, max);
+    } else {
+      products = await findProductsByCategory(category, page, limit, min, max);
+    }
     const maxPages = Math.ceil(products.total / limit);
 
     ctx.body = generateResponseBody({
@@ -190,30 +196,6 @@ const softDeleteProduct = async (ctx: Context) => {
   }
 };
 
-const getProductByCategory = async (ctx: Context) => {
-  try {
-    const category = ctx.query?.category as Category;
-    if (!category) throw new AppError("Category not found", 404);
-
-    const page = Number(ctx.query.page ?? 1);
-    const limit = Number(ctx.query.limit ?? 10);
-
-    const products = await findProductsByCategory(category, page, limit);
-
-    if (!products) throw new Error();
-
-    ctx.body = generateResponseBody({
-      data: products,
-      message: "Products retrieved successfully.",
-    });
-  } catch (e: AppError | Error | any) {
-    ctx.response.status = e.status ?? 400;
-    ctx.body = generateResponseBody({
-      message: e instanceof AppError ? e.message : "Could not get products",
-    });
-  }
-};
-
 const uploadProductImages = async (ctx: Context & CustomContext) => {
   try {
     const productId = Number(ctx.params.id);
@@ -247,8 +229,7 @@ const getProductImage = async (ctx: Context) => {
     const filePath = path.join("public/uploads", name);
     const buffer = await fs.readFile(filePath);
 
-    ctx.type = "image/jpg";
-    ctx.set("Content-Type", "image/jpeg");
+    ctx.type = "image/jpeg";
     ctx.body = buffer;
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
@@ -264,7 +245,6 @@ export {
   adminDeleteProduct,
   getAllProducts,
   getAllProductsWithSeller,
-  getProductByCategory,
   getProductBySeller,
   getProductImage,
   softDeleteProduct,

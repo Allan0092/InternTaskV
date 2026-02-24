@@ -24,13 +24,26 @@ const findProductsByCategory = async (
   category: Category,
   page = 1,
   limit = 10,
+  min = 0,
+  max = 999999,
 ) => {
+  const totalNum = await prisma.product.count({
+    where: {
+      category: category,
+      price: { gte: min, lte: max },
+      deletedAt: null,
+    },
+  });
   const products = await prisma.product.findMany({
-    where: { category: category, deletedAt: null },
+    where: {
+      category: category,
+      deletedAt: null,
+      price: { gte: min, lte: max },
+    },
     skip: (page - 1) * limit,
     take: limit,
   });
-  return products;
+  return { products: products, total: totalNum };
 };
 
 const findAllProductsWithSeller = async (

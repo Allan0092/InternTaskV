@@ -40,7 +40,6 @@ const updateProductSchema = yup.object().shape({
 const productCategorySchema = yup.object().shape({
   category: yup
     .string()
-    .required()
     .oneOf(
       Object.values(Category),
       `Provided Category must be one of ${Object.values(Category)}`,

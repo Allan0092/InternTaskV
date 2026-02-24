@@ -1,6 +1,5 @@
 import {
   getAllProductsWithSeller,
-  getProductByCategory,
   getProductBySeller,
   getProductImage,
 } from "@/controller/productController.js";
@@ -26,6 +25,7 @@ publicRouter.post("/register", validateBody(registerSchema), registerUser);
 publicRouter.get(
   "/products",
   validateQueryParams(pageAndLimitSchema),
+  validateQueryParams(productCategorySchema),
   getAllProductsWithSeller,
 );
 publicRouter.get(
@@ -33,12 +33,6 @@ publicRouter.get(
   validateQueryParams(pageAndLimitSchema),
   validateQueryParams(priceRangeSchema),
   getProductBySeller,
-);
-publicRouter.get(
-  "/products/category",
-  validateQueryParams(pageAndLimitSchema),
-  validateQueryParams(productCategorySchema),
-  getProductByCategory,
 );
 publicRouter.get("/image", getProductImage);
 
