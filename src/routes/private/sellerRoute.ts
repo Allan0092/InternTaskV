@@ -31,6 +31,7 @@ sellerRouter.put(
 // Upload Photos
 sellerRouter.post(
   "/upload-files",
+  validateUser,
   uploadPhoto.fields([{ name: "photo", maxCount: 12 }]),
   uploadProductImages,
 );
