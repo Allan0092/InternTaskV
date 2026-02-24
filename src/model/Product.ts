@@ -5,14 +5,17 @@ import {
 } from "@/generated/prisma/models.js";
 import { prisma } from "@/prisma/prisma.js";
 
-const findAllProducts = async (page = 1, limit = 10) => {
-  const totalNum = await prisma.product.count();
+const findAllProducts = async (page = 1, limit = 10, min = 0, max = 999999) => {
+  const totalNum = await prisma.product.count({
+    where: { price: { gte: min, lte: max }, deletedAt: null },
+  });
   const products = await prisma.product.findMany({
     include: { user: { select: { name: true } } },
     orderBy: { id: "asc" },
     skip: (page - 1) * limit,
     take: limit,
-    where: { deletedAt: null },
+    where: { deletedAt: null, price: { gte: min, lte: max } },
+    omit: { deletedAt: true },
   });
   return { products: products, total: totalNum };
 };
@@ -33,9 +36,11 @@ const findProductsByCategory = async (
 const findAllProductsWithSeller = async (
   page = 1,
   limit = 10,
+  min = 0,
+  max = 999999,
 ): Promise<ProductUpdateInput[]> => {
   const products = await prisma.product.findMany({
-    where: { deletedAt: null },
+    where: { deletedAt: null, price: { gte: min, lte: max } },
     include: { user: { select: { name: true } } },
     orderBy: { id: "asc" },
     skip: (page - 1) * limit,

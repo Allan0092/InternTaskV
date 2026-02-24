@@ -6,7 +6,6 @@ import {
 import {
   createProduct,
   findAllProducts,
-  findAllProductsWithSeller,
   findAndAddPhoto,
   findAndDeleteProduct,
   findAndDisableProduct,
@@ -23,8 +22,10 @@ const getAllProducts = async (ctx: Context) => {
   try {
     const page = Number(ctx.query.page ?? 1);
     const limit = Number(ctx.query.limit ?? 10);
+    const min = Number(ctx.query.min ?? 0);
+    const max = Number(ctx.query.max ?? Number.MAX_SAFE_INTEGER);
 
-    const products = await findAllProducts(page, limit);
+    const products = await findAllProducts(page, limit, min, max);
     const maxPages = Math.ceil(products.total / limit);
 
     ctx.body = generateResponseBody({
@@ -49,8 +50,10 @@ const getAllProductsWithSeller = async (ctx: Context) => {
   try {
     const page = Number(ctx.query.page ?? 1);
     const limit = Number(ctx.query.limit ?? 10);
+    const min = Number(ctx.query.min ?? 0);
+    const max = Number(ctx.query.max ?? Number.MAX_SAFE_INTEGER);
 
-    const products = await findAllProducts(page, limit);
+    const products = await findAllProducts(page, limit, min, max);
     const maxPages = Math.ceil(products.total / limit);
 
     ctx.body = generateResponseBody({
@@ -209,31 +212,6 @@ const getProductByCategory = async (ctx: Context) => {
   }
 };
 
-const getProductsByRange = async (ctx: Context) => {
-  try {
-    const min = Number(ctx.query.min);
-    const max = Number(ctx.query.max);
-    const page = Number(ctx.query.page ?? 1);
-    const limit = Number(ctx.query.limit ?? 10);
-
-    const products = await findAllProductsWithSeller(page, limit);
-    const selectedProducts = products.filter((p) => {
-      const price = Number(p.price);
-      return price >= min && price <= max;
-    });
-    ctx.body = generateResponseBody({
-      success: true,
-      message: "Products retrieved successfully",
-      data: selectedProducts,
-    });
-  } catch (e: AppError | Error | any) {
-    ctx.response.status = e.status ?? 400;
-    ctx.body = generateResponseBody({
-      message: e instanceof AppError ? e.message : "Could not get products",
-    });
-  }
-};
-
 const uploadProductImages = async (ctx: Context & CustomContext) => {
   try {
     const productId = Number(ctx.params.id);
@@ -261,6 +239,17 @@ const uploadProductImages = async (ctx: Context & CustomContext) => {
   }
 };
 
+const getProductImage = async (ctx: Context) => {
+  try {
+    const id = ctx.query.id;
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not get products",
+    });
+  }
+};
+
 export {
   addProduct,
   adminDeleteProduct,
@@ -268,7 +257,6 @@ export {
   getAllProductsWithSeller,
   getProductByCategory,
   getProductBySeller,
-  getProductsByRange,
   softDeleteProduct,
   updateProduct,
   uploadProductImages,

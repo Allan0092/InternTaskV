@@ -2,7 +2,6 @@ import {
   getAllProductsWithSeller,
   getProductByCategory,
   getProductBySeller,
-  getProductsByRange,
 } from "@/controller/productController.js";
 import { login, registerUser } from "@/controller/userController.js";
 import { validateBody, validateQueryParams } from "@/middleware/validate.js";
@@ -31,6 +30,7 @@ publicRouter.get(
 publicRouter.get(
   "/:id/products",
   validateQueryParams(pageAndLimitSchema),
+  validateQueryParams(priceRangeSchema),
   getProductBySeller,
 );
 publicRouter.get(
@@ -38,11 +38,6 @@ publicRouter.get(
   validateQueryParams(pageAndLimitSchema),
   validateQueryParams(productCategorySchema),
   getProductByCategory,
-);
-publicRouter.get(
-  "/products/search/price",
-  validateQueryParams(priceRangeSchema),
-  getProductsByRange,
 );
 
 export default publicRouter;
