@@ -19,6 +19,7 @@ import { generateResponseBody } from "@/utils/index.js";
 import fs from "fs/promises";
 import { Context } from "koa";
 import path from "node:path";
+import sharp from "sharp";
 
 const getAllProducts = async (ctx: Context) => {
   try {
@@ -211,10 +212,21 @@ const uploadProductImages = async (ctx: Context & CustomContext) => {
 
     const photos: string[] = [];
     if (files.photo) {
-      files.photo.forEach((p) => photos.push(p.filename));
-    }
-    console.log(photos);
+      files.photo.forEach(async (p) => {
+        const uniquePrefix = Math.round(Math.random() * 1000000);
+        const fileName = `${uniquePrefix}.webp`;
+        const outputPath = path.join("public/uploads", fileName);
+        await sharp(p.buffer)
+          .resize({ width: 1920, withoutEnlargement: true })
+          .webp({
+            quality: 82,
+            effort: 4,
+          })
+          .toFile(outputPath);
 
+        photos.push(p.filename);
+      });
+    }
     const product = await findAndAddPhoto(productId, photos);
 
     if (!product) throw new AppError("Product cannot be found.");
