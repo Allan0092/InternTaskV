@@ -1,15 +1,15 @@
+import { AppError } from "@/types/index.js";
 import { Next } from "koa";
 import { Context } from "node:vm";
 import winston from "winston";
 import { generateResponseBody } from "./index.js";
 
 const logger = winston.createLogger({
-  level: process.env.NODE_ENV === "production" ? "info" : "debug",
   format: winston.format.combine(
     winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     winston.format.errors({ stack: true }), // ← very important
     winston.format.splat(),
-    // winston.format.json(), // good for prod
+    winston.format.json(), // good for prod
     winston.format.prettyPrint(), // ← nicer for dev (uncomment if you prefer)
   ),
   defaultMeta: { service: "my-koa-app" },
@@ -61,23 +61,22 @@ process.on("unhandledRejection", (reason, promise) => {
 
 const loggerMiddleware = async (ctx: Context, next: Next) => {
   try {
-    await next(); // ← execute all following middlewares/routes
+    await next();
 
-    // If no body was set and status is 404 → default 404
     if (ctx.status === 404 && !ctx.body) {
-      ctx.status = 404;
       ctx.body = generateResponseBody({ message: "Not Found" });
     }
-  } catch (err: any) {
-    // Handle & log every error that happened during request
+  } catch (err: AppError | Error | any) {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
     ctx.status = status;
-    ctx.body = generateResponseBody({
-      message: message,
-      ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
-    });
+    ctx.body =
+      ctx.body ??
+      generateResponseBody({
+        message: message,
+        // ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+      });
 
     // Log with useful context
     logger.error(`${status} - ${message}`, {
@@ -86,14 +85,9 @@ const loggerMiddleware = async (ctx: Context, next: Next) => {
       ip: ctx.ip,
       error: err,
       stack: err.stack,
-      body: ctx.request.body, // optional – be careful with passwords!
-      // user: ctx.state.user,          // if you have auth
+      body: ctx.request.body,
+      user: ctx.state.user,
     });
-
-    // Optional: graceful shutdown in production for critical errors
-    if (status === 500) {
-      // e.g. ctx.app.emit('error', err, ctx);
-    }
   }
 };
 

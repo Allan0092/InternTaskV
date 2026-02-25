@@ -45,6 +45,7 @@ const getAllProducts = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not load products",
     });
+    throw e;
   }
 };
 
@@ -79,6 +80,7 @@ const getAllProductsWithSeller = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not load products",
     });
+    throw e;
   }
 };
 
@@ -99,6 +101,7 @@ const getProductBySeller = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not fetch products",
     });
+    throw e;
   }
 };
 
@@ -137,6 +140,7 @@ const addProduct = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Product could not be added",
     });
+    throw e;
   }
 };
 
@@ -159,6 +163,7 @@ const updateProduct = async (ctx: Context) => {
       message:
         e instanceof AppError ? e.message : "Could not update product details",
     });
+    throw e;
   }
 };
 
@@ -176,6 +181,7 @@ const adminDeleteProduct = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not delete product",
     });
+    throw e;
   }
 };
 
@@ -193,6 +199,7 @@ const softDeleteProduct = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not delete product",
     });
+    throw e;
   }
 };
 
@@ -220,6 +227,7 @@ const uploadProductImages = async (ctx: Context & CustomContext) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not get products",
     });
+    throw e;
   }
 };
 
@@ -237,6 +245,7 @@ const getProductImage = async (ctx: Context) => {
       message:
         e instanceof AppError ? e.message : "Could not get product image",
     });
+    throw e;
   }
 };
 

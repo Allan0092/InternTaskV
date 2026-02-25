@@ -17,7 +17,8 @@ app.use(parser());
 app.use(router.routes());
 
 app.use((ctx) => {
-  ctx.body = "hello world";
+  ctx.status = 404;
+  ctx.body = "Not Found";
 });
 
 app.listen(config.server_port, () => {
