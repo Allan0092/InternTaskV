@@ -87,7 +87,7 @@ const validateUser = async (ctx: Context, next: Next) => {
   try {
     const productId = parseInt(ctx.params.id ?? ctx.query.id);
     const user = await findProductSeller(productId);
-    if (!user) throw new AppError("Seller of product not found.");
+    if (!user) throw new AppError("Product not found.", 404);
 
     const { email: givenEmail } = ctx.state.user;
     if (ctx.state.user.role === "ADMIN") {

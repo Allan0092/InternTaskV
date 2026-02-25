@@ -151,7 +151,7 @@ const updateProduct = async (ctx: Context) => {
       .body as ProductUpdateInput;
 
     const product = await findAndUpdateProduct(id, productData);
-    if (!product) throw new AppError("Could not find product");
+    if (!product) throw new AppError("Could not find product", 404);
 
     ctx.body = generateResponseBody({
       success: true,

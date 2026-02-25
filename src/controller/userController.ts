@@ -19,6 +19,7 @@ const getUsers = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not fetch users.",
     });
+    throw e;
   }
 };
 
@@ -55,6 +56,7 @@ const login = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not login",
     });
+    throw e;
   }
 };
 
@@ -91,6 +93,7 @@ const registerUser = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not register user",
     });
+    throw e;
   }
 };
 export { getUsers, login, registerUser };

@@ -7,6 +7,7 @@ class AppError extends Error {
   ) {
     super(message);
     this.name = "AppError";
+    this.status = status;
     Object.setPrototypeOf(this, AppError.prototype);
   }
 }
