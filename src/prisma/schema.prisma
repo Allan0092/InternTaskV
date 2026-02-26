@@ -13,6 +13,21 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  USER
+  SELLER
+  ADMIN
+}
+
+enum Category {
+  ELECTRONICS
+  FASHION
+  HOME
+  TOYS
+  BOOKS
+  FOOD
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
@@ -23,6 +38,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   products Product[]
+  cart     Cart?
 
   @@map("user")
 }
@@ -38,24 +54,30 @@ model Product {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
+
+  cartProducts CartProduct[]
 
   @@map("product")
 }
 
-enum Role {
-  USER
-  SELLER
-  ADMIN
+model Cart {
+  id     Int           @id @default(autoincrement())
+  userId Int           @unique
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items  CartProduct[]
+
+  @@map("cart")
 }
 
-enum Category {
-  ELECTRONICS
-  FASHION
-  HOME
-  TOYS
-  BOOKS
-  FOOD
+model CartProduct {
+  cartId    Int
+  productId Int
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([cartId, productId])
+  @@map("cart_product")
 }
