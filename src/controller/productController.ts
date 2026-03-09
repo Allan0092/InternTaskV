@@ -88,7 +88,7 @@ const getAllProductsWithSeller = async (ctx: Context) => {
 const getProductBySeller = async (ctx: Context) => {
   try {
     const page = Number(ctx.query.page ?? 1);
-    const limit = Number(ctx.query.limti ?? 10);
+    const limit = Number(ctx.query.limit ?? 10);
     const seller = Number(ctx.params.id);
     const products = await findProductsBySeller(seller, page, limit);
 
@@ -108,17 +108,20 @@ const getProductBySeller = async (ctx: Context) => {
 
 const addProduct = async (ctx: Context) => {
   try {
-    const { name, category, price, description } = ctx.request.body as {
+    const { name, category, price, description, quantity } = ctx.request
+      .body as {
       name: string;
       price: number;
       description: string;
       category: Category;
+      quantity: number;
     };
     const product = {
       name,
       price,
       description,
       category,
+      quantity,
     };
     const { email } = ctx.state.user;
     const user = await findUserByEmail(email);

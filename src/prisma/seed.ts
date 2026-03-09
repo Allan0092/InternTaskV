@@ -80,6 +80,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 7999,
     description: "High-quality wireless headphones with noise cancellation",
     category: "ELECTRONICS",
+    quantity: 5,
     user: { connect: { email: "user1@email.com" } },
   },
   {
@@ -87,6 +88,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 15999,
     description: "Fitness tracker with heart rate monitor and GPS",
     category: "ELECTRONICS",
+    quantity: 50,
     user: { connect: { email: "user2@email.com" } },
   },
   {
@@ -94,6 +96,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 1299,
     description: "Comfortable 100% cotton t-shirt in multiple colors",
     category: "FASHION",
+    quantity: 3,
     user: { connect: { email: "user3@email.com" } },
   },
   {
@@ -101,6 +104,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 8999,
     description: "Lightweight running shoes with superior cushioning",
     category: "FASHION",
+    quantity: 6,
     user: { connect: { email: "user4@email.com" } },
   },
   {
@@ -108,6 +112,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 5499,
     description: "Programmable coffee maker with thermal carafe",
     category: "HOME",
+    quantity: 24,
     user: { connect: { email: "user5@email.com" } },
   },
   {
@@ -115,6 +120,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 2999,
     description: "Adjustable LED desk lamp with touch control",
     category: "HOME",
+    quantity: 1,
     user: { connect: { email: "user6@email.com" } },
   },
   {
@@ -122,6 +128,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 4599,
     description: "500-piece building blocks set for creative play",
     category: "TOYS",
+    quantity: 7,
     user: { connect: { email: "user7@email.com" } },
   },
   {
@@ -129,6 +136,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 3499,
     description: "Fast RC car with rechargeable battery",
     category: "TOYS",
+    quantity: 13,
     user: { connect: { email: "user1@email.com" } },
   },
   {
@@ -136,6 +144,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 3999,
     description: "Comprehensive guide to modern web development",
     category: "BOOKS",
+    quantity: 67,
     user: { connect: { email: "user2@email.com" } },
   },
   {
@@ -143,6 +152,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 2499,
     description: "100 easy recipes for everyday cooking",
     category: "BOOKS",
+    quantity: 8,
     user: { connect: { email: "user3@email.com" } },
   },
   {
@@ -150,6 +160,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 899,
     description: "Pure organic honey from local farms",
     category: "FOOD",
+    quantity: 9,
     user: { connect: { email: "user4@email.com" } },
   },
   {
@@ -157,6 +168,7 @@ const productData: Prisma.ProductCreateInput[] = [
     price: 699,
     description: "Premium green tea leaves, 100g pack",
     category: "FOOD",
+    quantity: 14,
     user: { connect: { email: "user5@email.com" } },
   },
 ];

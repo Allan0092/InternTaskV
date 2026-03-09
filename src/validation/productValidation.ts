@@ -20,6 +20,11 @@ const addProductSchema = yup.object().shape({
       `Provided Category must be one of ${Object.values(Category)}`,
     )
     .required("Product category is required"),
+  quantity: yup
+    .number()
+    .min(0)
+    .max(1000)
+    .required("Product quantity is required."),
 });
 
 const updateProductSchema = yup.object().shape({
