@@ -215,7 +215,7 @@ const uploadProductImages = async (ctx: Context & CustomContext) => {
 
     const photos: string[] = [];
     if (files.photo) {
-      files.photo.forEach(async (p) => {
+      const promises = files.photo.map(async (p) => {
         const uniquePrefix = Math.round(Math.random() * 1000000);
         const fileName = `${uniquePrefix}.webp`;
         const outputPath = path.join("public/uploads", fileName);
@@ -227,8 +227,10 @@ const uploadProductImages = async (ctx: Context & CustomContext) => {
           })
           .toFile(outputPath);
 
-        photos.push(p.filename);
+        return fileName; // Return the processed filename
       });
+      const processedPhotos = await Promise.all(promises);
+      photos.push(...processedPhotos); // Add all processed filenames
     }
     const product = await findAndAddPhoto(productId, photos);
 
