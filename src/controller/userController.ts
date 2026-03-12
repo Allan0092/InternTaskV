@@ -1,5 +1,11 @@
 import { Role } from "@/generated/prisma/enums.js";
-import { findAllUsers, findUserByEmail, saveUser } from "@/model/User.js";
+import {
+  findAllUsers,
+  findAndDeleteUserbyId,
+  findAndDisableUser,
+  findUserByEmail,
+  saveUser,
+} from "@/model/User.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import bcrypt from "bcryptjs";
@@ -32,6 +38,7 @@ const login = async (ctx: Context) => {
 
     const user = await findUserByEmail(email);
     if (!user) throw new AppError("Invalid Credentials", 401);
+    if (user.deletedAt) throw new AppError("User does not exist", 404);
 
     const passwordMatch: boolean = await bcrypt.compare(
       password,
@@ -96,4 +103,42 @@ const registerUser = async (ctx: Context) => {
     throw e;
   }
 };
-export { getUsers, login, registerUser };
+
+const deleteUser = async (ctx: Context) => {
+  try {
+    const id = parseInt(ctx.params.id);
+    const user = await findAndDeleteUserbyId(id);
+    if (!user) throw new AppError("Could not find user", 404);
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "User deleted successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not register user",
+    });
+    throw e;
+  }
+};
+
+const softDeleteUser = async (ctx: Context) => {
+  try {
+    const email = ctx.state.user.email;
+    const user = await findAndDisableUser(email);
+    if (!user) throw new AppError("Could not find user", 404);
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "User deleted successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not register user",
+    });
+    throw e;
+  }
+};
+
+export { deleteUser, getUsers, login, registerUser, softDeleteUser };

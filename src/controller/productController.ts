@@ -227,10 +227,10 @@ const uploadProductImages = async (ctx: Context & CustomContext) => {
           })
           .toFile(outputPath);
 
-        return fileName; // Return the processed filename
+        return fileName;
       });
       const processedPhotos = await Promise.all(promises);
-      photos.push(...processedPhotos); // Add all processed filenames
+      photos.push(...processedPhotos);
     }
     const product = await findAndAddPhoto(productId, photos);
 

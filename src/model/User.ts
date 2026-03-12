@@ -25,16 +25,36 @@ const saveUser = async (userData: UserCreateInput) => {
   return user;
 };
 
-const removeUserbyId = async (id: number) => {
+const findAndDeleteUserbyId = async (id: number) => {
   const user = await prisma.user.delete({ where: { id: id } });
   return user;
 };
 
-// const updateUserbyEmail = async (email: string, data: {}) => {
-//   const user = await findUserByEmail(email)
-//   if (!user) throw new AppError("Email not found.")
+const findAndDisableUser = async (email: string) => {
+  const now = new Date();
+  const user = await prisma.user.update({
+    where: { email: email },
+    data: { deletedAt: now },
+  });
 
-//   const updatedUser =
-// }
+  return user;
+};
 
-export { findAllUsers, findUserByEmail, removeUserbyId, saveUser };
+const findAndEnableUser = async (email: string) => {
+  const user = await prisma.user.update({
+    where: { email: email },
+    data: { deletedAt: null },
+  });
+  return user;
+};
+
+const updateUserbyEmail = async (email: string, data: {}) => {};
+
+export {
+  findAllUsers,
+  findAndDeleteUserbyId,
+  findAndDisableUser,
+  findAndEnableUser,
+  findUserByEmail,
+  saveUser,
+};

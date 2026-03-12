@@ -4,7 +4,7 @@ import {
   updateProduct,
   uploadProductImages,
 } from "@/controller/productController.js";
-import { validateBody, validateUser } from "@/middleware/validate.js";
+import { validateBody, validateUserAndProduct } from "@/middleware/validate.js";
 import { CustomContext } from "@/types/index.js";
 import { uploadPhoto } from "@/utils/index.js";
 import {
@@ -24,18 +24,18 @@ sellerRouter.post("/", validateBody(addProductSchema), addProduct);
 sellerRouter.put(
   "/:id",
   validateBody(updateProductSchema),
-  validateUser,
+  validateUserAndProduct,
   updateProduct,
 );
 
 // Upload Photos
 sellerRouter.put(
   "/:id/upload-images",
-  validateUser,
+  validateUserAndProduct,
   uploadPhoto.fields([{ name: "photo", maxCount: 12 }]),
   uploadProductImages,
 );
 
-sellerRouter.delete("/:id", validateUser, softDeleteProduct);
+sellerRouter.delete("/:id", validateUserAndProduct, softDeleteProduct);
 
 export default sellerRouter;

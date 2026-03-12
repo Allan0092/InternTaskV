@@ -75,7 +75,6 @@ const loggerMiddleware = async (ctx: Context, next: Next) => {
       ctx.body ??
       generateResponseBody({
         message: message,
-        // ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
       });
 
     // Log with useful context
