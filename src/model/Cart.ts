@@ -1,7 +1,25 @@
 import { prisma } from "@/prisma/prisma.js";
 
-const findCart = async (userId: number) => {
-  const cart = await prisma.cart.findUnique({ where: { userId: userId } });
+const findAllCart = async () => {
+  const cart = await prisma.cart.findMany({
+    include: { cartProducts: true },
+  });
+
+  return cart;
+};
+
+const findCart = async (email: string) => {
+  const cart = await prisma.cart.findFirst({
+    where: { user: { email: email } },
+    include: {
+      cartProducts: {
+        select: {
+          product: { select: { name: true, price: true, description: true } },
+          quantity: true,
+        },
+      },
+    },
+  });
   return cart;
 };
 
@@ -15,4 +33,4 @@ const findAndInsertProductInCart = async (
   //   });
 };
 
-export { findCart };
+export { findAllCart, findCart };
