@@ -74,6 +74,23 @@ const userData: Prisma.UserCreateInput[] = [
   },
 ];
 
+for (const user of userData) {
+  const hashedPassword = await bcrypt.hash(user.password, 10);
+  await prisma.user.upsert({
+    where: { email: user.email },
+    update: { role: user.role },
+    create: {
+      email: user.email,
+      name: user.name,
+      password: hashedPassword,
+      role: user.role,
+    },
+  });
+  console.log(`Upserted user ${user.name}`);
+}
+
+console.log("");
+
 const productData: Prisma.ProductCreateInput[] = [
   {
     name: "Wireless Headphones",
@@ -173,21 +190,6 @@ const productData: Prisma.ProductCreateInput[] = [
   },
 ];
 
-for (const user of userData) {
-  const hashedPassword = await bcrypt.hash(user.password, 10);
-  await prisma.user.upsert({
-    where: { email: user.email },
-    update: { role: user.role },
-    create: {
-      email: user.email,
-      name: user.name,
-      password: hashedPassword,
-      role: user.role,
-    },
-  });
-  console.log(`Upserted user ${user.name}`);
-}
-
 var id = 1;
 for (const product of productData) {
   await prisma.product.upsert({
@@ -204,4 +206,107 @@ for (const product of productData) {
   id += 1;
   console.log(`Upserted product ${product.name}`);
 }
+
+console.log("");
+// cart seed
+const cartData: {
+  email: string;
+  products: { email: string; quantity: number }[];
+}[] = [
+  {
+    email: "user8@email.com",
+    products: [
+      { email: "user1@email.com", quantity: 2 }, // product created by user1
+      { email: "user2@email.com", quantity: 1 },
+    ],
+  },
+  {
+    email: "user9@email.com",
+    products: [{ email: "user3@email.com", quantity: 5 }],
+  },
+];
+
+for (const c of cartData) {
+  const user = await prisma.user.findUnique({ where: { email: c.email } });
+  if (!user) continue;
+
+  const cart = await prisma.cart.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: { user: { connect: { id: user.id } } },
+  });
+
+  for (const p of c.products) {
+    const product = await prisma.product.findFirst({
+      where: { user: { email: p.email } },
+    });
+    if (!product) continue;
+
+    await prisma.cartProduct.upsert({
+      where: {
+        cartId_productId: { cartId: cart.cartId, productId: product.id },
+      },
+      update: { quantity: p.quantity },
+      create: {
+        cart: { connect: { cartId: cart.cartId } },
+        product: { connect: { id: product.id } },
+        quantity: p.quantity,
+      },
+    });
+  }
+  console.log(`Seeded cart for ${c.email}`);
+}
+
+console.log(``);
+
+//  orders / orderItems seed
+const orderData: {
+  email: string;
+  items: { productName: string; quantity: number; price: number }[];
+}[] = [
+  {
+    email: "user8@email.com",
+    items: [
+      { productName: "Wireless Headphones", quantity: 1, price: 7999 },
+      { productName: "Green Tea Pack", quantity: 2, price: 699 },
+    ],
+  },
+  {
+    email: "user9@email.com",
+    items: [{ productName: "Cotton T-Shirt", quantity: 3, price: 1299 }],
+  },
+];
+
+for (const o of orderData) {
+  const user = await prisma.user.findUnique({ where: { email: o.email } });
+  if (!user) continue;
+
+  const total = o.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const order = await prisma.order.create({
+    data: {
+      user: { connect: { id: user.id } },
+      orderDate: new Date(),
+      Total: total,
+    },
+  });
+
+  for (const it of o.items) {
+    const product = await prisma.product.findFirst({
+      where: { name: it.productName },
+    });
+    if (!product) continue;
+
+    await prisma.orderItem.create({
+      data: {
+        order: { connect: { orderId: order.orderId } },
+        productId: product.id,
+        quantity: it.quantity,
+        price: it.price,
+      },
+    });
+  }
+  console.log(`Created order ${order.orderId} for ${o.email}`);
+}
+
+console.log(``);
 console.log(`Database seeding complete!`);
