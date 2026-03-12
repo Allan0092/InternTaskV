@@ -83,7 +83,7 @@ const validateRole = (role: string) => {
   };
 };
 
-const validateUser = async (ctx: Context, next: Next) => {
+const validateUserAndProduct = async (ctx: Context, next: Next) => {
   try {
     const productId = parseInt(ctx.params.id ?? ctx.query.id);
     const user = await findProductSeller(productId);
@@ -105,4 +105,9 @@ const validateUser = async (ctx: Context, next: Next) => {
   }
 };
 
-export { validateBody, validateQueryParams, validateRole, validateUser };
+export {
+  validateBody,
+  validateQueryParams,
+  validateRole,
+  validateUserAndProduct,
+};
