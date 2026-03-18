@@ -1,4 +1,8 @@
-import { findAllCart, findCart } from "@/model/Cart.js";
+import {
+  findAllCart,
+  findAndAddProductToCart,
+  findCart,
+} from "@/model/Cart.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import { Context } from "koa";
@@ -43,4 +47,28 @@ const getAllCart = async (ctx: Context) => {
   }
 };
 
-export { getAllCart, getCart };
+const addProductToCart = async (ctx: Context) => {
+  try {
+    const email = ctx.state.user.email;
+    const productId = parseInt(ctx.params.id);
+    const quantity = (ctx.request.body as { quantity: number }).quantity ?? 1;
+    const result = await findAndAddProductToCart(email, productId, quantity);
+    if (!result) throw new AppError("Could not add product to cart");
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Item added to cart",
+      data: result,
+    });
+  } catch (e: Error | AppError | any) {
+    ctx.status = e.status ?? 404;
+    ctx.body = generateResponseBody({
+      success: false,
+      message:
+        e instanceof AppError ? e.message : "Could not add product to cart.",
+    });
+    throw e;
+  }
+};
+
+export { addProductToCart, getAllCart, getCart };

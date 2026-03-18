@@ -1,4 +1,4 @@
-import { getCart } from "@/controller/cartController.js";
+import { addProductToCart, getCart } from "@/controller/cartController.js";
 import { softDeleteUser } from "@/controller/userController.js";
 import { Context } from "koa";
 import Router from "koa-router";
@@ -9,6 +9,7 @@ const privateUserRouter = new Router<any, Context>({ prefix: "/users" });
 privateUserRouter.delete("/account", softDeleteUser);
 
 // Cart
-privateUserRouter.get("/cart", getCart);
+privateUserRouter.get("/carts", getCart);
+privateUserRouter.patch("/carts/:id", addProductToCart);
 
 export { privateUserRouter };

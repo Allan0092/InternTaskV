@@ -23,14 +23,43 @@ const findCart = async (email: string) => {
   return cart;
 };
 
-const findAndInsertProductInCart = async (
-  userId: number,
+const findAndAddProductToCart = async (
+  email: string,
   productId: number,
+  quantityToAdd: number = 1,
 ) => {
-  //   const cart = await prisma.cart.update({
-  //     where: { userId: userId },
-  //     data: { items: ,
-  //   });
+  let cart = await prisma.cart.findFirst({
+    where: { user: { email } },
+    select: { cartId: true },
+  });
+
+  if (!cart) {
+    cart = await prisma.cart.create({
+      data: {
+        user: { connect: { email } },
+      },
+      select: { cartId: true },
+    });
+  }
+
+  const cartProduct = await prisma.cartProduct.upsert({
+    where: {
+      cartId_productId: {
+        cartId: cart.cartId,
+        productId,
+      },
+    },
+    create: {
+      cartId: cart.cartId,
+      productId,
+      quantity: quantityToAdd,
+    },
+    update: {
+      quantity: { increment: quantityToAdd },
+    },
+  });
+
+  return cartProduct;
 };
 
-export { findAllCart, findCart };
+export { findAllCart, findAndAddProductToCart, findCart };
