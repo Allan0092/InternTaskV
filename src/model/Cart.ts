@@ -1,15 +1,22 @@
 import { prisma } from "@/prisma/prisma.js";
 import { AppError } from "@/types/index.js";
 
-const findAllCart = async () => {
+const findAllCart = async (page: number = 1, limit: number = 10) => {
   const cart = await prisma.cart.findMany({
     include: { cartProducts: true },
+    orderBy: { cartId: "asc" },
+    skip: (page - 1) * limit,
+    take: limit,
   });
 
   return cart;
 };
 
-const findCart = async (email: string) => {
+const findCart = async (
+  email: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
   const cart = await prisma.cart.findFirst({
     where: { user: { email: email } },
     include: {
@@ -21,6 +28,8 @@ const findCart = async (email: string) => {
           },
           quantity: true,
         },
+        skip: (page - 1) * limit,
+        take: limit,
       },
     },
     omit: { cartId: true, userId: true },

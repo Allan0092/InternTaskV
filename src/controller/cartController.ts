@@ -10,8 +10,10 @@ import { Context } from "koa";
 
 const getCart = async (ctx: Context) => {
   try {
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limit ?? 10);
     const email = ctx.state.user.email;
-    const cart = await findCart(email);
+    const cart = await findCart(email, page, limit);
     if (!cart) throw new AppError("Cart is empty", 404);
     ctx.body = generateResponseBody({
       success: true,
@@ -31,7 +33,9 @@ const getCart = async (ctx: Context) => {
 // Admin User
 const getAllCart = async (ctx: Context) => {
   try {
-    const cart = await findAllCart();
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limit ?? 10);
+    const cart = await findAllCart(page, limit);
     if (!cart) throw new AppError("Could not get cart");
     ctx.body = generateResponseBody({
       success: true,
