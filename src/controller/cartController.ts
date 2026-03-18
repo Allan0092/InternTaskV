@@ -1,6 +1,7 @@
 import {
   findAllCart,
   findAndAddProductToCart,
+  findAndRemoveProductFromCart,
   findCart,
 } from "@/model/Cart.js";
 import { AppError } from "@/types/index.js";
@@ -71,4 +72,29 @@ const addProductToCart = async (ctx: Context) => {
   }
 };
 
-export { addProductToCart, getAllCart, getCart };
+const removeProductFromCart = async (ctx: Context) => {
+  try {
+    const email = ctx.state.user.email;
+    const productId = parseInt(ctx.params.id);
+    const result = await findAndRemoveProductFromCart(email, productId);
+    if (!result) throw new AppError("Could not remove product from cart");
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Product removed from cart",
+      data: result,
+    });
+  } catch (e: Error | AppError | any) {
+    ctx.status = e.status ?? 404;
+    ctx.body = generateResponseBody({
+      success: false,
+      message:
+        e instanceof AppError
+          ? e.message
+          : "Could not remove product from cart.",
+    });
+    throw e;
+  }
+};
+
+export { addProductToCart, getAllCart, getCart, removeProductFromCart };

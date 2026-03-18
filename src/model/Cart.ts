@@ -1,4 +1,5 @@
 import { prisma } from "@/prisma/prisma.js";
+import { AppError } from "@/types/index.js";
 
 const findAllCart = async () => {
   const cart = await prisma.cart.findMany({
@@ -14,11 +15,15 @@ const findCart = async (email: string) => {
     include: {
       cartProducts: {
         select: {
-          product: { select: { name: true, price: true, description: true } },
+          id: true,
+          product: {
+            select: { name: true, price: true, description: true },
+          },
           quantity: true,
         },
       },
     },
+    omit: { cartId: true, userId: true },
   });
   return cart;
 };
@@ -62,4 +67,24 @@ const findAndAddProductToCart = async (
   return cartProduct;
 };
 
-export { findAllCart, findAndAddProductToCart, findCart };
+const findAndRemoveProductFromCart = async (
+  email: string,
+  cartProductId: number,
+) => {
+  const cart = await prisma.cart.findFirst({
+    where: { user: { email: email } },
+  });
+  if (!cart) throw new AppError("Cart is empty", 404);
+  const result = await prisma.cartProduct.delete({
+    where: { id: cartProductId },
+  });
+
+  return result;
+};
+
+export {
+  findAllCart,
+  findAndAddProductToCart,
+  findAndRemoveProductFromCart,
+  findCart,
+};
