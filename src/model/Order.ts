@@ -15,4 +15,20 @@ const findAllOrders = async (
   return orders;
 };
 
-export { findAllOrders };
+const findOrdersByEmail = async (
+  email: string,
+  page: number = 1,
+  limit: number = 10,
+  min: number = 0,
+  max: number = 999999999,
+) => {
+  const order = await prisma.order.findMany({
+    where: { user: { email: email } },
+    orderBy: { orderDate: "desc" },
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+  return order;
+};
+
+export { findAllOrders, findOrdersByEmail };

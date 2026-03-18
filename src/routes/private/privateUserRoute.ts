@@ -3,6 +3,7 @@ import {
   getCart,
   removeProductFromCart,
 } from "@/controller/cartController.js";
+import { getOrder } from "@/controller/orderController.js";
 import { softDeleteUser } from "@/controller/userController.js";
 import { Context } from "koa";
 import Router from "koa-router";
@@ -16,5 +17,8 @@ privateUserRouter.delete("/account", softDeleteUser);
 privateUserRouter.get("/carts", getCart);
 privateUserRouter.patch("/carts/:id", addProductToCart);
 privateUserRouter.delete("/carts/:id", removeProductFromCart);
+
+// Order
+privateUserRouter.get("/orders", getOrder);
 
 export { privateUserRouter };
