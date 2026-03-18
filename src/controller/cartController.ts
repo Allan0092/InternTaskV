@@ -14,11 +14,10 @@ const getCart = async (ctx: Context) => {
     const limit = Number(ctx.query.limit ?? 10);
     const email = ctx.state.user.email;
     const cart = await findCart(email, page, limit);
-    if (!cart) throw new AppError("Cart is empty", 404);
     ctx.body = generateResponseBody({
       success: true,
-      message: "Cart retrieved successfully.",
-      data: cart,
+      message: "Cart fetched successfully.",
+      data: cart ?? [],
     });
   } catch (e: Error | AppError | any) {
     ctx.status = e.status ?? 404;
@@ -36,7 +35,6 @@ const getAllCart = async (ctx: Context) => {
     const page = Number(ctx.query.page ?? 1);
     const limit = Number(ctx.query.limit ?? 10);
     const cart = await findAllCart(page, limit);
-    if (!cart) throw new AppError("Could not get cart");
     ctx.body = generateResponseBody({
       success: true,
       message: "Cart retrieved successfully.",
