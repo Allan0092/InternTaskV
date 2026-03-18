@@ -4,6 +4,7 @@ import {
   findAndRemoveProductFromCart,
   findCart,
 } from "@/model/Cart.js";
+import { findProduct } from "@/model/Product.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import { Context } from "koa";
@@ -55,6 +56,16 @@ const addProductToCart = async (ctx: Context) => {
     const email = ctx.state.user.email;
     const productId = parseInt(ctx.params.id);
     const quantity = (ctx.request.body as { quantity: number }).quantity ?? 1;
+
+    const product = await findProduct(productId);
+
+    if (!product) throw new AppError("product not found.");
+
+    if (product.quantity <= 0)
+      throw new AppError("Product is out of stock", 400);
+    if (product.quantity < quantity)
+      throw new AppError("Insufficient products in stock.");
+
     const result = await findAndAddProductToCart(email, productId, quantity);
     if (!result) throw new AppError("Could not add product to cart");
 

@@ -1,3 +1,4 @@
+import { OrderUpdateInput } from "@/generated/prisma/models.js";
 import { prisma } from "@/prisma/prisma.js";
 
 const findAllOrders = async (
@@ -11,6 +12,16 @@ const findAllOrders = async (
     skip: (page - 1) * limit,
     take: limit,
     where: { Total: { gte: min, lte: max } },
+    include: {
+      orderItems: {
+        select: {
+          productId: true,
+          price: true,
+          quantity: true,
+          orderItemId: true,
+        },
+      },
+    },
   });
   return orders;
 };
@@ -27,8 +38,14 @@ const findOrdersByEmail = async (
     orderBy: { orderDate: "desc" },
     skip: (page - 1) * limit,
     take: limit,
+    include: { orderItems: true },
   });
   return order;
 };
 
-export { findAllOrders, findOrdersByEmail };
+const updateOrder = async (orderId: number, data: OrderUpdateInput) => {
+  const order = await prisma.order.update({ where: { orderId }, data });
+  return order;
+};
+
+export { findAllOrders, findOrdersByEmail, updateOrder };
