@@ -28,6 +28,15 @@ enum Category {
   FOOD
 }
 
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPING
+  COMPLETED
+  DECLINED
+  CANCELLED
+}
+
 model User {
   id        Int       @id @default(autoincrement())
   name      String
@@ -92,6 +101,7 @@ model Order {
   orderDate  DateTime
   Total      Int
   orderItems OrderItem[]
+  status     OrderStatus @default(PENDING)
 
   @@map("order")
 }

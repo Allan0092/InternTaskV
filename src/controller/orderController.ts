@@ -26,7 +26,7 @@ const getAllOrders = async (ctx: Context) => {
   }
 };
 
-const getOrder = async (ctx: Context) => {
+const getOrders = async (ctx: Context) => {
   try {
     const email = ctx.state.user.email;
     const page = Number(ctx.query.page ?? 1);
@@ -49,4 +49,4 @@ const getOrder = async (ctx: Context) => {
   }
 };
 
-export { getAllOrders, getOrder };
+export { getAllOrders, getOrders };
