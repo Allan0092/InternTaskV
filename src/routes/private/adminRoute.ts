@@ -1,4 +1,5 @@
 import { getAllCart } from "@/controller/cartController.js";
+import { getAllOrders } from "@/controller/orderController.js";
 import {
   adminDeleteProduct,
   getAllProducts,
@@ -25,5 +26,8 @@ adminRouter.delete("/products/:id", adminDeleteProduct);
 
 // Cart
 adminRouter.get("/carts", getAllCart);
+
+// Orders
+adminRouter.get("/orders", getAllOrders);
 
 export default adminRouter;
