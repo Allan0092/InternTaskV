@@ -3,6 +3,7 @@ import {
   findAllUsers,
   findAndDeleteUserbyId,
   findAndDisableUser,
+  findAndEnableUser,
   findUserByEmail,
   saveUser,
 } from "@/model/User.js";
@@ -141,4 +142,31 @@ const softDeleteUser = async (ctx: Context) => {
   }
 };
 
-export { deleteUser, getUsers, login, registerUser, softDeleteUser };
+const enableUserAccount = async (ctx: Context) => {
+  try {
+    const id = parseInt(ctx.params.id);
+    const user = await findAndEnableUser(id);
+
+    if (!user) throw new Error();
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "User Account Enabled",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not register user",
+    });
+    throw e;
+  }
+};
+
+export {
+  deleteUser,
+  enableUserAccount,
+  getUsers,
+  login,
+  registerUser,
+  softDeleteUser,
+};

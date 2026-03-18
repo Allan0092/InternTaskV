@@ -40,9 +40,9 @@ const findAndDisableUser = async (email: string) => {
   return user;
 };
 
-const findAndEnableUser = async (email: string) => {
+const findAndEnableUser = async (id: number) => {
   const user = await prisma.user.update({
-    where: { email: email },
+    where: { id: id },
     data: { deletedAt: null },
   });
   return user;
