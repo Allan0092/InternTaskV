@@ -75,6 +75,7 @@ model Product {
 
 model Cart {
   cartId       Int           @id @default(autoincrement())
+  sku          String        @default(uuid()) @db.Uuid
   userId       Int           @unique
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   cartProducts CartProduct[]
