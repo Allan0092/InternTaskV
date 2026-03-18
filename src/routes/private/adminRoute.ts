@@ -17,11 +17,13 @@ const adminRouter = new Router<any, Context>({ prefix: "/admin" });
 // Users
 adminRouter.get("/users", getUsers);
 adminRouter.delete("/users/:id", deleteUser);
-adminRouter.get("/users/cart", getAllCart);
 adminRouter.patch("/users/:id", enableUserAccount);
 
 // Products
 adminRouter.get("/products", getAllProducts);
 adminRouter.delete("/products/:id", adminDeleteProduct);
+
+// Cart
+adminRouter.get("/carts", getAllCart);
 
 export default adminRouter;

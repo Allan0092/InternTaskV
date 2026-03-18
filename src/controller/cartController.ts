@@ -7,18 +7,19 @@ const getCart = async (ctx: Context) => {
   try {
     const email = ctx.state.user.email;
     const cart = await findCart(email);
-    if (!cart) throw new AppError("Could not get cart");
+    if (!cart) throw new AppError("Cart is empty", 404);
     ctx.body = generateResponseBody({
       success: true,
       message: "Cart retrieved successfully.",
       data: cart,
     });
   } catch (e: Error | AppError | any) {
-    ctx.status = 404;
+    ctx.status = e.status ?? 404;
     ctx.body = generateResponseBody({
       success: false,
       message: e instanceof AppError ? e.message : "could not get cart",
     });
+    throw e;
   }
 };
 
@@ -33,11 +34,12 @@ const getAllCart = async (ctx: Context) => {
       data: cart,
     });
   } catch (e: Error | AppError | any) {
-    ctx.status = 404;
+    ctx.status = e.status ?? 404;
     ctx.body = generateResponseBody({
       success: false,
       message: e instanceof AppError ? e.message : "could not get cart",
     });
+    throw e;
   }
 };
 
