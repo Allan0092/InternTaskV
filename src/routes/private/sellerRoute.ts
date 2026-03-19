@@ -1,4 +1,8 @@
 import {
+  getOrdersForSeller,
+  updateOrderStatus,
+} from "@/controller/orderController.js";
+import {
   addProduct,
   softDeleteProduct,
   updateProduct,
@@ -15,14 +19,14 @@ import { Context } from "koa";
 import Router from "koa-router";
 
 const sellerRouter = new Router<any, Context & CustomContext>({
-  prefix: "/products",
+  prefix: "",
 });
 
-sellerRouter.post("/", validateBody(addProductSchema), addProduct);
+sellerRouter.post("/products/", validateBody(addProductSchema), addProduct);
 
 // Update product details
 sellerRouter.put(
-  "/:id",
+  "/products/:id",
   validateBody(updateProductSchema),
   validateUserAndProduct,
   updateProduct,
@@ -30,12 +34,16 @@ sellerRouter.put(
 
 // Upload Photos
 sellerRouter.put(
-  "/:id/upload-images",
+  "/products/:id/upload-images",
   validateUserAndProduct,
   uploadPhoto.fields([{ name: "photo", maxCount: 12 }]),
   uploadProductImages,
 );
 
-sellerRouter.delete("/:id", validateUserAndProduct, softDeleteProduct);
+sellerRouter.delete("/products/:id", validateUserAndProduct, softDeleteProduct);
+
+// Orders
+sellerRouter.get("/orders", getOrdersForSeller);
+sellerRouter.patch("/orders/:id", updateOrderStatus);
 
 export default sellerRouter;

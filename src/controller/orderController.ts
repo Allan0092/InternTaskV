@@ -1,4 +1,10 @@
-import { findAllOrders, findOrdersByEmail } from "@/model/Order.js";
+import { OrderStatus } from "@/generated/prisma/enums.js";
+import {
+  findAllOrders,
+  findAndUpdateOrder,
+  findOrdersByEmail,
+  findSellersOrder,
+} from "@/model/Order.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import { Context } from "koa";
@@ -23,6 +29,7 @@ const getAllOrders = async (ctx: Context) => {
       success: false,
       message: e instanceof AppError ? e.message : "Could not fetch orders.",
     });
+    throw e;
   }
 };
 
@@ -46,7 +53,51 @@ const getOrders = async (ctx: Context) => {
       success: false,
       message: e instanceof AppError ? e.message : "Could not fetch orders.",
     });
+    throw e;
   }
 };
 
-export { getAllOrders, getOrders };
+const getOrdersForSeller = async (ctx: Context) => {
+  try {
+    const email = ctx.state.user.email;
+    const status = ctx.query.status as OrderStatus;
+    const orders = await findSellersOrder(email, status);
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Orders retrieved successfully",
+      data: orders,
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.status = e.status ?? 404;
+    ctx.body = generateResponseBody({
+      success: false,
+      message: e instanceof AppError ? e.message : "Could not fetch orders.",
+    });
+    throw e;
+  }
+};
+
+const updateOrderStatus = async (ctx: Context) => {
+  try {
+    const email = ctx.state.user.email;
+    const orderId = parseInt(ctx.params.id);
+    const status = ctx.request.body as { status: OrderStatus };
+    const result = await findAndUpdateOrder(orderId, status);
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Order status updated successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.status = e.status ?? 404;
+    ctx.body = generateResponseBody({
+      success: false,
+      message:
+        e instanceof AppError ? e.message : "Could not update order status.",
+    });
+    throw e;
+  }
+};
+
+export { getAllOrders, getOrders, getOrdersForSeller, updateOrderStatus };

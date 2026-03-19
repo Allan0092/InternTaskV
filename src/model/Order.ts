@@ -1,3 +1,4 @@
+import { OrderStatus } from "@/generated/prisma/enums.js";
 import { OrderUpdateInput } from "@/generated/prisma/models.js";
 import { prisma } from "@/prisma/prisma.js";
 
@@ -48,4 +49,44 @@ const findAndUpdateOrder = async (orderId: number, data: OrderUpdateInput) => {
   return order;
 };
 
-export { findAllOrders, findOrdersByEmail, updateOrder };
+const findSellersOrder = async (
+  email: string,
+  status: OrderStatus = OrderStatus.PENDING,
+) => {
+  const orders = await prisma.order.findMany({
+    where: {
+      status,
+      orderItems: {
+        some: {
+          product: {
+            user: {
+              email,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { orderDate: "desc" },
+    include: {
+      orderItems: {
+        select: {
+          id: true,
+          productId: true,
+          quantity: true,
+          price: true,
+        },
+      },
+      user: {
+        select: { id: true, name: true, email: true },
+      },
+    },
+  });
+  return orders;
+};
+
+export {
+  findAllOrders,
+  findAndUpdateOrder,
+  findOrdersByEmail,
+  findSellersOrder,
+};
