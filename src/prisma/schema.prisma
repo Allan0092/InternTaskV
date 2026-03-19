@@ -69,6 +69,7 @@ model Product {
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       Int
   cartProducts CartProduct[]
+  orderItems   OrderItem[]
 
   @@map("product")
 }
@@ -96,22 +97,23 @@ model CartProduct {
 }
 
 model Order {
-  orderId    Int         @id @default(autoincrement())
-  userId     Int
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orderDate  DateTime
-  Total      Int
-  orderItems OrderItem[]
-  status     OrderStatus @default(PENDING)
+  orderId     Int         @id @default(autoincrement())
+  buyerUserId Int
+  user        User        @relation(fields: [buyerUserId], references: [id], onDelete: Cascade)
+  orderDate   DateTime
+  Total       Int
+  orderItems  OrderItem[]
+  status      OrderStatus @default(PENDING)
 
   @@map("order")
 }
 
 model OrderItem {
-  orderItemId Int   @id @default(autoincrement())
+  orderItemId Int     @id @default(autoincrement())
   orderId     Int
   productId   Int
-  order       Order @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
+  order       Order   @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id], onDelete: NoAction)
   quantity    Int
   price       Int
 

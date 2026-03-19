@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { Prisma, Role } from "../generated/prisma/client.js";
+import { OrderStatus, Prisma, Role } from "../generated/prisma/client.js";
 import { prisma } from "./prisma.js";
 
 const userData: Prisma.UserCreateInput[] = [
@@ -263,17 +263,99 @@ console.log(``);
 const orderData: {
   email: string;
   items: { productName: string; quantity: number; price: number }[];
+  status: OrderStatus;
 }[] = [
   {
-    email: "user8@email.com",
+    email: userData[8].email,
+    items: [
+      {
+        productName: productData[0].name,
+        quantity: 1,
+        price: productData[0].price,
+      },
+      {
+        productName: productData[1].name,
+        quantity: 1,
+        price: productData[1].price,
+      },
+      {
+        productName: productData[11].name,
+        quantity: 2,
+        price: productData[11].price,
+      },
+    ],
+    status: OrderStatus.SHIPPING,
+  },
+  {
+    email: userData[8].email,
+    items: [
+      {
+        productName: productData[0].name,
+        quantity: 1,
+        price: productData[0].price,
+      },
+      {
+        productName: productData[1].name,
+        quantity: 1,
+        price: productData[1].price,
+      },
+      {
+        productName: productData[11].name,
+        quantity: 2,
+        price: productData[11].price,
+      },
+    ],
+    status: OrderStatus.DECLINED,
+  },
+  {
+    email: userData[2].email,
+    items: [
+      {
+        productName: productData[3].name,
+        quantity: 1,
+        price: productData[3].price,
+      },
+      {
+        productName: productData[10].name,
+        quantity: 2,
+        price: productData[10].price,
+      },
+    ],
+    status: OrderStatus.CANCELLED,
+  },
+  {
+    email: userData[9].email,
+    items: [{ productName: "Cotton T-Shirt", quantity: 3, price: 1299 }],
+    status: OrderStatus.PROCESSING,
+  },
+  {
+    email: "user1@email.com",
     items: [
       { productName: "Wireless Headphones", quantity: 1, price: 7999 },
       { productName: "Green Tea Pack", quantity: 2, price: 699 },
     ],
+    status: OrderStatus.PENDING,
   },
   {
-    email: "user9@email.com",
-    items: [{ productName: "Cotton T-Shirt", quantity: 3, price: 1299 }],
+    email: userData[7].email,
+    items: [
+      {
+        productName: productData[3].name,
+        quantity: 1,
+        price: productData[3].price,
+      },
+      {
+        productName: productData[9].name,
+        quantity: 2,
+        price: productData[9].price,
+      },
+      {
+        productName: productData[4].name,
+        quantity: 2,
+        price: productData[4].price,
+      },
+    ],
+    status: OrderStatus.SHIPPING,
   },
 ];
 
@@ -299,7 +381,7 @@ for (const o of orderData) {
     await prisma.orderItem.create({
       data: {
         order: { connect: { orderId: order.orderId } },
-        productId: product.id,
+        product: { connect: { id: product.id } },
         quantity: it.quantity,
         price: it.price,
       },
