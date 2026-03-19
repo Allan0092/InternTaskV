@@ -201,6 +201,7 @@ for (const product of productData) {
       description: product.description,
       price: product.price,
       user: product.user,
+      quantity: product.quantity,
     },
   });
   id += 1;
@@ -214,15 +215,42 @@ const cartData: {
   products: { email: string; quantity: number }[];
 }[] = [
   {
-    email: "user8@email.com",
+    email: userData[1].email,
     products: [
-      { email: "user1@email.com", quantity: 2 }, // product created by user1
-      { email: "user2@email.com", quantity: 1 },
+      { email: userData[7].email, quantity: 2 }, // product created by user1
+      { email: userData[3].email, quantity: 2 },
+      { email: userData[5].email, quantity: 5 },
+      { email: userData[2].email, quantity: 3 },
     ],
   },
   {
-    email: "user9@email.com",
-    products: [{ email: "user3@email.com", quantity: 5 }],
+    email: userData[2].email,
+    products: [
+      { email: userData[1].email, quantity: 2 }, // product created by user1
+      { email: userData[3].email, quantity: 2 },
+      { email: userData[5].email, quantity: 5 },
+      { email: userData[2].email, quantity: 3 },
+    ],
+  },
+  {
+    email: userData[3].email,
+    products: [
+      { email: userData[7].email, quantity: 2 }, // product created by user1
+      { email: userData[1].email, quantity: 2 },
+      { email: userData[5].email, quantity: 5 },
+      { email: userData[2].email, quantity: 3 },
+    ],
+  },
+  {
+    email: userData[8].email,
+    products: [
+      { email: userData[1].email, quantity: 2 }, // product created by user1
+      { email: userData[2].email, quantity: 1 },
+    ],
+  },
+  {
+    email: userData[9].email,
+    products: [{ email: userData[3].email, quantity: 5 }],
   },
 ];
 
