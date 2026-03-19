@@ -244,11 +244,11 @@ for (const c of cartData) {
 
     await prisma.cartProduct.upsert({
       where: {
-        cartId_productId: { cartId: cart.cartId, productId: product.id },
+        cartId_productId: { cartId: cart.id, productId: product.id },
       },
       update: { quantity: p.quantity },
       create: {
-        cart: { connect: { cartId: cart.cartId } },
+        cart: { connect: { id: cart.id } },
         product: { connect: { id: product.id } },
         quantity: p.quantity,
       },
@@ -380,14 +380,14 @@ for (const o of orderData) {
 
     await prisma.orderItem.create({
       data: {
-        order: { connect: { orderId: order.orderId } },
+        order: { connect: { id: order.id } },
         product: { connect: { id: product.id } },
         quantity: it.quantity,
         price: it.price,
       },
     });
   }
-  console.log(`Created order ${order.orderId} for ${o.email}`);
+  console.log(`Created order ${order.id} for ${o.email}`);
 }
 
 console.log(``);

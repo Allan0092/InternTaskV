@@ -4,7 +4,7 @@ import { AppError } from "@/types/index.js";
 const findAllCart = async (page: number = 1, limit: number = 10) => {
   const cart = await prisma.cart.findMany({
     include: { cartProducts: true },
-    orderBy: { cartId: "asc" },
+    orderBy: { id: "asc" },
     skip: (page - 1) * limit,
     take: limit,
   });
@@ -32,7 +32,7 @@ const findCart = async (
         take: limit,
       },
     },
-    omit: { cartId: true, userId: true },
+    omit: { id: true, userId: true },
   });
   return cart;
 };
@@ -44,7 +44,7 @@ const findAndAddProductToCart = async (
 ) => {
   let cart = await prisma.cart.findFirst({
     where: { user: { email } },
-    select: { cartId: true },
+    select: { id: true },
   });
 
   if (!cart) {
@@ -52,19 +52,19 @@ const findAndAddProductToCart = async (
       data: {
         user: { connect: { email } },
       },
-      select: { cartId: true },
+      select: { id: true },
     });
   }
 
   const cartProduct = await prisma.cartProduct.upsert({
     where: {
       cartId_productId: {
-        cartId: cart.cartId,
+        cartId: cart.id,
         productId,
       },
     },
     create: {
-      cartId: cart.cartId,
+      cartId: cart.id,
       productId,
       quantity: quantityToAdd,
     },
