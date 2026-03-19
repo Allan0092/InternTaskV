@@ -1,3 +1,4 @@
+import { findOrderSellers } from "@/model/Order.js";
 import { findProductSeller } from "@/model/Product.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
@@ -105,9 +106,42 @@ const validateUserAndProduct = async (ctx: Context, next: Next) => {
   }
 };
 
+const validateSellerAndOrder = async (ctx: Context, next: Next) => {
+  try {
+    const orderId = parseInt(ctx.params.id ?? ctx.query.id);
+    const users = await findOrderSellers(orderId);
+
+    if (!users) throw new AppError("Seller not found.", 404);
+
+    const { email: givenEmail } = ctx.state.user;
+
+    if (ctx.state.user.role === "ADMIN") {
+      await next();
+    } else if (ctx.state.user.role !== "SELLER") {
+      throw new AppError("User is not registered as a seller.");
+    } else if (
+      users
+        .map((user) => {
+          return user.email === givenEmail;
+        })
+        .indexOf(true) !== -1
+    ) {
+      await next();
+    } else {
+      throw new Error();
+    }
+  } catch (e: Error | AppError | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Seller not authorised.",
+    });
+  }
+};
+
 export {
   validateBody,
   validateQueryParams,
   validateRole,
+  validateSellerAndOrder,
   validateUserAndProduct,
 };

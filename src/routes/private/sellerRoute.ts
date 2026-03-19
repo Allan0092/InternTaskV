@@ -8,7 +8,11 @@ import {
   updateProduct,
   uploadProductImages,
 } from "@/controller/productController.js";
-import { validateBody, validateUserAndProduct } from "@/middleware/validate.js";
+import {
+  validateBody,
+  validateSellerAndOrder,
+  validateUserAndProduct,
+} from "@/middleware/validate.js";
 import { CustomContext } from "@/types/index.js";
 import { uploadPhoto } from "@/utils/index.js";
 import {
@@ -44,6 +48,6 @@ sellerRouter.delete("/products/:id", validateUserAndProduct, softDeleteProduct);
 
 // Orders
 sellerRouter.get("/orders", getOrdersForSeller);
-sellerRouter.patch("/orders/:id", updateOrderStatus);
+sellerRouter.patch("/orders/:id", validateSellerAndOrder, updateOrderStatus);
 
 export default sellerRouter;

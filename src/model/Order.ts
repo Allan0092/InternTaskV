@@ -84,9 +84,39 @@ const findSellersOrder = async (
   return orders;
 };
 
+const findOrderSellers = async (orderId: number) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: {
+      orderItems: {
+        select: {
+          product: {
+            select: {
+              user: true, // seller
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!order) return [];
+
+  const sellers = order.orderItems
+    .map((item) => item.product.user)
+    .filter((user): user is NonNullable<typeof user> => Boolean(user));
+
+  const uniqueSellers = Array.from(
+    new Map(sellers.map((s) => [s.id, s])).values(),
+  );
+
+  return uniqueSellers;
+};
+
 export {
   findAllOrders,
   findAndUpdateOrder,
   findOrdersByEmail,
+  findOrderSellers,
   findSellersOrder,
 };
