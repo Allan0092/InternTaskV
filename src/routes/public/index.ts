@@ -1,3 +1,4 @@
+import { paymentTest } from "@/controller/paymentController.js";
 import {
   getAllProductsWithSeller,
   getProductBySeller,
@@ -37,5 +38,6 @@ publicRouter.get(
 
 // Get product image by providing image file name
 publicRouter.get("/image", getProductImage);
+publicRouter.get("/payment", paymentTest);
 
 export default publicRouter;
