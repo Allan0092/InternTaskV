@@ -91,9 +91,33 @@ const findAndRemoveProductFromCart = async (
   return result;
 };
 
+const findCartByEmail = async (email: string) => {
+  const cart = await prisma.cart.findFirst({
+    where: { user: { email } },
+    include: {
+      cartProducts: {
+        include: {
+          product: {
+            select: { id: true, price: true },
+          },
+        },
+      },
+    },
+  });
+  return cart;
+};
+
+const clearCart = async (cartId: number) => {
+  await prisma.cartProduct.deleteMany({
+    where: { cartId },
+  });
+};
+
 export {
+  clearCart,
   findAllCart,
   findAndAddProductToCart,
   findAndRemoveProductFromCart,
   findCart,
+  findCartByEmail,
 };

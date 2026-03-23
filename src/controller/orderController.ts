@@ -1,4 +1,5 @@
 import { OrderStatus } from "@/generated/prisma/enums.js";
+import { clearCart, findCartByEmail } from "@/model/Cart.js";
 import {
   findAllOrders,
   findAndUpdateOrder,
@@ -6,7 +7,10 @@ import {
   findSellersOrder,
 } from "@/model/Order.js";
 import { AppError } from "@/types/index.js";
-import { generateResponseBody } from "@/utils/index.js";
+import {
+  convertCartItemToOrderItem,
+  generateResponseBody,
+} from "@/utils/index.js";
 import { Context } from "koa";
 
 const getAllOrders = async (ctx: Context) => {
@@ -100,4 +104,76 @@ const updateOrderStatus = async (ctx: Context) => {
   }
 };
 
-export { getAllOrders, getOrders, getOrdersForSeller, updateOrderStatus };
+const placeOrder = async (ctx: Context) => {
+  try {
+    const email = ctx.state.user.email;
+
+    // Get the user's cart
+    const cart = await findCartByEmail(email);
+    if (!cart || cart.cartProducts.length === 0) {
+      throw new AppError("Cart is empty", 400);
+    }
+
+    // Create an empty order first
+    const { prisma } = await import("@/prisma/prisma.js");
+    const order = await prisma.order.create({
+      data: {
+        Total: 0,
+        status: OrderStatus.PENDING,
+        user: { connect: { email } },
+      },
+    });
+
+    // Convert cart items to order items with order reference
+    const orderItems = await convertCartItemToOrderItem(
+      cart.cartProducts,
+      order.id,
+    );
+
+    // Add items to the order and calculate total
+    const total = orderItems.reduce(
+      (sum, item) => sum + (item.price as number) * (item.quantity as number),
+      0,
+    );
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        Total: total,
+        orderItems: {
+          createMany: {
+            data: orderItems.map((item) => ({
+              productId: item.product?.connect?.id || 0,
+              quantity: item.quantity as number,
+              price: item.price as number,
+            })),
+          },
+        },
+      },
+    });
+
+    // Clear the cart after order is placed
+    await clearCart(cart.id);
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Order placed successfully.",
+      data: { orderId: order.id },
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      success: false,
+      message: e instanceof AppError ? e.message : "Could not place order.",
+    });
+    throw e;
+  }
+};
+
+export {
+  getAllOrders,
+  getOrders,
+  getOrdersForSeller,
+  placeOrder,
+  updateOrderStatus,
+};
