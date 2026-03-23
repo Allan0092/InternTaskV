@@ -1,4 +1,4 @@
-import { findOrderSellers } from "@/model/Order.js";
+import { findOrdersByEmail, findOrderSellers } from "@/model/Order.js";
 import { findProductSeller } from "@/model/Product.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
@@ -131,15 +131,50 @@ const validateSellerAndOrder = async (ctx: Context, next: Next) => {
       throw new Error();
     }
   } catch (e: Error | AppError | any) {
-    ctx.response.status = e.status ?? 400;
+    ctx.response.status = e.status ?? 401;
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Seller not authorised.",
     });
   }
 };
 
+const validateBuyerAndOrder = async (ctx: Context, next: Next) => {
+  try {
+    const orderId = parseInt(ctx.params.id ?? ctx.query.id);
+    const email = ctx.state.user.email;
+
+    if (ctx.state.user.role === "ADMIN") {
+      await next();
+      return;
+    }
+
+    const orders = await findOrdersByEmail(email, 1, 1000);
+
+    if (!orders || orders.length === 0) {
+      throw new AppError("No orders found for this user.", 404);
+    }
+
+    const orderExists = orders.some((order) => order.id === orderId);
+
+    if (orderExists) {
+      await next();
+    } else {
+      throw new AppError("Order does not belong to this user.", 401);
+    }
+  } catch (e: Error | AppError | any) {
+    ctx.response.status = e.status ?? 401;
+    ctx.body = generateResponseBody({
+      message:
+        e instanceof AppError
+          ? e.message
+          : "Buyer not authorized for this order.",
+    });
+  }
+};
+
 export {
   validateBody,
+  validateBuyerAndOrder,
   validateQueryParams,
   validateRole,
   validateSellerAndOrder,

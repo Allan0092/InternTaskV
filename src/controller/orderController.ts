@@ -3,6 +3,7 @@ import { clearCart, findCartByEmail } from "@/model/Cart.js";
 import {
   findAllOrders,
   findAndUpdateOrder,
+  findOrderById,
   findOrdersByEmail,
   findSellersOrder,
 } from "@/model/Order.js";
@@ -104,6 +105,60 @@ const updateOrderStatus = async (ctx: Context) => {
   }
 };
 
+const cancelOrder = async (ctx: Context) => {
+  try {
+    const orderId = parseInt(ctx.params.id);
+
+    const order = await findOrderById(orderId);
+
+    if (!order) {
+      throw new AppError("Order not found.", 404);
+    }
+
+    if (order.status === OrderStatus.PENDING) {
+      await findAndUpdateOrder(orderId, { status: OrderStatus.CANCELLED });
+      ctx.body = generateResponseBody({
+        success: true,
+        message: "Order cancelled successfully.",
+      });
+    } else if (order.status === OrderStatus.PROCESSING) {
+      throw new AppError(
+        "Cannot cancel order that is being processed. Please contact support.",
+        400,
+      );
+    } else if (order.status === OrderStatus.SHIPPING) {
+      throw new AppError(
+        "Cannot cancel order that has already shipped. Please initiate a return instead.",
+        400,
+      );
+    } else if (order.status === OrderStatus.COMPLETED) {
+      throw new AppError(
+        "Cannot cancel completed order. Please initiate a return if needed.",
+        400,
+      );
+    } else if (order.status === OrderStatus.DECLINED) {
+      throw new AppError(
+        "This order has already been declined. No further action needed.",
+        400,
+      );
+    } else if (order.status === OrderStatus.CANCELLED) {
+      throw new AppError("This order has already been cancelled.", 400);
+    } else {
+      throw new AppError(
+        "Cannot cancel order in current status. Please contact support.",
+        400,
+      );
+    }
+  } catch (e: AppError | Error | any) {
+    ctx.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      success: false,
+      message: e instanceof AppError ? e.message : "Could not cancel order.",
+    });
+    throw e;
+  }
+};
+
 const placeOrder = async (ctx: Context) => {
   try {
     const email = ctx.state.user.email;
@@ -171,6 +226,7 @@ const placeOrder = async (ctx: Context) => {
 };
 
 export {
+  cancelOrder,
   getAllOrders,
   getOrders,
   getOrdersForSeller,

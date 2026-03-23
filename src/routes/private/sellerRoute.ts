@@ -15,6 +15,7 @@ import {
 } from "@/middleware/validate.js";
 import { CustomContext } from "@/types/index.js";
 import { uploadPhoto } from "@/utils/index.js";
+import { sellerUpdateOrderSchema } from "@/validation/orderValidation.js";
 import {
   addProductSchema,
   updateProductSchema,
@@ -48,6 +49,11 @@ sellerRouter.delete("/products/:id", validateUserAndProduct, softDeleteProduct);
 
 // Orders
 sellerRouter.get("/orders", getOrdersForSeller);
-sellerRouter.patch("/orders/:id", validateSellerAndOrder, updateOrderStatus);
+sellerRouter.patch(
+  "/orders/:id",
+  validateBody(sellerUpdateOrderSchema),
+  validateSellerAndOrder,
+  updateOrderStatus,
+);
 
 export default sellerRouter;

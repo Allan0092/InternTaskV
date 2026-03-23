@@ -113,6 +113,14 @@ const findOrderSellers = async (orderId: number) => {
   return uniqueSellers;
 };
 
+const findOrderById = async (orderId: number) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { orderItems: true },
+  });
+  return order;
+};
+
 const saveOrder = async (email: string, orderItems: any[]) => {
   // Calculate total price
   const total = orderItems.reduce(
@@ -142,6 +150,7 @@ const saveOrder = async (email: string, orderItems: any[]) => {
 export {
   findAllOrders,
   findAndUpdateOrder,
+  findOrderById,
   findOrdersByEmail,
   findOrderSellers,
   findSellersOrder,
