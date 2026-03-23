@@ -1,3 +1,4 @@
+import { Role } from "@/generated/prisma/enums.js";
 import { findOrdersByEmail, findOrderSellers } from "@/model/Order.js";
 import { findProductSeller } from "@/model/Product.js";
 import { AppError } from "@/types/index.js";
@@ -64,7 +65,7 @@ const validateBody = <T extends yup.AnyObject>(schema: yup.ObjectSchema<T>) => {
   };
 };
 
-const validateRole = (role: string) => {
+const validateRole = (role: Role) => {
   return async (ctx: Context, next: Next) => {
     try {
       const { role: givenRole } = ctx.state.user;

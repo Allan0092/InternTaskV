@@ -1,3 +1,4 @@
+import { Role } from "@/generated/prisma/enums.js";
 import { validateRole } from "@/middleware/validate.js";
 import { CustomContext } from "@/types/index.js";
 import "dotenv/config";
@@ -16,9 +17,9 @@ privateRouter.use(jwt({ secret: process.env.SECRET_KEY ?? "some-secret-key" }));
 privateRouter.use(privateUserRouter.routes());
 
 //Seller Router
-privateRouter.use(validateRole("SELLER"), sellerRouter.routes());
+privateRouter.use(validateRole(Role.SELLER), sellerRouter.routes());
 
 // Admin Router
-privateRouter.use(validateRole("ADMIN"), adminRouter.routes());
+privateRouter.use(validateRole(Role.ADMIN), adminRouter.routes());
 
 export default privateRouter;
