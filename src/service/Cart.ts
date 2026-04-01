@@ -56,7 +56,7 @@ const findAndAddProductToCart = async (
     });
   }
 
-  const cartProduct = await prisma.cartProduct.upsert({
+  const cartProduct = await prisma.cartItem.upsert({
     where: {
       cartId_productId: {
         cartId: cart.id,
@@ -84,7 +84,7 @@ const findAndRemoveProductFromCart = async (
     where: { user: { email: email } },
   });
   if (!cart) throw new AppError("Cart is empty", 404);
-  const result = await prisma.cartProduct.delete({
+  const result = await prisma.cartItem.delete({
     where: { id: cartProductId },
   });
 
@@ -108,7 +108,7 @@ const findCartByEmail = async (email: string) => {
 };
 
 const clearCart = async (cartId: number) => {
-  await prisma.cartProduct.deleteMany({
+  await prisma.cartItem.deleteMany({
     where: { cartId },
   });
 };

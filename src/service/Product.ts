@@ -127,18 +127,18 @@ const findProductSeller = async (
 const findAndAddPhoto = async (id: number, photos: string[]) => {
   const currPhoto = await prisma.product.findUnique({
     where: { id: id },
-    select: { picture: true },
+    select: { images: true },
   });
   if (
-    currPhoto?.picture.length === 1 &&
-    currPhoto?.picture[0] === "default.jpg"
+    currPhoto?.images.length === 1 &&
+    currPhoto?.images[0] === "default.jpg"
   ) {
   } else {
-    currPhoto?.picture.forEach((p) => photos.push(p));
+    currPhoto?.images.forEach((p) => photos.push(p));
   }
   const product = await prisma.product.update({
     where: { id: id },
-    data: { picture: photos },
+    data: { images: photos },
   });
 
   return product;

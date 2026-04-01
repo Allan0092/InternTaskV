@@ -1,5 +1,5 @@
 import { Product, User } from "@/generated/prisma/browser.js";
-import { CartProduct } from "@/generated/prisma/client.js";
+import { CartItem } from "@/generated/prisma/client.js";
 import { OrderItemCreateInput } from "@/generated/prisma/models.js";
 import { findProduct } from "@/service/Product.js";
 import { AppError } from "@/types/index.js";
@@ -52,7 +52,7 @@ const uploadPhoto = multer({
 });
 
 const convertCartItemToOrderItem = async (
-  cartItems: CartProduct[],
+  cartItems: CartItem[],
   orderId: number,
 ): Promise<OrderItemCreateInput[]> => {
   let orderItems: OrderItemCreateInput[] = [];

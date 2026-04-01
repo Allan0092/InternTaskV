@@ -270,7 +270,7 @@ for (const c of cartData) {
     });
     if (!product) continue;
 
-    await prisma.cartProduct.upsert({
+    await prisma.cartItem.upsert({
       where: {
         cartId_productId: { cartId: cart.id, productId: product.id },
       },
