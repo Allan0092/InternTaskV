@@ -8,7 +8,10 @@ import {
   getOrders,
   placeOrder,
 } from "@/controller/orderController.js";
-import { getKhaltiUrl } from "@/controller/paymentController.js";
+import {
+  checkKhaltiPaymentStatus,
+  getKhaltiUrl,
+} from "@/controller/paymentController.js";
 import { softDeleteUser } from "@/controller/userController.js";
 import { validateBuyerAndOrder } from "@/middleware/validate.js";
 import { Context } from "koa";
@@ -35,6 +38,7 @@ privateUserRouter.delete(
 );
 
 // Payment
-privateUserRouter.get("/payment/:sku", getKhaltiUrl);
+privateUserRouter.get("/payment", getKhaltiUrl);
+privateUserRouter.get("/payment/check", checkKhaltiPaymentStatus);
 
 export { privateUserRouter };
