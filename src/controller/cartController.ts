@@ -3,8 +3,8 @@ import {
   findAndAddProductToCart,
   findAndRemoveProductFromCart,
   findCart,
-} from "@/model/Cart.js";
-import { findProduct } from "@/model/Product.js";
+} from "@/service/Cart.js";
+import { findProduct } from "@/service/Product.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import { Context } from "koa";

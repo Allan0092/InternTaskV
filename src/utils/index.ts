@@ -1,7 +1,7 @@
 import { Product, User } from "@/generated/prisma/browser.js";
 import { CartProduct } from "@/generated/prisma/client.js";
 import { OrderItemCreateInput } from "@/generated/prisma/models.js";
-import { findProduct } from "@/model/Product.js";
+import { findProduct } from "@/service/Product.js";
 import { AppError } from "@/types/index.js";
 import multer, { File } from "@koa/multer";
 import { IncomingMessage } from "node:http";

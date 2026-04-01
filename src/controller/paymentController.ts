@@ -1,15 +1,35 @@
 import { OrderStatus } from "@/generated/prisma/enums.js";
-import { findOrderBySku } from "@/model/Order.js";
-import { findUserByEmail } from "@/model/User.js";
+import { findOrderBySku } from "@/service/Order.js";
+import { findUserByEmail } from "@/service/User.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import axios from "axios";
 import "dotenv";
 import { Context } from "koa";
 
-const options = {
+type Options = {
+  method: string;
+  url: string;
+  headers: Record<string, any>;
+  data: Record<string, any>;
+};
+// const data = {
+//   users :  {
+//     roles: {
+
+//     }
+//   }
+// }
+
+// ?? => null | undefinde
+// || -? null ,undesin ,0 , false ,
+
+// user.roles ?? 'fallback1'
+// user.roles || 'fallback2'
+// data?.users.roles;
+const options: Options = {
   method: "POST",
-  url: process.env.KHALTI_API,
+  url: process.env.KHALTI_API!,
   headers: {
     Authorization: process.env.KHALTI_KEY,
     "Content-Type": "application/json",
@@ -50,7 +70,7 @@ const paymentTest = async (ctx: Context) => {
 const getKhaltiUrl = async (ctx: Context) => {
   try {
     // TODO: check order not empty -> get related data(total, name, email, order id)
-    const sku = ctx.param.sku as string;
+    const sku = ctx.params.sku as string;
     const email = ctx.state.user.email;
 
     const order = await findOrderBySku(sku);
@@ -82,6 +102,8 @@ const getKhaltiUrl = async (ctx: Context) => {
         },
       },
     });
+
+    console.log(response.data);
 
     ctx.body = generateResponseBody({
       success: true,

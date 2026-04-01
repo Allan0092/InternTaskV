@@ -12,8 +12,8 @@ import {
   findAndUpdateProduct,
   findProductsByCategory,
   findProductsBySeller,
-} from "@/model/Product.js";
-import { findUserByEmail } from "@/model/User.js";
+} from "@/service/Product.js";
+import { findUserByEmail } from "@/service/User.js";
 import { AppError, CustomContext } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import fs from "fs/promises";

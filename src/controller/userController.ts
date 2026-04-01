@@ -6,7 +6,7 @@ import {
   findAndEnableUser,
   findUserByEmail,
   saveUser,
-} from "@/model/User.js";
+} from "@/service/User.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import bcrypt from "bcryptjs";

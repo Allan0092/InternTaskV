@@ -1,12 +1,12 @@
 import { OrderStatus } from "@/generated/prisma/enums.js";
-import { clearCart, findCartByEmail } from "@/model/Cart.js";
+import { clearCart, findCartByEmail } from "@/service/Cart.js";
 import {
   findAllOrders,
   findAndUpdateOrder,
   findOrderById,
   findOrdersByEmail,
   findSellersOrder,
-} from "@/model/Order.js";
+} from "@/service/Order.js";
 import { AppError } from "@/types/index.js";
 import {
   convertCartItemToOrderItem,

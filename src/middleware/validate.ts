@@ -1,6 +1,6 @@
 import { Role } from "@/generated/prisma/enums.js";
-import { findOrdersByEmail, findOrderSellers } from "@/model/Order.js";
-import { findProductSeller } from "@/model/Product.js";
+import { findOrdersByEmail, findOrderSellers } from "@/service/Order.js";
+import { findProductSeller } from "@/service/Product.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import { Context, Next } from "koa";
