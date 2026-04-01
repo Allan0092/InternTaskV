@@ -30,11 +30,27 @@ enum Category {
 
 enum OrderStatus {
   PENDING
+  PAID
   PROCESSING
   SHIPPING
   COMPLETED
   DECLINED
   CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentGateway {
+  KHALTI
+  ESEWA
+  PAYPAL
+  STRIPE
 }
 
 model User {
@@ -98,12 +114,15 @@ model CartProduct {
 
 model Order {
   id          Int         @id @default(autoincrement())
+  sku         String      @unique @default(uuid()) @db.Uuid
   buyerUserId Int
   user        User        @relation(fields: [buyerUserId], references: [id], onDelete: Cascade)
   orderDate   DateTime    @default(now())
   Total       Int
   orderItems  OrderItem[]
   status      OrderStatus @default(PENDING)
+  paymentId   String      @unique @db.Uuid
+  payments    Payment     @relation(fields: [paymentId], references: [id])
 
   @@map("order")
 }
@@ -118,4 +137,14 @@ model OrderItem {
   price     Int
 
   @@map("orderitem")
+}
+
+model Payment {
+  id      String         @id @default(uuid()) @db.Uuid
+  geteway PaymentGateway @default(KHALTI)
+  date    DateTime       @default(now())
+  status  PaymentStatus  @default(PENDING)
+  order   Order?
+
+  @@map("payment")
 }

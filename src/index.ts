@@ -1,5 +1,5 @@
 import cors from "@koa/cors";
-import "dotenv";
+import "dotenv/config";
 import Koa from "koa";
 import parser from "koa-bodyparser";
 import router from "./routes/index.js";

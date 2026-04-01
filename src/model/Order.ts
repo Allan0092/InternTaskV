@@ -147,10 +147,16 @@ const saveOrder = async (email: string, orderItems: any[]) => {
   return order.id;
 };
 
+const findOrderBySku = async (sku: string) => {
+  const order = await prisma.order.findUnique({ where: { sku } });
+  return order;
+};
+
 export {
   findAllOrders,
   findAndUpdateOrder,
   findOrderById,
+  findOrderBySku,
   findOrdersByEmail,
   findOrderSellers,
   findSellersOrder,
