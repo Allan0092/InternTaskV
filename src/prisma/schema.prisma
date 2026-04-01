@@ -121,8 +121,8 @@ model Order {
   Total       Int
   orderItems  OrderItem[]
   status      OrderStatus @default(PENDING)
-  paymentId   String      @unique @db.Uuid
-  payments    Payment     @relation(fields: [paymentId], references: [id])
+  paymentId   String?     @unique @db.Uuid
+  payments    Payment?    @relation(fields: [paymentId], references: [id])
 
   @@map("order")
 }
@@ -145,6 +145,9 @@ model Payment {
   date    DateTime       @default(now())
   status  PaymentStatus  @default(PENDING)
   order   Order?
+
+  pidx       String
+  expires_at DateTime?
 
   @@map("payment")
 }

@@ -8,25 +8,33 @@ import {
   getOrders,
   placeOrder,
 } from "@/controller/orderController.js";
+import { getKhaltiUrl } from "@/controller/paymentController.js";
 import { softDeleteUser } from "@/controller/userController.js";
 import { validateBuyerAndOrder } from "@/middleware/validate.js";
 import { Context } from "koa";
 import Router from "koa-router";
 
-const privateUserRouter = new Router<any, Context>({ prefix: "/users" });
+const privateUserRouter = new Router<any, Context>();
 
 // User Account
-privateUserRouter.delete("/account", softDeleteUser);
+privateUserRouter.delete("/users/account", softDeleteUser);
 
 // Cart
-privateUserRouter.get("/carts", getCart);
-privateUserRouter.patch("/carts/:id", addProductToCart);
-privateUserRouter.delete("/carts/:id", removeProductFromCart);
+privateUserRouter.get("/users/carts", getCart);
+privateUserRouter.patch("/users/carts/:id", addProductToCart);
+privateUserRouter.delete("/users/carts/:id", removeProductFromCart);
 
 // Order
-privateUserRouter.get("/orders", getOrders);
-privateUserRouter.post("/orders", placeOrder);
+privateUserRouter.get("/users/orders", getOrders);
+privateUserRouter.post("/users/orders", placeOrder);
 
-privateUserRouter.delete("/orders/:id", validateBuyerAndOrder, cancelOrder);
+privateUserRouter.delete(
+  "/users/orders/:id",
+  validateBuyerAndOrder,
+  cancelOrder,
+);
+
+// Payment
+privateUserRouter.get("/payment/:sku", getKhaltiUrl);
 
 export { privateUserRouter };
