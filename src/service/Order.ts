@@ -152,11 +152,22 @@ const findOrderBySku = async (sku: string) => {
   return order;
 };
 
+const findOrderProductsBySku = async (sku: string) => {
+  const products = await prisma.order.findUniqueOrThrow({
+    where: { sku },
+    select: {
+      orderItems: { select: { product: true, quantity: true, price: true } },
+    },
+  });
+  return products.orderItems;
+};
+
 export {
   findAllOrders,
   findAndUpdateOrder,
   findOrderById,
   findOrderBySku,
+  findOrderProductsBySku,
   findOrdersByEmail,
   findOrderSellers,
   findSellersOrder,
