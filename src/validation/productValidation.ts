@@ -58,8 +58,8 @@ const pageAndLimitSchema = yup.object().shape({
     .max(100, "page number must be less than 100"),
   limit: yup
     .number()
-    .min(1, "Page number must be greater that 0")
-    .max(20, "page number must be less than 100"),
+    .min(1, "limit must be greater that 0")
+    .max(101, "limit must be less than 100"),
 });
 
 export {

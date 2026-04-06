@@ -26,7 +26,7 @@ const getAllProducts = async (ctx: Context) => {
     const page = Number(ctx.query.page ?? 1);
     const limit = Number(ctx.query.limit ?? 10);
     const min = Number(ctx.query.min ?? 0);
-    const max = Number(ctx.query.max ?? Number.MAX_SAFE_INTEGER);
+    const max = Number(ctx.query.max ?? 999999);
 
     const products = await findAllProducts(page, limit, min, max);
     const maxPages = Math.ceil(products.total / limit);
@@ -55,7 +55,7 @@ const getAllProductsWithSeller = async (ctx: Context) => {
     const page = Number(ctx.query.page ?? 1);
     const limit = Number(ctx.query.limit ?? 10);
     const min = Number(ctx.query.min ?? 0);
-    const max = Number(ctx.query.max ?? Number.MAX_SAFE_INTEGER);
+    const max = Number(ctx.query.max ?? 999999);
     const category = ctx.query.category as Category;
     let products;
 
