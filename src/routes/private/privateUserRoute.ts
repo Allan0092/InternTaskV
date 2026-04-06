@@ -7,6 +7,7 @@ import {
   cancelOrder,
   getOrders,
   placeOrder,
+  testOrderItems,
 } from "@/controller/orderController.js";
 import {
   checkKhaltiPaymentStatus,
@@ -40,5 +41,8 @@ privateUserRouter.delete(
 // Payment
 privateUserRouter.get("/payment", getKhaltiUrl);
 privateUserRouter.get("/payment/check", checkKhaltiPaymentStatus);
+
+//Email
+privateUserRouter.get("/test", testOrderItems);
 
 export { privateUserRouter };

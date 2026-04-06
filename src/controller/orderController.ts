@@ -4,6 +4,7 @@ import {
   findAllOrders,
   findAndUpdateOrder,
   findOrderById,
+  findOrderProductsBySku,
   findOrdersByEmail,
   findSellersOrder,
 } from "@/service/Order.js";
@@ -225,11 +226,35 @@ const placeOrder = async (ctx: Context) => {
   }
 };
 
+// const sendOrderEmails = async (ctx: Context) => {
+//   try {
+//     const buyerEmail = ctx.state.email;
+//     const orderSKU = ctx.request.query.sku as string;
+//     const info = await sendNewOrderNotificationToBuyer(buyerEmail, orderSKU);
+
+//   } catch (e: AppError | Error | any) {
+//     ctx.status = e.status ?? 400;
+//     ctx.body = generateResponseBody({
+//       success: false,
+//       message: e instanceof AppError ? e.message : "Could not place order.",
+//     });
+//     throw e;
+//   }
+// };
+
+const testOrderItems = async (ctx: Context) => {
+  const sku = ctx.request.query.sku as string;
+  const products = await findOrderProductsBySku(sku);
+  console.log(products);
+};
+
 export {
   cancelOrder,
   getAllOrders,
   getOrders,
   getOrdersForSeller,
   placeOrder,
+  testOrderItems,
+  // sendOrderEmails,
   updateOrderStatus,
 };
