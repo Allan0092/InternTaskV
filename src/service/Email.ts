@@ -1,6 +1,11 @@
-import { Product } from "@/generated/prisma/client.js";
+import { AppError } from "@/types/index.js";
 import "dotenv/config.js";
 import { createTransport } from "nodemailer";
+import {
+  findOrderBySku,
+  findOrderProductsAndSellersBySku,
+  findOrderProductsBySku,
+} from "./Order.js";
 
 const transporter = createTransport({
   host: process.env.EMAIL_HOST,
@@ -102,24 +107,93 @@ const sendNewOrderNotificationToBuyer = async (
   return info;
 };
 
-const sendNewOrderNotificationToSeller = async (
-  sellerEmail: string,
-  product: Product,
-  orderSKU: string,
-) => {
-  const info = await sendEmail(
-    sellerEmail,
-    "New Order has been placed",
-    `
-        A new order has been placed for your product.
-        Product name: ${product.name}
-        Order Sku: ${orderSKU}
-        Please process this order as soon as possible.
-        `,
-    `<h1>A new order has been placed</h1>`,
-  );
+const sendNewOrderNotificationToSeller = async (orderSKU: string) => {
+  const orderItems = await findOrderProductsAndSellersBySku(orderSKU);
 
-  return info;
+  // Group order items by seller email so each seller gets one consolidated email
+  const itemsBySeller = new Map<
+    string,
+    { name: string; price: number; quantity: number }[]
+  >();
+
+  for (const item of orderItems) {
+    const sellerEmail = item.product.user.email;
+    if (!itemsBySeller.has(sellerEmail)) {
+      itemsBySeller.set(sellerEmail, []);
+    }
+    itemsBySeller.get(sellerEmail)!.push({
+      name: item.product.name,
+      price: item.price,
+      quantity: item.quantity,
+    });
+  }
+
+  const results = [];
+  for (const [sellerEmail, items] of itemsBySeller) {
+    const productListText = items
+      .map((p) => `  - ${p.name} (x${p.quantity}) — Rs. ${p.price}`)
+      .join("\n");
+
+    const productListHtml = items
+      .map(
+        (p) => `
+      <tr>
+        <td style="padding:10px 0;border-bottom:1px solid #e5e7eb;">${p.name}</td>
+        <td style="padding:10px 0;border-bottom:1px solid #e5e7eb;text-align:center;">${p.quantity}</td>
+        <td style="padding:10px 0;border-bottom:1px solid #e5e7eb;text-align:right;">Rs. ${p.price}</td>
+      </tr>`,
+      )
+      .join("");
+
+    const info = await sendEmail(
+      sellerEmail,
+      "New order received for your product(s)",
+      `Hi,\n\nGreat news! A new order has been placed for your product(s).\n\nOrder SKU: ${orderSKU}\n\nItems ordered:\n${productListText}\n\nPlease log in to your seller dashboard and process this order as soon as possible.\n\n— Real Daraz`,
+      `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:32px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <tr><td style="background:#1565c0;padding:28px 36px;">
+          <h1 style="margin:0;color:#ffffff;font-size:24px;letter-spacing:0.5px;">Real Daraz — Seller Portal</h1>
+        </td></tr>
+        <tr><td style="padding:32px 36px;">
+          <h2 style="margin:0 0 8px;color:#111827;font-size:20px;">You have a new order!</h2>
+          <p style="margin:0 0 24px;color:#6b7280;font-size:14px;">A customer has placed an order for your product(s). Please process it promptly.</p>
+
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr style="background:#f9fafb;">
+              <th style="padding:10px 0;text-align:left;font-size:13px;color:#374151;">Product</th>
+              <th style="padding:10px 0;text-align:center;font-size:13px;color:#374151;">Qty</th>
+              <th style="padding:10px 0;text-align:right;font-size:13px;color:#374151;">Price</th>
+            </tr>
+            ${productListHtml}
+          </table>
+
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:6px;margin-bottom:24px;">
+            <tr><td style="padding:16px;">
+              <p style="margin:0;font-size:13px;color:#6b7280;">Order Reference</p>
+              <p style="margin:4px 0 0;font-size:15px;font-weight:bold;color:#111827;letter-spacing:1px;">${orderSKU}</p>
+            </td></tr>
+          </table>
+
+          <p style="margin:0;color:#374151;font-size:14px;">Log in to your seller dashboard to confirm and ship the order.</p>
+        </td></tr>
+        <tr><td style="background:#f9fafb;padding:20px 36px;text-align:center;border-top:1px solid #e5e7eb;">
+          <p style="margin:0;font-size:12px;color:#9ca3af;">&copy; ${new Date().getFullYear()} Real Daraz. All rights reserved.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+    );
+    results.push(info);
+  }
+
+  return results;
 };
 
 const sendOtpMail = async (

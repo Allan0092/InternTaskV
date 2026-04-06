@@ -162,11 +162,28 @@ const findOrderProductsBySku = async (sku: string) => {
   return products.orderItems;
 };
 
+const findOrderProductsAndSellersBySku = async (sku: string) => {
+  const products = await prisma.order.findUniqueOrThrow({
+    where: { sku },
+    select: {
+      orderItems: {
+        select: {
+          product: { include: { user: { select: { email: true } } } },
+          quantity: true,
+          price: true,
+        },
+      },
+    },
+  });
+  return products.orderItems;
+};
+
 export {
   findAllOrders,
   findAndUpdateOrder,
   findOrderById,
   findOrderBySku,
+  findOrderProductsAndSellersBySku,
   findOrderProductsBySku,
   findOrdersByEmail,
   findOrderSellers,

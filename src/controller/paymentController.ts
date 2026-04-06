@@ -3,7 +3,10 @@ import {
   PaymentGateway,
   PaymentStatus,
 } from "@/generated/prisma/enums.js";
-import { sendNewOrderNotificationToBuyer } from "@/service/Email.js";
+import {
+  sendNewOrderNotificationToBuyer,
+  sendNewOrderNotificationToSeller,
+} from "@/service/Email.js";
 import { findAndUpdateOrder, findOrderBySku } from "@/service/Order.js";
 import {
   createPayment,
@@ -187,6 +190,7 @@ const checkKhaltiPaymentStatus = async (ctx: Context) => {
         case "Completed": {
           await updatePaymentStatus(payment.id, PaymentStatus.SUCCESS);
           await sendNewOrderNotificationToBuyer(email, sku);
+          await sendNewOrderNotificationToSeller(sku);
         }
       }
 
