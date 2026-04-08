@@ -74,6 +74,10 @@ const HomePage = () => {
     }
   };
 
+  // Search state
+  const [searchInput, setSearchInput] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
+
   // Applied filter state (triggers fetch)
   const [appliedMin, setAppliedMin] = useState<number | undefined>(undefined);
   const [appliedMax, setAppliedMax] = useState<number | undefined>(undefined);
@@ -105,6 +109,18 @@ const HomePage = () => {
     setDrawerOpen(false);
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAppliedSearch(searchInput.trim());
+    setPage(1);
+  };
+
+  const clearSearch = () => {
+    setSearchInput("");
+    setAppliedSearch("");
+    setPage(1);
+  };
+
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -116,6 +132,7 @@ const HomePage = () => {
     if (appliedMin !== undefined) params.min = appliedMin;
     if (appliedMax !== undefined) params.max = appliedMax;
     if (appliedCategory !== "") params.category = appliedCategory;
+    if (appliedSearch !== "") params.search = appliedSearch;
 
     axios
       .get<{ success: boolean; data: ProductsResponse }>(
@@ -130,7 +147,7 @@ const HomePage = () => {
       })
       .catch(() => setError("Failed to load products. Please try again."))
       .finally(() => setLoading(false));
-  }, [page, limit, appliedMin, appliedMax, appliedCategory]);
+  }, [page, limit, appliedMin, appliedMax, appliedCategory, appliedSearch]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -252,18 +269,56 @@ const HomePage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Toolbar */}
-        <div className="flex items-center justify-between mb-5">
-          {!loading && !error && (
-            <p className="text-sm text-gray-500">
-              Showing{" "}
-              <span className="font-medium text-gray-700">
-                {products.length}
-              </span>{" "}
-              of <span className="font-medium text-gray-700">{total}</span>{" "}
-              products
-            </p>
-          )}
-          {loading && <span />}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-5">
+          {/* Search box */}
+          <form onSubmit={handleSearch} className="relative flex-1 flex items-center gap-2">
+            <div className="relative flex-1">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search products…"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full pl-9 pr-8 py-2 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm"
+              />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
+            >
+              Search
+            </button>
+          </form>
+
+          <div className="flex items-center gap-3 shrink-0">
+            {!loading && !error && (
+              <p className="text-sm text-gray-500">
+                <span className="font-medium text-gray-700">{total}</span> products
+              </p>
+            )}
           <button
             onClick={() => setDrawerOpen(true)}
             className="relative flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm"
@@ -288,6 +343,7 @@ const HomePage = () => {
               </span>
             )}
           </button>
+          </div>
         </div>
         {/* Loading */}
         {loading && (

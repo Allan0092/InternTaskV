@@ -87,6 +87,8 @@ model Product {
   cartProducts CartItem[]
   orderItems   OrderItem[]
 
+  @@index([name])
+  @@index([category])
   @@map("product")
 }
 

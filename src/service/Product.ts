@@ -5,19 +5,38 @@ import {
 } from "@/generated/prisma/models.js";
 import { prisma } from "@/prisma/prisma.js";
 
-const findAllProducts = async (page = 1, limit = 10, min = 0, max = 999999) => {
-  const totalNum = await prisma.product.count({
-    where: { price: { gte: min, lte: max }, deletedAt: null },
-  });
+const findAllProducts = async (
+  page = 1,
+  limit = 10,
+  min = 0,
+  max = 999999,
+  search?: string,
+) => {
+  const searchFilter = search
+    ? {
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          { description: { contains: search, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+
+  const where = {
+    deletedAt: null,
+    price: { gte: min, lte: max },
+    ...searchFilter,
+  };
+
+  const totalNum = await prisma.product.count({ where });
   const products = await prisma.product.findMany({
     include: { user: { select: { name: true } } },
     orderBy: { id: "desc" },
     skip: (page - 1) * limit,
     take: limit,
-    where: { deletedAt: null, price: { gte: min, lte: max } },
+    where,
     omit: { createdAt: true, deletedAt: true, updatedAt: true, userId: true },
   });
-  return { products: products, total: totalNum };
+  return { products, total: totalNum };
 };
 
 const findProductsByCategory = async (
@@ -26,22 +45,30 @@ const findProductsByCategory = async (
   limit = 10,
   min = 0,
   max = 999999,
+  search?: string,
 ) => {
+  const searchFilter = search
+    ? {
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          { description: { contains: search, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+
+  const where = {
+    category: category,
+    deletedAt: null,
+    price: { gte: min, lte: max },
+    ...searchFilter,
+  };
   const totalNum = await prisma.product.count({
-    where: {
-      category: category,
-      price: { gte: min, lte: max },
-      deletedAt: null,
-    },
+    where,
   });
   const products = await prisma.product.findMany({
     include: { user: { select: { name: true } } },
     omit: { createdAt: true, deletedAt: true, updatedAt: true, userId: true },
-    where: {
-      category: category,
-      deletedAt: null,
-      price: { gte: min, lte: max },
-    },
+    where,
     skip: (page - 1) * limit,
     take: limit,
   });
