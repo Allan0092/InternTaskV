@@ -20,7 +20,11 @@ const getUsers = async (ctx: Context) => {
     const limit = Number(ctx.query.limit ?? 10);
 
     const users = await findAllUsers(page, limit);
-    ctx.body = generateResponseBody({ success: true, data: users });
+    ctx.body = generateResponseBody({
+      success: true,
+      data: users,
+      message: "Users fetched successfully.",
+    });
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 500;
     ctx.body = generateResponseBody({
