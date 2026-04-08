@@ -4,6 +4,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import AddProductPage from "./pages/AddProductPage";
 import AdminPage from "./pages/AdminPage";
+import CartPage from "./pages/CartPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -17,6 +18,14 @@ const App = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute allowedRoles={["USER", "SELLER", "ADMIN"]}>
+                <CartPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/products/new"
             element={

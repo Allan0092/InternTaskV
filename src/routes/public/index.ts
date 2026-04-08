@@ -31,7 +31,7 @@ publicRouter.get(
 
 // Get products sold by seller id
 publicRouter.get(
-  "/products/:id",
+  "/users/:id/products",
   validateQueryParams(pageAndLimitSchema),
   getProductBySeller,
 );

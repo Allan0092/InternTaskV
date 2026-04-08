@@ -39,6 +39,29 @@ const Navbar = () => {
             Home
           </Link>
 
+          {/* Cart icon for logged-in users */}
+          {user && (
+            <Link
+              to="/cart"
+              className="relative text-blue-100 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-blue-600"
+              aria-label="Cart"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm9 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                />
+              </svg>
+            </Link>
+          )}
+
           {/* SELLER: Add Product */}
           {user?.role === "SELLER" && (
             <Link

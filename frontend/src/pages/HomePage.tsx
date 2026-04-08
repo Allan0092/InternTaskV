@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CATEGORIES, categoryColors, LIMIT_OPTIONS } from "../constants";
+import { useAuth } from "../context/AuthContext";
 
 interface Product {
   id: number;
@@ -23,6 +25,8 @@ interface ProductsResponse {
 }
 
 const HomePage = () => {
+  const { user, token } = useAuth();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -36,6 +40,39 @@ const HomePage = () => {
   const [minInput, setMinInput] = useState("");
   const [maxInput, setMaxInput] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  // Cart state
+  const [qty, setQty] = useState<Record<number, number>>({});
+  const [addingTo, setAddingTo] = useState<number | null>(null);
+  const [addedTo, setAddedTo] = useState<number | null>(null);
+  const [cartError, setCartError] = useState<Record<number, string>>({});
+
+  const getQty = (id: number) => qty[id] ?? 1;
+
+  const handleAddToCart = async (productId: number) => {
+    if (!user || !token) {
+      navigate("/login");
+      return;
+    }
+    setAddingTo(productId);
+    setCartError((prev) => ({ ...prev, [productId]: "" }));
+    try {
+      await axios.patch(
+        `http://localhost:3000/api/users/carts/${productId}`,
+        { quantity: getQty(productId) },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setAddedTo(productId);
+      setTimeout(() => setAddedTo(null), 2000);
+    } catch {
+      setCartError((prev) => ({
+        ...prev,
+        [productId]: "Could not add to cart.",
+      }));
+    } finally {
+      setAddingTo(null);
+    }
+  };
 
   // Applied filter state (triggers fetch)
   const [appliedMin, setAppliedMin] = useState<number | undefined>(undefined);
@@ -376,9 +413,42 @@ const HomePage = () => {
                       by {product.user.name}
                     </span>
                   </div>
-                  <button className="mt-3 w-full py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-colors">
-                    Add to Cart
-                  </button>
+                  {cartError[product.id] && (
+                    <p className="text-xs text-red-500 mt-2">
+                      {cartError[product.id]}
+                    </p>
+                  )}
+                  <div className="mt-3 flex gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      max={product.quantity || 1}
+                      value={getQty(product.id)}
+                      onChange={(e) =>
+                        setQty((prev) => ({
+                          ...prev,
+                          [product.id]: Math.max(1, Number(e.target.value)),
+                        }))
+                      }
+                      disabled={product.quantity === 0}
+                      className="w-16 border border-gray-200 rounded-xl px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-40"
+                    />
+                    <button
+                      onClick={() => handleAddToCart(product.id)}
+                      disabled={
+                        product.quantity === 0 || addingTo === product.id
+                      }
+                      className="flex-1 py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors"
+                    >
+                      {addedTo === product.id
+                        ? "✓ Added!"
+                        : addingTo === product.id
+                          ? "Adding…"
+                          : user
+                            ? "Add to Cart"
+                            : "Sign in to buy"}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
