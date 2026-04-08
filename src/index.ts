@@ -2,6 +2,8 @@ import cors from "@koa/cors";
 import "dotenv/config";
 import Koa from "koa";
 import parser from "koa-bodyparser";
+import serve from "koa-static";
+import path from "node:path";
 import router from "./routes/index.js";
 import { logger, loggerMiddleware } from "./utils/logger.js";
 import { config } from "./validation/dotEnvValidation.js";
@@ -13,6 +15,8 @@ app.context.logger = logger;
 app.use(loggerMiddleware);
 app.use(cors());
 app.use(parser());
+
+app.use(serve(path.join(process.cwd(), "public")));
 
 app.use(router.routes());
 

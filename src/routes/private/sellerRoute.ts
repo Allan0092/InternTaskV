@@ -4,6 +4,7 @@ import {
 } from "@/controller/orderController.js";
 import {
   addProduct,
+  getAllSellerProducts,
   softDeleteProduct,
   updateProduct,
   uploadProductImages,
@@ -28,6 +29,9 @@ const sellerRouter = new Router<any, Context & CustomContext>({
 });
 
 sellerRouter.post("/products/", validateBody(addProductSchema), addProduct);
+
+// Get Seller's product
+sellerRouter.get("/products/", getAllSellerProducts);
 
 // Update product details
 sellerRouter.put(

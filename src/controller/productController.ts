@@ -106,6 +106,30 @@ const getProductBySeller = async (ctx: Context) => {
   }
 };
 
+const getAllSellerProducts = async (ctx: Context) => {
+  try {
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limit ?? 10);
+    const { email } = ctx.state.user;
+    const user = await findUserByEmail(email);
+    if (!user) throw new AppError("Could not find user");
+    const seller = user.id;
+    const products = await findProductsBySeller(seller, page, limit);
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "products retrieved successfully",
+      data: products,
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 500;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not fetch products",
+    });
+    throw e;
+  }
+};
+
 const addProduct = async (ctx: Context) => {
   try {
     const { name, category, price, description, quantity } = ctx.request
@@ -271,6 +295,7 @@ export {
   adminDeleteProduct,
   getAllProducts,
   getAllProductsWithSeller,
+  getAllSellerProducts,
   getProductBySeller,
   getProductImage,
   softDeleteProduct,
