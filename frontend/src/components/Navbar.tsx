@@ -72,6 +72,26 @@ const Navbar = () => {
             </Link>
           )}
 
+          {/* USER: My Orders */}
+          {user?.role === "USER" && (
+            <Link
+              to="/my-orders"
+              className="text-blue-100 hover:text-white text-sm font-medium transition-colors px-2 py-1 rounded-lg hover:bg-blue-600"
+            >
+              My Orders
+            </Link>
+          )}
+
+          {/* SELLER: Orders */}
+          {user?.role === "SELLER" && (
+            <Link
+              to="/orders"
+              className="text-blue-100 hover:text-white text-sm font-medium transition-colors px-2 py-1 rounded-lg hover:bg-blue-600"
+            >
+              Orders
+            </Link>
+          )}
+
           {/* ADMIN: Admin Panel */}
           {user?.role === "ADMIN" && (
             <Link

@@ -43,6 +43,35 @@ const CartPage = () => {
   }, [token]);
 
   const [removing, setRemoving] = useState<number | null>(null);
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState<number | null>(null);
+  const [orderError, setOrderError] = useState<string | null>(null);
+
+  const handlePlaceOrder = async () => {
+    setPlacingOrder(true);
+    setOrderError(null);
+    try {
+      const res = await axios.post<{
+        success: boolean;
+        message: string;
+        data: { orderId?: number };
+      }>(
+        "http://localhost:3000/api/users/orders",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (res.data.success && res.data.data.orderId) {
+        setOrderSuccess(res.data.data.orderId);
+        setCart((prev) => (prev ? { ...prev, cartProducts: [] } : prev));
+      } else {
+        setOrderError(res.data.message ?? "Could not place order.");
+      }
+    } catch {
+      setOrderError("Failed to place order. Please try again.");
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
 
   const handleRemove = async (cartProductId: number) => {
     setRemoving(cartProductId);
@@ -255,14 +284,52 @@ const CartPage = () => {
               </div>
             ))}
           </div>
+          {orderSuccess && (
+            <div className="mb-5 px-4 py-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-start gap-3">
+              <svg
+                className="w-5 h-5 shrink-0 mt-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              <div>
+                <p className="font-semibold">
+                  Order #{orderSuccess} placed successfully!
+                </p>
+                <p className="text-green-600 text-xs mt-0.5">
+                  Your order is now pending. Thank you for shopping with us.
+                </p>
+              </div>
+            </div>
+          )}
+          {orderError && (
+            <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+              {orderError}
+            </div>
+          )}
           <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
             <span className="font-semibold text-gray-800">Total</span>
             <span className="text-xl font-bold text-blue-600">
               ₨{total.toLocaleString()}
             </span>
           </div>
-          <button className="mt-5 w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl text-sm transition-colors">
-            Proceed to Checkout
+          <button
+            onClick={handlePlaceOrder}
+            disabled={placingOrder || !!orderSuccess}
+            className="mt-5 w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium rounded-xl text-sm transition-colors"
+          >
+            {placingOrder
+              ? "Placing Order…"
+              : orderSuccess
+                ? "✓ Order Placed"
+                : "Proceed to Checkout"}
           </button>
           <Link
             to="/"

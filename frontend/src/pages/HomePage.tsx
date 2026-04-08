@@ -39,7 +39,7 @@ const HomePage = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [minInput, setMinInput] = useState("");
   const [maxInput, setMaxInput] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   // Cart state
   const [qty, setQty] = useState<Record<number, number>>({});
@@ -77,25 +77,19 @@ const HomePage = () => {
   // Applied filter state (triggers fetch)
   const [appliedMin, setAppliedMin] = useState<number | undefined>(undefined);
   const [appliedMax, setAppliedMax] = useState<number | undefined>(undefined);
-  const [appliedCategories, setAppliedCategories] = useState<string[]>([]);
+  const [appliedCategory, setAppliedCategory] = useState("");
 
   const activeFilterCount =
     (appliedMin !== undefined ? 1 : 0) +
     (appliedMax !== undefined ? 1 : 0) +
-    appliedCategories.length;
-
-  const toggleCategory = (cat: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
-    );
-  };
+    (appliedCategory !== "" ? 1 : 0);
 
   const applyFilters = () => {
     const minVal = minInput !== "" ? Number(minInput) : undefined;
     const maxVal = maxInput !== "" ? Number(maxInput) : undefined;
     setAppliedMin(minVal);
     setAppliedMax(maxVal);
-    setAppliedCategories(selectedCategories);
+    setAppliedCategory(selectedCategory);
     setPage(1);
     setDrawerOpen(false);
   };
@@ -103,10 +97,10 @@ const HomePage = () => {
   const clearFilters = () => {
     setMinInput("");
     setMaxInput("");
-    setSelectedCategories([]);
+    setSelectedCategory("");
     setAppliedMin(undefined);
     setAppliedMax(undefined);
-    setAppliedCategories([]);
+    setAppliedCategory("");
     setPage(1);
     setDrawerOpen(false);
   };
@@ -121,7 +115,7 @@ const HomePage = () => {
     };
     if (appliedMin !== undefined) params.min = appliedMin;
     if (appliedMax !== undefined) params.max = appliedMax;
-    if (appliedCategories.length === 1) params.category = appliedCategories[0];
+    if (appliedCategory !== "") params.category = appliedCategory;
 
     axios
       .get<{ success: boolean; data: ProductsResponse }>(
@@ -136,7 +130,7 @@ const HomePage = () => {
       })
       .catch(() => setError("Failed to load products. Please try again."))
       .finally(() => setLoading(false));
-  }, [page, limit, appliedMin, appliedMax, appliedCategories]);
+  }, [page, limit, appliedMin, appliedMax, appliedCategory]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -225,10 +219,11 @@ const HomePage = () => {
                   className="flex items-center gap-3 cursor-pointer group"
                 >
                   <input
-                    type="checkbox"
-                    checked={selectedCategories.includes(cat)}
-                    onChange={() => toggleCategory(cat)}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-500 accent-blue-500 cursor-pointer"
+                    type="radio"
+                    name="category"
+                    checked={selectedCategory === cat}
+                    onChange={() => setSelectedCategory(cat)}
+                    className="w-4 h-4 border-gray-300 text-blue-500 accent-blue-500 cursor-pointer"
                   />
                   <span className="text-sm text-gray-700 group-hover:text-blue-500 transition-colors">
                     {cat}
@@ -410,7 +405,7 @@ const HomePage = () => {
                       ₨{product.price.toLocaleString()}
                     </span>
                     <span className="text-gray-400 text-xs">
-                      by {product.user.name}
+                      by {product.user?.name}
                     </span>
                   </div>
                   {cartError[product.id] && (

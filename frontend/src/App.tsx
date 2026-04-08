@@ -8,6 +8,8 @@ import CartPage from "./pages/CartPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import SellerOrdersPage from "./pages/SellerOrdersPage";
+import UserOrdersPage from "./pages/UserOrdersPage";
 
 const App = () => {
   return (
@@ -27,10 +29,26 @@ const App = () => {
             }
           />
           <Route
+            path="/my-orders"
+            element={
+              <ProtectedRoute allowedRoles={["USER"]}>
+                <UserOrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/products/new"
             element={
               <ProtectedRoute allowedRoles={["SELLER"]}>
                 <AddProductPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute allowedRoles={["SELLER"]}>
+                <SellerOrdersPage />
               </ProtectedRoute>
             }
           />
