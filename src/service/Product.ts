@@ -15,7 +15,7 @@ const findAllProducts = async (page = 1, limit = 10, min = 0, max = 999999) => {
     skip: (page - 1) * limit,
     take: limit,
     where: { deletedAt: null, price: { gte: min, lte: max } },
-    omit: { deletedAt: true },
+    omit: { createdAt: true, deletedAt: true, updatedAt: true, userId: true },
   });
   return { products: products, total: totalNum };
 };
@@ -35,6 +35,8 @@ const findProductsByCategory = async (
     },
   });
   const products = await prisma.product.findMany({
+    include: { user: { select: { name: true } } },
+    omit: { createdAt: true, deletedAt: true, updatedAt: true, userId: true },
     where: {
       category: category,
       deletedAt: null,
