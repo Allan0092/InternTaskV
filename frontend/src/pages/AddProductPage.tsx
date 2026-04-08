@@ -1,10 +1,10 @@
-import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import SellerProductList, {
   type SellerProduct,
 } from "../components/SellerProductList";
 import { CATEGORIES } from "../constants";
 import { useAuth } from "../context/AuthContext";
+import api, { isAxiosError } from "../lib/Axios";
 
 type Tab = "create" | "my-products";
 
@@ -44,11 +44,10 @@ const AddProductPage = () => {
   const fetchMyProducts = () => {
     setProductsLoading(true);
     setProductsError(null);
-    axios
-      .get<{ success: boolean; data: SellerProduct[] }>(
-        "http://localhost:3000/api/products/",
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
+    api
+      .get<{ success: boolean; data: SellerProduct[] }>("/api/products/", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => setMyProducts(res.data.data))
       .catch(() => setProductsError("Failed to load products."))
       .finally(() => setProductsLoading(false));
@@ -67,11 +66,11 @@ const AddProductPage = () => {
     setCreateError(null);
     setCreating(true);
     try {
-      const res = await axios.post<{
+      const res = await api.post<{
         success: boolean;
         data: Partial<SellerProduct> & { id?: number };
       }>(
-        "http://localhost:3000/api/products/",
+        "/api/products/",
         {
           name: form.name,
           price: Number(form.price),
@@ -92,7 +91,7 @@ const AddProductPage = () => {
         setUserId(res.data.data.userId);
       }
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.data?.message) {
+      if (isAxiosError(err) && err.response?.data?.message) {
         setCreateError(err.response.data.message);
       } else {
         setCreateError("Failed to create product. Please try again.");
@@ -130,19 +129,15 @@ const AddProductPage = () => {
     try {
       const fd = new FormData();
       selectedFiles.forEach((f) => fd.append("images", f));
-      await axios.post(
-        `http://localhost:3000/api/products/${uploadProductId}/upload-images`,
-        fd,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
+      await api.put(`/api/products/${uploadProductId}/upload-images`, fd, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-      );
+      });
       setUploadSuccess(true);
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.data?.message) {
+      if (isAxiosError(err) && err.response?.data?.message) {
         setUploadError(err.response.data.message);
       } else {
         setUploadError("Image upload failed. Please try again.");

@@ -39,7 +39,11 @@ const findOrdersByEmail = async (
     orderBy: { orderDate: "desc" },
     skip: (page - 1) * limit,
     take: limit,
-    include: { orderItems: true },
+    include: {
+      orderItems: true,
+      payments: { select: { status: true, id: true } },
+    },
+    omit: { paymentId: true },
   });
   return order;
 };
@@ -79,6 +83,7 @@ const findSellersOrder = async (
       user: {
         select: { id: true, name: true, email: true },
       },
+      payments: true,
     },
   });
   return orders;
@@ -116,7 +121,7 @@ const findOrderSellers = async (orderId: number) => {
 const findOrderById = async (orderId: number) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { orderItems: true },
+    include: { orderItems: true, payments: true },
   });
   return order;
 };

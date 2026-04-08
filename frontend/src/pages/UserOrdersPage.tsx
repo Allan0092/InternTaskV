@@ -1,7 +1,7 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api, { isAxiosError } from "../lib/Axios";
 
 type OrderStatus =
   | "PENDING"
@@ -27,8 +27,12 @@ interface Order {
   orderDate: string;
   Total: number;
   status: OrderStatus;
-  paymentId: string | null;
+  //   paymentId: string | null;
   orderItems: OrderItem[];
+  payments: {
+    id: string;
+    status: "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED" | "CANCELLED";
+  } | null;
 }
 
 const statusStyles: Record<OrderStatus, string> = {
@@ -57,15 +61,20 @@ const UserOrdersPage = () => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [cancelling, setCancelling] = useState<number | null>(null);
   const [cancelError, setCancelError] = useState<Record<number, string>>({});
+  const [paying, setPaying] = useState<number | null>(null);
+  const [payError, setPayError] = useState<Record<number, string>>({});
+  const [checkingStatus, setCheckingStatus] = useState<number | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<Record<number, string>>(
+    {},
+  );
 
   const fetchOrders = () => {
     setLoading(true);
     setError(null);
-    axios
-      .get<{ success: boolean; data: Order[] }>(
-        "http://localhost:3000/api/users/orders",
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
+    api
+      .get<{ success: boolean; data: Order[] }>("/api/users/orders", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => setOrders(res.data.data))
       .catch(() => setError("Failed to load your orders. Please try again."))
       .finally(() => setLoading(false));
@@ -80,7 +89,7 @@ const UserOrdersPage = () => {
     setCancelling(orderId);
     setCancelError((prev) => ({ ...prev, [orderId]: "" }));
     try {
-      await axios.delete(`http://localhost:3000/api/users/orders/${orderId}`, {
+      await api.delete(`/api/users/orders/${orderId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrders((prev) =>
@@ -88,12 +97,58 @@ const UserOrdersPage = () => {
       );
     } catch (err: unknown) {
       const msg =
-        axios.isAxiosError(err) && err.response?.data?.message
+        isAxiosError(err) && err.response?.data?.message
           ? err.response.data.message
           : "Could not cancel order.";
       setCancelError((prev) => ({ ...prev, [orderId]: msg }));
     } finally {
       setCancelling(null);
+    }
+  };
+
+  const handlePay = async (orderId: number, sku: string) => {
+    setPaying(orderId);
+    setPayError((prev) => ({ ...prev, [orderId]: "" }));
+    try {
+      const res = await api.get<{
+        success: boolean;
+        data: { url: string };
+      }>("/api/payment/", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { sku },
+      });
+      window.location.href = res.data.data.url;
+    } catch {
+      setPayError((prev) => ({
+        ...prev,
+        [orderId]: "Could not initiate payment. Please try again.",
+      }));
+    } finally {
+      setPaying(null);
+    }
+  };
+
+  const handleCheckStatus = async (orderId: number, sku: string) => {
+    setCheckingStatus(orderId);
+    try {
+      const res = await api.get<{
+        success: boolean;
+        data: { status: string };
+      }>("/api/payment/check", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { sku },
+      });
+      setPaymentStatus((prev) => ({
+        ...prev,
+        [orderId]: res.data.data.status,
+      }));
+    } catch {
+      setPaymentStatus((prev) => ({
+        ...prev,
+        [orderId]: "Failed to fetch status.",
+      }));
+    } finally {
+      setCheckingStatus(null);
     }
   };
 
@@ -368,8 +423,8 @@ const UserOrdersPage = () => {
                       </div>
                     </div>
 
-                    {/* Footer: SKU + cancel */}
-                    <div className="pt-1 flex items-center justify-between gap-4 flex-wrap">
+                    {/* Footer: SKU + actions */}
+                    <div className="pt-1 space-y-3">
                       <p className="text-xs text-gray-400">
                         SKU:{" "}
                         <span className="font-mono text-gray-500">
@@ -378,22 +433,82 @@ const UserOrdersPage = () => {
                       </p>
 
                       {isCancellable && (
-                        <div className="flex flex-col items-end gap-1">
-                          {cancelError[order.id] && (
-                            <p className="text-xs text-red-500">
-                              {cancelError[order.id]}
-                            </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* Pay Now — only if no payment initiated yet */}
+                          {!order.payments && (
+                            <button
+                              onClick={() => handlePay(order.id, order.sku)}
+                              disabled={paying === order.id}
+                              className="flex-1 min-w-32 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors"
+                            >
+                              {paying === order.id ? "Redirecting…" : "Pay Now"}
+                            </button>
                           )}
+
+                          {/* Check Payment Status — only if payment already initiated */}
+                          {order.payments && (
+                            <button
+                              onClick={() =>
+                                handleCheckStatus(order.id, order.sku)
+                              }
+                              disabled={checkingStatus === order.id}
+                              className="flex-1 min-w-32 px-4 py-2 rounded-xl border border-blue-200 text-blue-600 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold transition-colors"
+                            >
+                              {checkingStatus === order.id
+                                ? "Checking…"
+                                : "Check Payment Status"}
+                            </button>
+                          )}
+
+                          {/* Cancel */}
                           <button
                             onClick={() => handleCancel(order.id)}
                             disabled={cancelling === order.id}
-                            className="px-4 py-1.5 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium transition-colors"
+                            className="px-4 py-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium transition-colors"
                           >
                             {cancelling === order.id
                               ? "Cancelling…"
                               : "Cancel Order"}
                           </button>
                         </div>
+                      )}
+
+                      {/* Existing payment info from API */}
+                      {order.payments && (
+                        <div className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-100 text-sm flex items-center gap-2">
+                          <span className="text-blue-500 font-medium">
+                            Payment Status:
+                          </span>
+                          <span className="text-blue-700 font-semibold">
+                            {order.payments.status}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Payment status from manual check */}
+                      {paymentStatus[order.id] && (
+                        <div className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-100 text-sm flex items-center gap-2">
+                          <span className="text-blue-500 font-medium">
+                            Latest Payment Status:
+                          </span>
+                          <span className="text-blue-700 font-semibold">
+                            {paymentStatus[order.id]}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Pay error */}
+                      {payError[order.id] && (
+                        <p className="text-xs text-red-500">
+                          {payError[order.id]}
+                        </p>
+                      )}
+
+                      {/* Cancel error */}
+                      {cancelError[order.id] && (
+                        <p className="text-xs text-red-500">
+                          {cancelError[order.id]}
+                        </p>
                       )}
                     </div>
                   </div>

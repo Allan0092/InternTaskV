@@ -1,7 +1,7 @@
-import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api, { isAxiosError } from "../lib/Axios";
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -18,14 +18,14 @@ const LoginPage = () => {
     setError(null);
     setLoading(true);
     try {
-      const res = await axios.post<{
+      const res = await api.post<{
         success: boolean;
         data: { token: string };
-      }>("http://localhost:3000/api/public/login", { email, password });
+      }>("/api/public/login", { email, password });
       login(res.data.data.token);
       navigate("/");
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.data?.message) {
+      if (isAxiosError(err) && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
         setError("Login failed. Please check your credentials.");

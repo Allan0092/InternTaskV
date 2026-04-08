@@ -105,8 +105,8 @@ const getKhaltiUrl = async (ctx: Context) => {
         "Content-Type": "application/json",
       },
       data: {
-        return_url: "http://example.com/payment",
-        website_url: "https://example.com/",
+        return_url: "http://localhost:5173/my-orders",
+        website_url: "http://localhost:5173/",
         amount: order?.Total,
         purchase_order_id: order?.sku,
         purchase_order_name: `Order ${order.id}`,
@@ -119,8 +119,6 @@ const getKhaltiUrl = async (ctx: Context) => {
     });
 
     const responseData: PaymentPlacement = response.data;
-
-    console.log(response.data);
 
     const payment = await createPayment(
       PaymentGateway.KHALTI,

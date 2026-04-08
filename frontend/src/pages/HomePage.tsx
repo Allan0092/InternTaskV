@@ -1,8 +1,8 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CATEGORIES, categoryColors, LIMIT_OPTIONS } from "../constants";
 import { useAuth } from "../context/AuthContext";
+import api from "../lib/Axios";
 
 interface Product {
   id: number;
@@ -57,8 +57,8 @@ const HomePage = () => {
     setAddingTo(productId);
     setCartError((prev) => ({ ...prev, [productId]: "" }));
     try {
-      await axios.patch(
-        `http://localhost:3000/api/users/carts/${productId}`,
+      await api.patch(
+        `/api/users/carts/${productId}`,
         { quantity: getQty(productId) },
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -134,9 +134,9 @@ const HomePage = () => {
     if (appliedCategory !== "") params.category = appliedCategory;
     if (appliedSearch !== "") params.search = appliedSearch;
 
-    axios
+    api
       .get<{ success: boolean; data: ProductsResponse }>(
-        "http://localhost:3000/api/public/products",
+        "/api/public/products",
         { params },
       )
       .then((res) => {
@@ -271,7 +271,10 @@ const HomePage = () => {
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-5">
           {/* Search box */}
-          <form onSubmit={handleSearch} className="relative flex-1 flex items-center gap-2">
+          <form
+            onSubmit={handleSearch}
+            className="relative flex-1 flex items-center gap-2"
+          >
             <div className="relative flex-1">
               <svg
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
@@ -299,8 +302,18 @@ const HomePage = () => {
                   onClick={clearSearch}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               )}
@@ -316,33 +329,34 @@ const HomePage = () => {
           <div className="flex items-center gap-3 shrink-0">
             {!loading && !error && (
               <p className="text-sm text-gray-500">
-                <span className="font-medium text-gray-700">{total}</span> products
+                <span className="font-medium text-gray-700">{total}</span>{" "}
+                products
               </p>
             )}
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="relative flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="relative flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
-              />
-            </svg>
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
+                />
+              </svg>
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
         {/* Loading */}

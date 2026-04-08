@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api, { isAxiosError } from "../lib/Axios";
 
 type Role = "USER" | "SELLER";
 
@@ -35,10 +35,10 @@ const RegisterPage = () => {
       };
       if (role === "SELLER") body.role = "SELLER";
 
-      await axios.post("http://localhost:3000/api/public/register", body);
+      await api.post("/api/public/register", body);
       navigate("/login", { state: { registered: true } });
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.data?.message) {
+      if (isAxiosError(err) && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
         setError("Registration failed. Please try again.");

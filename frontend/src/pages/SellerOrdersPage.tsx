@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import api from "../lib/Axios";
 
 type OrderStatus =
   | "PENDING"
@@ -70,14 +70,11 @@ const SellerOrdersPage = () => {
     setError(null);
     const params: Record<string, string> = {};
     if (status !== "ALL") params.status = status;
-    axios
-      .get<{ success: boolean; data: Order[] }>(
-        "http://localhost:3000/api/orders",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params,
-        },
-      )
+    api
+      .get<{ success: boolean; data: Order[] }>("/api/orders", {
+        headers: { Authorization: `Bearer ${token}` },
+        params,
+      })
       .then((res) => setOrders(res.data.data))
       .catch(() => setError("Failed to load orders. Please try again."))
       .finally(() => setLoading(false));

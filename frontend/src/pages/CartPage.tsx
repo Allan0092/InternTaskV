@@ -1,7 +1,7 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api from "../lib/Axios";
 
 interface CartProduct {
   id: number;
@@ -27,11 +27,10 @@ const CartPage = () => {
   const fetchCart = () => {
     setLoading(true);
     setError(null);
-    axios
-      .get<{ success: boolean; data: Cart }>(
-        "http://localhost:3000/api/users/carts",
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
+    api
+      .get<{ success: boolean; data: Cart }>("/api/users/carts", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => setCart(res.data.data))
       .catch(() => setError("Failed to load your cart. Please try again."))
       .finally(() => setLoading(false));
@@ -51,12 +50,12 @@ const CartPage = () => {
     setPlacingOrder(true);
     setOrderError(null);
     try {
-      const res = await axios.post<{
+      const res = await api.post<{
         success: boolean;
         message: string;
         data: { orderId?: number };
       }>(
-        "http://localhost:3000/api/users/orders",
+        "/api/users/orders",
         {},
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -76,10 +75,9 @@ const CartPage = () => {
   const handleRemove = async (cartProductId: number) => {
     setRemoving(cartProductId);
     try {
-      await axios.delete(
-        `http://localhost:3000/api/users/carts/${cartProductId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      await api.delete(`/api/users/carts/${cartProductId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setCart((prev) =>
         prev
           ? {
@@ -285,29 +283,37 @@ const CartPage = () => {
             ))}
           </div>
           {orderSuccess && (
-            <div className="mb-5 px-4 py-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-start gap-3">
-              <svg
-                className="w-5 h-5 shrink-0 mt-0.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              <div>
-                <p className="font-semibold">
-                  Order #{orderSuccess} placed successfully!
-                </p>
-                <p className="text-green-600 text-xs mt-0.5">
-                  Your order is now pending. Thank you for shopping with us.
-                </p>
+            <>
+              <div className="mb-3 px-4 py-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 shrink-0 mt-0.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <div>
+                  <p className="font-semibold">
+                    Order #{orderSuccess} placed successfully!
+                  </p>
+                  <p className="text-green-600 text-xs mt-0.5">
+                    Your order is pending payment. Go to My Orders to pay.
+                  </p>
+                </div>
               </div>
-            </div>
+              <Link
+                to="/my-orders"
+                className="mb-3 flex items-center justify-center gap-2 w-full py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl text-sm transition-colors"
+              >
+                Pay Now
+              </Link>
+            </>
           )}
           {orderError && (
             <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">

@@ -1,5 +1,5 @@
-import axios from "axios";
 import { useRef, useState } from "react";
+import api, { isAxiosError } from "../lib/Axios";
 
 const CATEGORIES = ["ELECTRONICS", "FASHION", "HOME", "TOYS", "BOOKS", "FOOD"];
 const LIMIT_OPTIONS = [6, 12, 24];
@@ -122,22 +122,18 @@ const SellerProductList = ({
     try {
       const fd = new FormData();
       uploadFiles.forEach((f) => fd.append("images", f));
-      await axios.post(
-        `http://localhost:3000/api/products/${productId}/upload-images`,
-        fd,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
+      await api.put(`/api/products/${productId}/upload-images`, fd, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-      );
+      });
       setUploadSuccess(productId);
       setUploadFiles([]);
       setUploadTarget(null);
       onRefresh();
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.data?.message) {
+      if (isAxiosError(err) && err.response?.data?.message) {
         setUploadError(err.response.data.message);
       } else {
         setUploadError("Image upload failed.");
