@@ -3,10 +3,6 @@ import {
   PaymentGateway,
   PaymentStatus,
 } from "@/generated/prisma/enums.js";
-import {
-  sendNewOrderNotificationToBuyer,
-  sendNewOrderNotificationToSeller,
-} from "@/service/Email.js";
 import { findAndUpdateOrder, findOrderBySku } from "@/service/Order.js";
 import {
   createPayment,
@@ -52,6 +48,7 @@ const options: Options = {
   data: {
     return_url: "http://example.com/payment",
     website_url: "https://example.com/",
+    merchant_name: "The Real Daraz",
     amount: "1000",
     purchase_order_id: "Order01",
     purchase_order_name: "test",
@@ -107,7 +104,7 @@ const getKhaltiUrl = async (ctx: Context) => {
       data: {
         return_url: "http://localhost:5173/my-orders",
         website_url: "http://localhost:5173/",
-        amount: order?.Total,
+        amount: order?.Total * 1000,
         purchase_order_id: order?.sku,
         purchase_order_name: `Order ${order.id}`,
         customer_info: {
@@ -164,10 +161,15 @@ const checkKhaltiPaymentStatus = async (ctx: Context) => {
 
     if (!payment) throw new AppError("Payment could not be found", 404);
 
-    const pidx = payment.pidx;
+    if (payment.status === PaymentStatus.SUCCESS) {
+      ctx.body = generateResponseBody({
+        success: true,
+        message: "Payment status fetched successfully",
+        data: { status: payment.status },
+      });
+    }
 
-    const user = await findUserByEmail(email);
-    if (!user) throw new AppError("User cannot be found", 404);
+    const pidx = payment.pidx;
 
     try {
       const response = await axios({
@@ -187,8 +189,11 @@ const checkKhaltiPaymentStatus = async (ctx: Context) => {
       switch (paymentData.status) {
         case "Completed": {
           await updatePaymentStatus(payment.id, PaymentStatus.SUCCESS);
-          await sendNewOrderNotificationToBuyer(email, sku);
-          await sendNewOrderNotificationToSeller(sku);
+          await findAndUpdateOrder(order.id, { status: OrderStatus.PAID });
+          // try{
+          // await sendNewOrderNotificationToBuyer(email, sku);
+          // await sendNewOrderNotificationToSeller(sku);
+          // }catch(e: any){}
         }
       }
 
@@ -201,6 +206,9 @@ const checkKhaltiPaymentStatus = async (ctx: Context) => {
       const status = e.response.status;
       const data: PaymentVerification = e.response.data;
       // TODO: Handle each case
+      // if (e.code === "EENVELOPE") {
+      //   throw new AppError("Could not send mail at this moment");
+      // }
       throw new AppError(data.status, 400);
     }
   } catch (e: AppError | any) {

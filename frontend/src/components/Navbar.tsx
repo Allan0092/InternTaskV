@@ -68,7 +68,7 @@ const Navbar = () => {
               to="/products/new"
               className="text-blue-100 hover:text-white text-sm font-medium transition-colors px-2 py-1 rounded-lg hover:bg-blue-600"
             >
-              Add Product
+              My Products
             </Link>
           )}
 
