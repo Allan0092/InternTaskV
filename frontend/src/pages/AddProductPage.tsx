@@ -57,10 +57,9 @@ const AddProductPage = () => {
     if (tab === "my-products") {
       fetchMyProducts();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
-  // ── Create product ─────────────────────────────────────────────
+  // Create product
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreateError(null);
@@ -86,7 +85,6 @@ const AddProductPage = () => {
         setCreatedProduct({ id: productId });
         setUploadProductId(productId);
       }
-      // If response has userId, cache it
       if (res.data.data?.userId) {
         setUserId(res.data.data.userId);
       }

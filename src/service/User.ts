@@ -48,7 +48,13 @@ const findAndEnableUser = async (id: number) => {
   return user;
 };
 
-const updateUserbyEmail = async (email: string, data: {}) => {};
+const updateUserbyEmail = async (email: string, data: UserUpdateInput) => {
+  const user = await prisma.user.update({
+    where: { email },
+    data,
+  });
+  return user;
+};
 
 export {
   findAllUsers,
@@ -57,4 +63,5 @@ export {
   findAndEnableUser,
   findUserByEmail,
   saveUser,
+  updateUserbyEmail,
 };

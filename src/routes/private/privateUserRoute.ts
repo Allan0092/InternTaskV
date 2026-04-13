@@ -13,8 +13,9 @@ import {
   checkKhaltiPaymentStatus,
   getKhaltiUrl,
 } from "@/controller/paymentController.js";
-import { softDeleteUser } from "@/controller/userController.js";
-import { validateBuyerAndOrder } from "@/middleware/validate.js";
+import { editUser, softDeleteUser } from "@/controller/userController.js";
+import { validateBody, validateBuyerAndOrder } from "@/middleware/validate.js";
+import { updateUserSchema } from "@/validation/updateUserValidation.js";
 import { Context } from "koa";
 import Router from "koa-router";
 
@@ -22,6 +23,8 @@ const privateUserRouter = new Router<any, Context>();
 
 // User Account
 privateUserRouter.delete("/users/account", softDeleteUser);
+privateUserRouter.get("/users"); //TODO For getting user's account details
+privateUserRouter.patch("/users", validateBody(updateUserSchema), editUser);
 
 // Cart
 privateUserRouter.get("/users/carts", getCart);

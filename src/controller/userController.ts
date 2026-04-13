@@ -1,4 +1,5 @@
 import { Role } from "@/generated/prisma/enums.js";
+import { UserUpdateInput } from "@/generated/prisma/models.js";
 import {
   findAllUsers,
   findAndDeleteUserbyId,
@@ -6,6 +7,7 @@ import {
   findAndEnableUser,
   findUserByEmail,
   saveUser,
+  updateUserbyEmail,
 } from "@/service/User.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
@@ -166,8 +168,31 @@ const enableUserAccount = async (ctx: Context) => {
   }
 };
 
+const editUser = async (ctx: Context) => {
+  try {
+    const data: UserUpdateInput = ctx.request.body as UserUpdateInput;
+    const role = ctx.state.user.role;
+    const email = role === Role.ADMIN ? data.email : ctx.state.user.email;
+
+    const user = await updateUserbyEmail(email, data);
+    if (!user) throw new Error();
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "User updated successfully",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not update user",
+    });
+    throw e;
+  }
+};
+
 export {
   deleteUser,
+  editUser,
   enableUserAccount,
   getUsers,
   login,

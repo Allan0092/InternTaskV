@@ -6,9 +6,12 @@ import {
 } from "@/controller/productController.js";
 import {
   deleteUser,
+  editUser,
   enableUserAccount,
   getUsers,
 } from "@/controller/userController.js";
+import { validateBody } from "@/middleware/validate.js";
+import { updateUserSchema } from "@/validation/updateUserValidation.js";
 import "dotenv";
 import { Context } from "koa";
 import Router from "koa-router";
@@ -19,6 +22,7 @@ const adminRouter = new Router<any, Context>({ prefix: "/admin" });
 adminRouter.get("/users", getUsers);
 adminRouter.delete("/users/:id", deleteUser);
 adminRouter.patch("/users/:id", enableUserAccount);
+adminRouter.patch("/users", validateBody(updateUserSchema), editUser);
 
 // Products
 adminRouter.get("/products", getAllProducts);

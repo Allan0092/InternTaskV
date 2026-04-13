@@ -34,7 +34,7 @@ sellerRouter.post("/products/", validateBody(addProductSchema), addProduct);
 sellerRouter.get("/products/", getAllSellerProducts);
 
 // Update product details
-sellerRouter.put(
+sellerRouter.patch(
   "/products/:id",
   validateBody(updateProductSchema),
   validateUserAndProduct,
