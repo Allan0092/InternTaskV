@@ -362,7 +362,7 @@ const orderData: {
       { productName: "Wireless Headphones", quantity: 1, price: 7999 },
       { productName: "Green Tea Pack", quantity: 2, price: 699 },
     ],
-    status: OrderStatus.PENDING,
+    status: OrderStatus.PROCESSING,
   },
   {
     email: userData[7].email,
