@@ -53,6 +53,14 @@ const findAndUpdateOrder = async (orderId: number, data: OrderUpdateInput) => {
   return order;
 };
 
+const findAllOrderItemStatus = async (orderId: number) => {
+  const result = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: { orderItems: { select: { status: true } } },
+  });
+  return result;
+};
+
 const findSellersOrder = async (
   email: string,
   status: OrderStatus = OrderStatus.PENDING,
@@ -183,10 +191,20 @@ const findOrderProductsAndSellersBySku = async (sku: string) => {
   return products.orderItems;
 };
 
+const findOrderByOrderItemId = async (id: number) => {
+  const order = await prisma.orderItem.findUnique({
+    where: { id },
+    select: { order: { include: { orderItems: true } } },
+  });
+  return order?.order;
+};
+
 export {
+  findAllOrderItemStatus,
   findAllOrders,
   findAndUpdateOrder,
   findOrderById,
+  findOrderByOrderItemId,
   findOrderBySku,
   findOrderProductsAndSellersBySku,
   findOrderProductsBySku,

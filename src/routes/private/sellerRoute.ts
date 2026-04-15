@@ -1,4 +1,7 @@
-import { getOrdersForSeller } from "@/controller/orderController.js";
+import {
+  checkAndUpdateOrderStatusWithSellerUpdate,
+  getOrdersForSeller,
+} from "@/controller/orderController.js";
 import { updateOrderItemStatus } from "@/controller/orderItemController.js";
 import {
   addProduct,
@@ -63,6 +66,7 @@ sellerRouter.patch(
   validateBody(sellerUpdateOrderItemSchema),
   validateSellerAndOrderItem,
   updateOrderItemStatus,
+  checkAndUpdateOrderStatusWithSellerUpdate,
 );
 
 export default sellerRouter;

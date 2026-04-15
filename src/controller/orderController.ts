@@ -1,3 +1,4 @@
+import { OrderItem } from "@/generated/prisma/client.js";
 import { OrderItemStatus, OrderStatus } from "@/generated/prisma/enums.js";
 import { clearCart, findCartByEmail } from "@/service/Cart.js";
 import {
@@ -108,23 +109,19 @@ const updateOrderStatus = async (ctx: Context) => {
 
 const checkAndUpdateOrderStatusWithSellerUpdate = async (ctx: Context) => {
   try {
-    const orderId = parseInt(ctx.params.id); // TODO Change according to needs
-    // const { productId: orderItemId } = ctx.request.body as {
-    //   productId: number;
-    // };
-    const order = await findOrderById(orderId);
+    const order = await findOrderById(ctx.state.order.id);
 
     if (order?.status === OrderStatus.PENDING) {
       const status = order.orderItems.some(
-        (item) => item.status === OrderItemStatus.PROCESSING,
+        (item: OrderItem) => item.status === OrderItemStatus.PROCESSING,
       );
       if (status) {
         await findAndUpdateOrder(order?.id, { status: OrderStatus.PROCESSING });
         // TODO notification
       }
     } else if (order?.status === OrderStatus.PROCESSING) {
-      const status = order.orderItems.map(
-        (item) => item.status === OrderItemStatus.SHIPPED,
+      const status = order.orderItems.every(
+        (item: OrderItem) => item.status === OrderItemStatus.SHIPPED,
       );
       if (status) {
         await findAndUpdateOrder(order?.id, { status: OrderStatus.SHIPPING });

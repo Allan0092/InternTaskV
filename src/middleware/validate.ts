@@ -1,6 +1,6 @@
-import { Role } from "@/generated/prisma/enums.js";
+import { OrderItemStatus, Role } from "@/generated/prisma/enums.js";
 import {
-  findOrderById,
+  findOrderByOrderItemId,
   findOrdersByEmail,
   findOrderSellers,
 } from "@/service/Order.js";
@@ -114,13 +114,15 @@ const validateUserAndProduct = async (ctx: Context, next: Next) => {
 
 const validateSellerAndOrderItem = async (ctx: Context, next: Next) => {
   try {
-    const { orderId, orderItemId } = ctx.request.body as {
-      orderId: number;
+    const { orderItemId, status } = ctx.request.body as {
       orderItemId: number;
+      status: OrderItemStatus;
     };
 
-    const order = await findOrderById(orderId);
-    if (!order) throw new AppError("Could nto find order");
+    const order = await findOrderByOrderItemId(orderItemId);
+    if (!order) throw new AppError("Could not find order");
+
+    ctx.state.order = order;
 
     const orderItem = await findOrderItem(orderItemId);
     if (!orderItem) throw new AppError("Could not find order item");

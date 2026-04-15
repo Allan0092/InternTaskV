@@ -12,7 +12,7 @@ const sellerUpdateOrderItemSchema = yup.object().shape({
       ]),
     )
     .required("Order Status is required."),
-  orderId: yup.number().min(1).required("Order id is required."),
+  //   orderId: yup.number().min(1).required("Order id is required."),
   orderItemId: yup.number().min(1).required("Order item id is required."),
 });
 

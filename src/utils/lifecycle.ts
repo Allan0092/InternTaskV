@@ -39,33 +39,44 @@ const orderStatusLifeCycle = (
   return false;
 };
 
-const orderItemStatusLifecycle = (
+const orderItemStatusLifecycleOrThrow = (
   currStatus: OrderItemStatus,
   newStatus: OrderItemStatus,
 ) => {
+  if (currStatus === newStatus) {
+    throw new AppError(`Order Item status already set to ${currStatus}`);
+  }
   // Final Status
   switch (currStatus) {
     case OrderItemStatus.SHIPPED:
-      throw new AppError("Cannot change order item status from Shipped", 401);
+      throw new AppError("Cannot change order item status from Shipped", 401, {
+        status: currStatus,
+      });
     case OrderItemStatus.DECLINE:
-      throw new AppError("Cannot change order item status from Declined", 401);
+      throw new AppError("Cannot change order item status from Declined", 401, {
+        status: currStatus,
+      });
     case OrderItemStatus.COMPLETED:
-      throw new AppError("Order has already been Completed", 401);
+      throw new AppError("Order has already been Completed", 401, {
+        status: currStatus,
+      });
   }
 
   if (currStatus === OrderItemStatus.PENDING) {
     if (newStatus === OrderItemStatus.PROCESSING) {
-      return true;
+      return;
     } else if (newStatus === OrderItemStatus.DECLINE) {
-      return true;
+      return;
     }
   }
   if (currStatus === OrderItemStatus.PROCESSING) {
     if (newStatus === OrderItemStatus.SHIPPED) {
-      return true;
+      return;
     }
   }
-  throw new AppError("Could not change the status", 401);
+  throw new AppError("Could not change the status", 401, {
+    status: currStatus,
+  });
 };
 
-export { orderItemStatusLifecycle, orderStatusLifeCycle };
+export { orderItemStatusLifecycleOrThrow, orderStatusLifeCycle };
