@@ -1,5 +1,10 @@
 import { Role } from "@/generated/prisma/enums.js";
-import { findOrdersByEmail, findOrderSellers } from "@/service/Order.js";
+import {
+  findOrderById,
+  findOrdersByEmail,
+  findOrderSellers,
+} from "@/service/Order.js";
+import { findOrderItem } from "@/service/OrderItem.js";
 import { findProductSeller } from "@/service/Product.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
@@ -69,7 +74,7 @@ const validateRole = (role: Role) => {
   return async (ctx: Context, next: Next) => {
     try {
       const { role: givenRole } = ctx.state.user;
-      if (givenRole === "ADMIN") {
+      if (givenRole === Role.ADMIN) {
         await next();
       } else if (role === givenRole) {
         await next();
@@ -92,7 +97,7 @@ const validateUserAndProduct = async (ctx: Context, next: Next) => {
     if (!user) throw new AppError("Product not found.", 404);
 
     const { email: givenEmail } = ctx.state.user;
-    if (ctx.state.user.role === "ADMIN") {
+    if (ctx.state.user.role === Role.ADMIN) {
       await next();
     } else if (user.email === givenEmail) {
       await next();
@@ -101,6 +106,40 @@ const validateUserAndProduct = async (ctx: Context, next: Next) => {
     }
   } catch (e: Error | AppError | any) {
     ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "You are not authorised.",
+    });
+  }
+};
+
+const validateSellerAndOrderItem = async (ctx: Context, next: Next) => {
+  try {
+    const { orderId, orderItemId } = ctx.request.body as {
+      orderId: number;
+      orderItemId: number;
+    };
+
+    const order = await findOrderById(orderId);
+    if (!order) throw new AppError("Could nto find order");
+
+    const orderItem = await findOrderItem(orderItemId);
+    if (!orderItem) throw new AppError("Could not find order item");
+
+    const user = await findProductSeller(orderItem.productId);
+    if (!user) throw new AppError("Product not found.", 404);
+
+    const { email: givenEmail } = ctx.state.user;
+    if (ctx.state.user.role === Role.ADMIN) {
+      await next();
+    } else if (user.email === givenEmail && user.role === Role.SELLER) {
+      // TODO Check orderItem lifecycle
+
+      await next();
+    } else {
+      throw new AppError("Not authorised for this Order", 401);
+    }
+  } catch (e: Error | AppError | any) {
+    ctx.response.status = e.status ?? 401;
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "You are not authorised.",
     });
@@ -116,9 +155,9 @@ const validateSellerAndOrder = async (ctx: Context, next: Next) => {
 
     const { email: givenEmail } = ctx.state.user;
 
-    if (ctx.state.user.role === "ADMIN") {
+    if (ctx.state.user.role === Role.ADMIN) {
       await next();
-    } else if (ctx.state.user.role !== "SELLER") {
+    } else if (ctx.state.user.role !== Role.SELLER) {
       throw new AppError("User is not registered as a seller.");
     } else if (
       users
@@ -144,7 +183,7 @@ const validateBuyerAndOrder = async (ctx: Context, next: Next) => {
     const orderId = parseInt(ctx.params.id ?? ctx.query.id);
     const email = ctx.state.user.email;
 
-    if (ctx.state.user.role === "ADMIN") {
+    if (ctx.state.user.role === Role.ADMIN) {
       await next();
       return;
     }
@@ -179,5 +218,6 @@ export {
   validateQueryParams,
   validateRole,
   validateSellerAndOrder,
+  validateSellerAndOrderItem,
   validateUserAndProduct,
 };
