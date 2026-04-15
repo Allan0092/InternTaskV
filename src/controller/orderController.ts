@@ -1,4 +1,4 @@
-import { OrderStatus } from "@/generated/prisma/enums.js";
+import { OrderItemStatus, OrderStatus } from "@/generated/prisma/enums.js";
 import { clearCart, findCartByEmail } from "@/service/Cart.js";
 import {
   findAllOrders,
@@ -97,6 +97,42 @@ const updateOrderStatus = async (ctx: Context) => {
     });
   } catch (e: AppError | Error | any) {
     ctx.status = e.status ?? 404;
+    ctx.body = generateResponseBody({
+      success: false,
+      message:
+        e instanceof AppError ? e.message : "Could not update order status.",
+    });
+    throw e;
+  }
+};
+
+const checkAndUpdateOrderStatusWithSellerUpdate = async (ctx: Context) => {
+  try {
+    const orderId = parseInt(ctx.params.id); // TODO Change according to needs
+    // const { productId: orderItemId } = ctx.request.body as {
+    //   productId: number;
+    // };
+    const order = await findOrderById(orderId);
+
+    if (order?.status === OrderStatus.PENDING) {
+      const status = order.orderItems.some(
+        (item) => item.status === OrderItemStatus.PROCESSING,
+      );
+      if (status) {
+        await findAndUpdateOrder(order?.id, { status: OrderStatus.PROCESSING });
+        // TODO notification
+      }
+    } else if (order?.status === OrderStatus.PROCESSING) {
+      const status = order.orderItems.map(
+        (item) => item.status === OrderItemStatus.SHIPPED,
+      );
+      if (status) {
+        await findAndUpdateOrder(order?.id, { status: OrderStatus.SHIPPING });
+        // TODO notification
+      }
+    }
+  } catch (e: AppError | any) {
+    ctx.status = e.status ?? 500;
     ctx.body = generateResponseBody({
       success: false,
       message:
@@ -250,6 +286,7 @@ const testOrderItems = async (ctx: Context) => {
 
 export {
   cancelOrder,
+  checkAndUpdateOrderStatusWithSellerUpdate,
   getAllOrders,
   getOrders,
   getOrdersForSeller,
