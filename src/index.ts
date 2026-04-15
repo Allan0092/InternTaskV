@@ -5,6 +5,7 @@ import parser from "koa-bodyparser";
 import serve from "koa-static";
 import path from "node:path";
 import router from "./routes/index.js";
+import { generateResponseBody } from "./utils/index.js";
 import { logger, loggerMiddleware } from "./utils/logger.js";
 import { config } from "./validation/dotEnvValidation.js";
 
@@ -22,7 +23,10 @@ app.use(router.routes());
 
 app.use((ctx) => {
   ctx.status = 404;
-  ctx.body = "Not Found";
+  ctx.body = generateResponseBody({
+    success: false,
+    message: "This URL does not exist. Please check your request.",
+  });
 });
 
 app.listen(config.server_port, () => {
