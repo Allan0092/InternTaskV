@@ -1,7 +1,5 @@
-import {
-  getOrdersForSeller,
-  updateOrderStatus,
-} from "@/controller/orderController.js";
+import { getOrdersForSeller } from "@/controller/orderController.js";
+import { updateOrderItemStatus } from "@/controller/orderItemController.js";
 import {
   addProduct,
   getAllSellerProducts,
@@ -11,12 +9,12 @@ import {
 } from "@/controller/productController.js";
 import {
   validateBody,
-  validateSellerAndOrder,
+  validateSellerAndOrderItem,
   validateUserAndProduct,
 } from "@/middleware/validate.js";
 import { CustomContext } from "@/types/index.js";
 import { uploadPhoto } from "@/utils/index.js";
-import { sellerUpdateOrderSchema } from "@/validation/orderValidation.js";
+import { sellerUpdateOrderItemSchema } from "@/validation/orderItemValidation.js";
 import {
   addProductSchema,
   updateProductSchema,
@@ -53,11 +51,18 @@ sellerRouter.delete("/products/:id", validateUserAndProduct, softDeleteProduct);
 
 // Orders
 sellerRouter.get("/orders", getOrdersForSeller);
+// sellerRouter.patch(
+//   "/orders/:id",
+//   validateBody(sellerUpdateOrderSchema),
+//   validateSellerAndOrder,
+//   updateOrderStatus,
+// );
+
 sellerRouter.patch(
-  "/orders/:id",
-  validateBody(sellerUpdateOrderSchema),
-  validateSellerAndOrder,
-  updateOrderStatus,
+  "/orders/update",
+  validateBody(sellerUpdateOrderItemSchema),
+  validateSellerAndOrderItem,
+  updateOrderItemStatus,
 );
 
 export default sellerRouter;

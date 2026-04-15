@@ -6,9 +6,12 @@ import { Context } from "koa";
 
 const updateOrderItemStatus = async (ctx: Context) => {
   try {
-    const orderItemId = parseInt(ctx.params.id);
-    const { status } = ctx.request.body as { status: OrderItemStatus };
-    if (!status) throw new AppError("");
+    const { orderItemId, status } = ctx.request.body as {
+      orderId: number;
+      status: OrderItemStatus;
+      orderItemId: number;
+    };
+    // const orderItemId = parseInt(ctx.request.body.productId as {productId: string});
 
     const orderItem = await findOrderItem(orderItemId);
     if (!orderItem) throw new AppError("Could not find order item", 404);
@@ -34,7 +37,7 @@ const updateOrderItemStatus = async (ctx: Context) => {
       message: "Order Item status updated successfully",
     });
   } catch (e: AppError | Error | any) {
-    ctx.status = e.status ?? 404;
+    ctx.status = e.status ?? 400;
     ctx.body = generateResponseBody({
       success: false,
       message:

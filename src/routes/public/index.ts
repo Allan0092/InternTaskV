@@ -40,4 +40,6 @@ publicRouter.get(
 publicRouter.get("/image", getProductImage);
 publicRouter.get("/payment", paymentTest);
 
+// publicRouter.get("/test-status/:id", checkAndUpdateOrderStatusWithSellerUpdate);
+
 export default publicRouter;
