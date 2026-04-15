@@ -102,7 +102,7 @@ const getKhaltiUrl = async (ctx: Context) => {
         "Content-Type": "application/json",
       },
       data: {
-        return_url: "http://localhost:5173/my-orders",
+        return_url: "http://localhost:5173/payment",
         website_url: "http://localhost:5173/",
         amount: order?.Total * 1000,
         purchase_order_id: order?.sku,
@@ -189,7 +189,9 @@ const checkKhaltiPaymentStatus = async (ctx: Context) => {
       switch (paymentData.status) {
         case "Completed": {
           await updatePaymentStatus(payment.id, PaymentStatus.SUCCESS);
-          await findAndUpdateOrder(order.id, { status: OrderStatus.PAID });
+          await findAndUpdateOrder(order.id, {
+            status: OrderStatus.PROCESSING,
+          });
           // try{
           // await sendNewOrderNotificationToBuyer(email, sku);
           // await sendNewOrderNotificationToSeller(sku);
