@@ -7,6 +7,7 @@ import AdminPage from "./pages/AdminPage";
 import CartPage from "./pages/CartPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import PaymentPage from "./pages/PaymentPage";
 import RegisterPage from "./pages/RegisterPage";
 import SellerOrdersPage from "./pages/SellerOrdersPage";
 import UserOrdersPage from "./pages/UserOrdersPage";
@@ -49,6 +50,14 @@ const App = () => {
             element={
               <ProtectedRoute allowedRoles={["SELLER"]}>
                 <SellerOrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute allowedRoles={["USER"]}>
+                <PaymentPage />
               </ProtectedRoute>
             }
           />
