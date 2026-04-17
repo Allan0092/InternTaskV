@@ -66,6 +66,19 @@ const SellerProductList = ({
   const [uploadSuccess, setUploadSuccess] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ── Edit state ─────────────────────────────────────────────────
+  const [editTarget, setEditTarget] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    price: "",
+    description: "",
+    category: CATEGORIES[0],
+    quantity: "",
+  });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editSuccess, setEditSuccess] = useState<number | null>(null);
+
   const activeFilterCount =
     (appliedMin !== undefined ? 1 : 0) +
     (appliedMax !== undefined ? 1 : 0) +
@@ -113,6 +126,49 @@ const SellerProductList = ({
   const totalPages = Math.max(1, Math.ceil(filtered.length / limit));
   const safePage = Math.min(page, totalPages);
   const paginated = filtered.slice((safePage - 1) * limit, safePage * limit);
+
+  // ── Edit product ───────────────────────────────────────────────
+  const openEdit = (product: SellerProduct) => {
+    setEditTarget(product.id);
+    setEditForm({
+      name: product.name,
+      price: String(product.price),
+      description: product.description,
+      category: product.category,
+      quantity: String(product.quantity),
+    });
+    setEditError(null);
+    setEditSuccess(null);
+  };
+
+  const handleEditSubmit = async (productId: number) => {
+    setEditSaving(true);
+    setEditError(null);
+    try {
+      const body: Record<string, string | number> = {};
+      if (editForm.name.trim()) body.name = editForm.name.trim();
+      if (editForm.description.trim())
+        body.description = editForm.description.trim();
+      if (editForm.price !== "") body.price = Number(editForm.price);
+      if (editForm.quantity !== "") body.quantity = Number(editForm.quantity);
+      if (editForm.category) body.category = editForm.category;
+
+      await api.patch(`/api/products/${productId}`, body, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEditSuccess(productId);
+      setEditTarget(null);
+      onRefresh();
+    } catch (err: unknown) {
+      if (isAxiosError(err) && err.response?.data?.message) {
+        setEditError(err.response.data.message);
+      } else {
+        setEditError("Failed to update product.");
+      }
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   // ── Image upload ───────────────────────────────────────────────
   const handleUpload = async (productId: number) => {
@@ -511,6 +567,114 @@ const SellerProductList = ({
                     className="w-full py-1.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-blue-400 hover:text-blue-500 transition-colors"
                   >
                     Upload Images
+                  </button>
+                )}
+
+                {/* Edit product */}
+                {editTarget === product.id ? (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs font-semibold text-gray-600">
+                      Edit Product
+                    </p>
+                    {editError && (
+                      <p className="text-xs text-red-500">{editError}</p>
+                    )}
+                    <input
+                      type="text"
+                      placeholder="Name"
+                      value={editForm.name}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, name: e.target.value }))
+                      }
+                      className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Price"
+                      min={0}
+                      value={editForm.price}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, price: e.target.value }))
+                      }
+                      className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Quantity"
+                      min={0}
+                      value={editForm.quantity}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, quantity: e.target.value }))
+                      }
+                      className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    <select
+                      value={editForm.category}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, category: e.target.value }))
+                      }
+                      className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <textarea
+                      placeholder="Description"
+                      value={editForm.description}
+                      rows={2}
+                      onChange={(e) =>
+                        setEditForm((f) => ({
+                          ...f,
+                          description: e.target.value,
+                        }))
+                      }
+                      className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditSubmit(product.id)}
+                        disabled={editSaving}
+                        className="flex-1 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-medium transition-colors"
+                      >
+                        {editSaving ? "Saving…" : "Save"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditTarget(null);
+                          setEditError(null);
+                        }}
+                        className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-500 hover:bg-gray-50 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : editSuccess === product.id ? (
+                  <div className="flex items-center gap-1.5 mt-2 text-xs text-green-600">
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Product updated!
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => openEdit(product)}
+                    className="mt-2 w-full py-1.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-indigo-400 hover:text-indigo-500 transition-colors"
+                  >
+                    Edit Product
                   </button>
                 )}
               </div>
