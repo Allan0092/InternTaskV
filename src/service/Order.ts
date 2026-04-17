@@ -83,13 +83,14 @@ const findSellersOrder = async (
       orderItems: {
         select: {
           id: true,
-          productId: true,
+          product: { select: { user: { select: { email: true } } } },
+          status: true,
           quantity: true,
           price: true,
         },
       },
       user: {
-        select: { id: true, name: true, email: true },
+        select: { name: true, email: true },
       },
       payments: true,
     },
@@ -129,7 +130,11 @@ const findOrderSellers = async (orderId: number) => {
 const findOrderById = async (orderId: number) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { orderItems: true, payments: true },
+    include: {
+      orderItems: true,
+      payments: true,
+      user: { select: { email: true, name: true } },
+    },
   });
   return order;
 };

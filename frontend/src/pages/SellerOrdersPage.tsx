@@ -11,11 +11,23 @@ type OrderStatus =
   | "DECLINED"
   | "CANCELLED";
 
+type ItemStatus =
+  | "PENDING"
+  | "DECLINE"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "COMPLETED";
+
 interface OrderItem {
   id: number;
-  productId: number;
   quantity: number;
   price: number;
+  status: ItemStatus;
+  product: {
+    user: {
+      email: string;
+    };
+  };
 }
 
 interface Order {
@@ -28,7 +40,6 @@ interface Order {
   paymentId: string | null;
   orderItems: OrderItem[];
   user: {
-    id: number;
     name: string;
     email: string;
   };
@@ -55,8 +66,16 @@ const statusStyles: Record<OrderStatus, string> = {
   CANCELLED: "bg-gray-100 text-gray-500",
 };
 
+const itemStatusStyles: Record<ItemStatus, string> = {
+  PENDING: "bg-yellow-100 text-yellow-700",
+  DECLINE: "bg-red-100 text-red-700",
+  PROCESSING: "bg-purple-100 text-purple-700",
+  SHIPPED: "bg-cyan-100 text-cyan-700",
+  COMPLETED: "bg-green-100 text-green-700",
+};
+
 const SellerOrdersPage = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +83,7 @@ const SellerOrdersPage = () => {
     "ALL",
   );
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [updatingItemId, setUpdatingItemId] = useState<number | null>(null);
 
   const fetchOrders = (status: OrderStatus | "ALL") => {
     setLoading(true);
@@ -87,6 +107,28 @@ const SellerOrdersPage = () => {
 
   const toggleExpand = (id: number) =>
     setExpandedId((prev) => (prev === id ? null : id));
+
+  const handleUpdateItemStatus = (orderItemId: number, status: ItemStatus) => {
+    setUpdatingItemId(orderItemId);
+    api
+      .patch(
+        "/api/orders/update",
+        { orderItemId, status },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      .then(() => {
+        setOrders((prev) =>
+          prev.map((order) => ({
+            ...order,
+            orderItems: order.orderItems.map((item) =>
+              item.id === orderItemId ? { ...item, status } : item,
+            ),
+          })),
+        );
+      })
+      .catch(() => setError("Failed to update item status. Please try again."))
+      .finally(() => setUpdatingItemId(null));
+  };
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gray-50 py-8 px-4">
@@ -267,46 +309,110 @@ const SellerOrdersPage = () => {
                         Order Items
                       </p>
                       <div className="space-y-2">
-                        {order.orderItems.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center justify-between bg-white rounded-xl px-4 py-2.5 border border-gray-100"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                                <svg
-                                  className="w-4 h-4 text-blue-300"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={1.5}
-                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                  />
-                                </svg>
+                        {order.orderItems.map((item) => {
+                          const isMine =
+                            item.product.user.email === user?.email;
+                          const isUpdating = updatingItemId === item.id;
+                          return (
+                            <div
+                              key={item.id}
+                              className={`flex items-center justify-between bg-white rounded-xl px-4 py-2.5 border ${isMine ? "border-blue-200" : "border-gray-100"}`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                                  <svg
+                                    className="w-4 h-4 text-blue-300"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={1.5}
+                                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                    />
+                                  </svg>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">
+                                    Item #{item.id}
+                                    {isMine && (
+                                      <span className="ml-1.5 text-xs text-blue-500 font-normal">
+                                        (yours)
+                                      </span>
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-gray-400">
+                                    Qty: {item.quantity}
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-700">
-                                  Product #{item.productId}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  Qty: {item.quantity}
-                                </p>
+                              <div className="flex items-center gap-3">
+                                <div className="text-right">
+                                  <p className="text-sm font-semibold text-gray-800">
+                                    ₨
+                                    {(
+                                      item.price * item.quantity
+                                    ).toLocaleString()}
+                                  </p>
+                                  <p className="text-xs text-gray-400">
+                                    ₨{item.price.toLocaleString()} each
+                                  </p>
+                                </div>
+                                <div className="flex flex-col items-end gap-1.5 min-w-24">
+                                  <span
+                                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${itemStatusStyles[item.status]}`}
+                                  >
+                                    {item.status}
+                                  </span>
+                                  {isMine && item.status === "PENDING" && (
+                                    <div className="flex gap-1">
+                                      <button
+                                        disabled={isUpdating}
+                                        onClick={() =>
+                                          handleUpdateItemStatus(
+                                            item.id,
+                                            "PROCESSING",
+                                          )
+                                        }
+                                        className="text-xs px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors disabled:opacity-50"
+                                      >
+                                        Process
+                                      </button>
+                                      <button
+                                        disabled={isUpdating}
+                                        onClick={() =>
+                                          handleUpdateItemStatus(
+                                            item.id,
+                                            "DECLINE",
+                                          )
+                                        }
+                                        className="text-xs px-2 py-0.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+                                      >
+                                        Decline
+                                      </button>
+                                    </div>
+                                  )}
+                                  {isMine && item.status === "PROCESSING" && (
+                                    <button
+                                      disabled={isUpdating}
+                                      onClick={() =>
+                                        handleUpdateItemStatus(
+                                          item.id,
+                                          "SHIPPED",
+                                        )
+                                      }
+                                      className="text-xs px-2 py-0.5 rounded-lg bg-cyan-100 text-cyan-700 hover:bg-cyan-200 transition-colors disabled:opacity-50"
+                                    >
+                                      Mark Shipped
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <p className="text-sm font-semibold text-gray-800">
-                                ₨{(item.price * item.quantity).toLocaleString()}
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                ₨{item.price.toLocaleString()} each
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center">
