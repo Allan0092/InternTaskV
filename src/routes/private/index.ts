@@ -11,7 +11,20 @@ import sellerRouter from "./sellerRoute.js";
 
 const privateRouter = new Router<any, Context & CustomContext>();
 
-privateRouter.use(jwt({ secret: process.env.SECRET_KEY ?? "some-secret-key" }));
+privateRouter.use(
+  jwt({
+    secret: process.env.SECRET_KEY ?? "some-secret-key",
+    getToken: (ctx) => {
+      const auth = ctx.headers.authorization;
+      if (auth && auth.startsWith("Bearer ")) {
+        return auth.slice(7);
+      }
+
+      const queryToken = ctx.query.token;
+      return typeof queryToken === "string" ? queryToken : null;
+    },
+  }),
+);
 
 //Logged in User
 privateRouter.use(privateUserRouter.routes());

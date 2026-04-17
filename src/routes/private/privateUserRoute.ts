@@ -13,6 +13,7 @@ import {
   checkKhaltiPaymentStatus,
   getKhaltiUrl,
 } from "@/controller/paymentController.js";
+import { streamNotifications } from "@/controller/socketController.js";
 import { editUser, softDeleteUser } from "@/controller/userController.js";
 import { validateBody, validateBuyerAndOrder } from "@/middleware/validate.js";
 import { updateUserSchema } from "@/validation/updateUserValidation.js";
@@ -23,7 +24,7 @@ const privateUserRouter = new Router<any, Context>();
 
 // User Account
 privateUserRouter.delete("/users/account", softDeleteUser);
-privateUserRouter.get("/users"); //TODO For getting user's account details
+privateUserRouter.get("/users/details"); //TODO For getting user's account details
 privateUserRouter.patch("/users", validateBody(updateUserSchema), editUser);
 
 // Cart
@@ -44,6 +45,9 @@ privateUserRouter.delete(
 // Payment
 privateUserRouter.get("/payment", getKhaltiUrl);
 privateUserRouter.get("/payment/check", checkKhaltiPaymentStatus);
+
+// Notifications
+privateUserRouter.get("/notifications/stream", streamNotifications);
 
 //Email
 privateUserRouter.get("/test", testOrderItems);

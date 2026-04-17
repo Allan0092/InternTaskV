@@ -1,12 +1,14 @@
 import { OrderItem } from "@/generated/prisma/client.js";
 import { OrderItemStatus, OrderStatus } from "@/generated/prisma/enums.js";
 import { clearCart, findCartByEmail } from "@/service/Cart.js";
+import { notifyUser, notifyUsers } from "@/service/Notification.js";
 import {
   findAllOrders,
   findAndUpdateOrder,
   findOrderById,
   findOrderProductsBySku,
   findOrdersByEmail,
+  findOrderSellers,
   findSellersOrder,
 } from "@/service/Order.js";
 import { AppError } from "@/types/index.js";
@@ -117,7 +119,15 @@ const checkAndUpdateOrderStatusWithSellerUpdate = async (ctx: Context) => {
       );
       if (status) {
         await findAndUpdateOrder(order?.id, { status: OrderStatus.PROCESSING });
-        // TODO notification
+
+        notifyUser(order.user.email, {
+          type: "ORDER_STATUS_UPDATED",
+          message: `Your order #${order.id} is now PROCESSING.`,
+          data: {
+            orderId: order.id,
+            orderStatus: OrderStatus.PROCESSING,
+          },
+        });
       }
     } else if (order?.status === OrderStatus.PROCESSING) {
       const status = order.orderItems.every(
@@ -125,7 +135,15 @@ const checkAndUpdateOrderStatusWithSellerUpdate = async (ctx: Context) => {
       );
       if (status) {
         await findAndUpdateOrder(order?.id, { status: OrderStatus.SHIPPING });
-        // TODO notification
+
+        notifyUser(order.user.email, {
+          type: "ORDER_STATUS_UPDATED",
+          message: `Your order #${order.id} is now SHIPPING.`,
+          data: {
+            orderId: order.id,
+            orderStatus: OrderStatus.SHIPPING,
+          },
+        });
       }
     }
   } catch (e: AppError | any) {
@@ -240,6 +258,20 @@ const placeOrder = async (ctx: Context) => {
         },
       },
     });
+
+    const sellers = await findOrderSellers(order.id);
+
+    notifyUsers(
+      sellers.map((seller) => seller.email),
+      {
+        type: "NEW_ORDER_FOR_SELLER",
+        message: `A new order #${order.id} includes your product(s).`,
+        data: {
+          orderId: order.id,
+          buyerEmail: email,
+        },
+      },
+    );
 
     // Clear the cart after order is placed
     await clearCart(cart.id);

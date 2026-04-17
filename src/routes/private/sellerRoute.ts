@@ -25,9 +25,7 @@ import {
 import { Context } from "koa";
 import Router from "koa-router";
 
-const sellerRouter = new Router<any, Context & CustomContext>({
-  prefix: "",
-});
+const sellerRouter = new Router<any, Context & CustomContext>();
 
 sellerRouter.post("/products/", validateBody(addProductSchema), addProduct);
 
@@ -54,12 +52,6 @@ sellerRouter.delete("/products/:id", validateUserAndProduct, softDeleteProduct);
 
 // Orders
 sellerRouter.get("/orders", getOrdersForSeller);
-// sellerRouter.patch(
-//   "/orders/:id",
-//   validateBody(sellerUpdateOrderSchema),
-//   validateSellerAndOrder,
-//   updateOrderStatus,
-// );
 
 sellerRouter.patch(
   "/orders/update",

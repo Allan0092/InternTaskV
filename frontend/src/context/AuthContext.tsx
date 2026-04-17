@@ -24,9 +24,21 @@ interface AuthUser {
   role: Role;
 }
 
+export interface UserNotification {
+  type:
+    | "NEW_ORDER_FOR_SELLER"
+    | "ORDER_ITEM_STATUS_UPDATED"
+    | "ORDER_STATUS_UPDATED";
+  message: string;
+  timestamp: string;
+  data?: Record<string, unknown>;
+}
+
 interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
+  notifications: UserNotification[];
+  clearNotifications: () => void;
   /** Call after a product fetch/create to cache the seller's userId */
   setUserId: (id: number) => void;
   login: (token: string) => void;
@@ -60,6 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const stored = localStorage.getItem(TOKEN_KEY);
     return stored ? parseToken(stored) : null;
   });
+  const [notifications, setNotifications] = useState<UserNotification[]>([]);
 
   useEffect(() => {
     if (token) {
@@ -75,6 +88,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [token]);
 
+  useEffect(() => {
+    if (!token) return;
+
+    const baseUrl = import.meta.env.VITE_API_BASE_URL as string;
+    if (!baseUrl) return;
+
+    const sseUrl = new URL("/api/notifications/stream", baseUrl);
+    sseUrl.searchParams.set("token", token);
+
+    const eventSource = new EventSource(sseUrl.toString());
+
+    eventSource.addEventListener("notification", (event) => {
+      try {
+        const payload = JSON.parse(
+          (event as MessageEvent).data,
+        ) as UserNotification;
+        setNotifications((prev) => [payload, ...prev].slice(0, 50));
+      } catch {
+        // Ignore malformed payloads to keep stream alive.
+      }
+    });
+
+    return () => {
+      eventSource.close();
+    };
+  }, [token]);
+
   const login = (newToken: string) => {
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
@@ -85,14 +125,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
+    setNotifications([]);
   };
 
   const setUserId = (id: number) => {
     setUser((prev) => (prev ? { ...prev, id } : prev));
   };
 
+  const clearNotifications = () => setNotifications([]);
+
   return (
-    <AuthContext.Provider value={{ user, token, setUserId, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        notifications,
+        clearNotifications,
+        setUserId,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
