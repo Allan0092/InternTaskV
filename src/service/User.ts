@@ -26,7 +26,7 @@ const saveUser = async (userData: UserCreateInput) => {
 };
 
 const findAndDeleteUserbyId = async (id: number) => {
-  const user = await prisma.user.delete({ where: { id: id } });
+  const user = await prisma.user.delete({ where: { id } });
   return user;
 };
 

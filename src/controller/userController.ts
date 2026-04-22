@@ -123,7 +123,7 @@ const deleteUser = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      message: e instanceof AppError ? e.message : "Could not register user",
+      message: e instanceof AppError ? e.message : "Could not delete user",
     });
     throw e;
   }

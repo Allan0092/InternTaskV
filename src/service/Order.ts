@@ -7,21 +7,24 @@ const findAllOrders = async (
   limit: number = 10,
   min: number = 0,
   max: number = 999999999,
+  status?: OrderStatus | undefined,
 ) => {
   const orders = await prisma.order.findMany({
     orderBy: { orderDate: "desc" },
     skip: (page - 1) * limit,
     take: limit,
-    where: { Total: { gte: min, lte: max } },
+    where: { Total: { gte: min, lte: max }, status },
     include: {
       orderItems: {
         select: {
-          productId: true,
+          id: true,
+          product: { select: { id: true, name: true } },
           price: true,
           quantity: true,
-          id: true,
+          status: true,
         },
       },
+      payments: true,
     },
   });
   return orders;

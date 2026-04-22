@@ -1,8 +1,9 @@
 import { getAllCart } from "@/controller/cartController.js";
-import { getAllOrders } from "@/controller/orderController.js";
+import { getAllOrders, updateOrder } from "@/controller/orderController.js";
 import {
   adminDeleteProduct,
   getAllProducts,
+  updateProduct,
 } from "@/controller/productController.js";
 import {
   deleteUser,
@@ -10,8 +11,6 @@ import {
   enableUserAccount,
   getUsers,
 } from "@/controller/userController.js";
-import { validateBody } from "@/middleware/validate.js";
-import { updateUserSchema } from "@/validation/updateUserValidation.js";
 import "dotenv";
 import { Context } from "koa";
 import Router from "koa-router";
@@ -21,11 +20,12 @@ const adminRouter = new Router<any, Context>({ prefix: "/admin" });
 // Users
 adminRouter.get("/users", getUsers);
 adminRouter.delete("/users/:id", deleteUser);
-adminRouter.patch("/users/:id", enableUserAccount);
-adminRouter.patch("/users", validateBody(updateUserSchema), editUser);
+adminRouter.patch("/users/enable/:id", enableUserAccount);
+adminRouter.patch("/users/:id", editUser);
 
 // Products
 adminRouter.get("/products", getAllProducts);
+adminRouter.patch("/products/:id", updateProduct);
 adminRouter.delete("/products/:id", adminDeleteProduct);
 
 // Cart
@@ -33,5 +33,6 @@ adminRouter.get("/carts", getAllCart);
 
 // Orders
 adminRouter.get("/orders", getAllOrders);
+adminRouter.patch("/orders/:id", updateOrder);
 
 export default adminRouter;

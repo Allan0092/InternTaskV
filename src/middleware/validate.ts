@@ -77,6 +77,7 @@ const validateRole = (role: Role) => {
         throw new AppError("Role not authorized", 401);
       }
     } catch (e: Error | AppError | any) {
+      if (ctx.body && ctx.status) return;
       ctx.response.status = e.status ?? 400;
       ctx.body = generateResponseBody({
         message: e instanceof AppError ? e.message : "You are not authorised.",

@@ -1,5 +1,6 @@
 import { OrderItem } from "@/generated/prisma/client.js";
 import { OrderItemStatus, OrderStatus } from "@/generated/prisma/enums.js";
+import { OrderUpdateInput } from "@/generated/prisma/models.js";
 import { clearCart, findCartByEmail } from "@/service/Cart.js";
 import { notifyUser, notifyUsers } from "@/service/Notification.js";
 import {
@@ -24,7 +25,8 @@ const getAllOrders = async (ctx: Context) => {
     const limit = Number(ctx.query.limit ?? 10);
     const min = Number(ctx.query.min ?? 0);
     const max = Number(ctx.query.max ?? 999999999);
-    const orders = await findAllOrders(page, limit, min, max);
+    const status = ctx.query.status as OrderStatus;
+    const orders = await findAllOrders(page, limit, min, max, status);
     if (!orders) throw new AppError("No orders found");
 
     ctx.body = generateResponseBody({
@@ -87,12 +89,37 @@ const getOrdersForSeller = async (ctx: Context) => {
   }
 };
 
+const updateOrder = async (ctx: Context) => {
+  try {
+    const orderId = parseInt(ctx.params.id);
+    const data = ctx.request.body as OrderUpdateInput;
+    const result = findAndUpdateOrder(orderId, data);
+
+    if (!result) throw new AppError("Could not update the order.");
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Order updated successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.status = e.status ?? 404;
+    ctx.body = generateResponseBody({
+      success: false,
+      message:
+        e instanceof AppError ? e.message : "Could not update order status.",
+    });
+    throw e;
+  }
+};
+
 const updateOrderStatus = async (ctx: Context) => {
   try {
     const email = ctx.state.user.email;
     const orderId = parseInt(ctx.params.id);
     const status = ctx.request.body as { status: OrderStatus };
     const result = await findAndUpdateOrder(orderId, status);
+
+    if (!result) throw new AppError("Could not update order status", 400);
 
     ctx.body = generateResponseBody({
       success: true,
@@ -321,6 +348,7 @@ export {
   getOrdersForSeller,
   placeOrder,
   testOrderItems,
+  updateOrder,
   // sendOrderEmails,
   updateOrderStatus,
 };
