@@ -41,6 +41,18 @@ const HomePage = () => {
   const [maxInput, setMaxInput] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  // Carousel state
+  const [carouselIdx, setCarouselIdx] = useState<Record<number, number>>({});
+  const getImgIdx = (id: number) => carouselIdx[id] ?? 0;
+  const getImgSrc = (product: Product, idx: number) => {
+    const imgs = product.images.filter((img) => !!img);
+    if (imgs.length === 0)
+      return `https://placehold.co/400x300/e2e8f0/94a3b8?text=${encodeURIComponent(product.name)}`;
+    return `http://localhost:3000/uploads/${imgs[idx % imgs.length]}`;
+  };
+  const getRealImages = (product: Product) =>
+    product.images.filter((img) => !!img);
+
   // Cart state
   const [qty, setQty] = useState<Record<number, number>>({});
   const [addingTo, setAddingTo] = useState<number | null>(null);
@@ -429,28 +441,82 @@ const HomePage = () => {
                 key={product.id}
                 className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group cursor-pointer"
               >
-                {/* Image */}
-                <div className="relative h-48 bg-linear-to-br from-gray-100 to-gray-200 overflow-hidden">
-                  <img
-                    src={
-                      product.images[0] === "default.jpg"
-                        ? `https://placehold.co/400x300/e2e8f0/94a3b8?text=${encodeURIComponent(product.name)}`
-                        : `http://localhost:3000/uploads/${product.images[0]}`
-                    }
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {product.quantity <= 3 && product.quantity > 0 && (
-                    <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                      Only {product.quantity} left
-                    </span>
-                  )}
-                  {product.quantity === 0 && (
-                    <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                      Out of Stock
-                    </span>
-                  )}
-                </div>
+                {/* Image carousel */}
+                {(() => {
+                  const real = getRealImages(product);
+                  const idx = getImgIdx(product.id);
+                  const hasMultiple = real.length > 1;
+                  return (
+                    <div className="relative h-48 bg-gray-100 overflow-hidden">
+                      <img
+                        src={getImgSrc(product, idx)}
+                        alt={`${product.name} ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+
+                      {/* Prev / Next buttons */}
+                      {hasMultiple && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCarouselIdx((prev) => ({
+                                ...prev,
+                                [product.id]:
+                                  (idx - 1 + real.length) % real.length,
+                              }));
+                            }}
+                            className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs transition-colors"
+                          >
+                            ‹
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCarouselIdx((prev) => ({
+                                ...prev,
+                                [product.id]: (idx + 1) % real.length,
+                              }));
+                            }}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs transition-colors"
+                          >
+                            ›
+                          </button>
+
+                          {/* Dot indicators */}
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                            {real.map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCarouselIdx((prev) => ({
+                                    ...prev,
+                                    [product.id]: i,
+                                  }));
+                                }}
+                                className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                                  i === idx ? "bg-white" : "bg-white/50"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {product.quantity <= 3 && product.quantity > 0 && (
+                        <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                          Only {product.quantity} left
+                        </span>
+                      )}
+                      {product.quantity === 0 && (
+                        <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                          Out of Stock
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Content */}
                 <div className="p-4">
