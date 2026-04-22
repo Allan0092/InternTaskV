@@ -11,6 +11,7 @@ const findAllProducts = async (
   min = 0,
   max = 999999,
   search?: string,
+  category?: Category,
 ) => {
   const searchFilter = search
     ? {
@@ -23,6 +24,7 @@ const findAllProducts = async (
 
   const where = {
     deletedAt: null,
+    category,
     price: { gte: min, lte: max },
     ...searchFilter,
   };
@@ -37,42 +39,6 @@ const findAllProducts = async (
     omit: { createdAt: true, deletedAt: true, updatedAt: true, userId: true },
   });
   return { products, total: totalNum };
-};
-
-const findProductsByCategory = async (
-  category: Category,
-  page = 1,
-  limit = 10,
-  min = 0,
-  max = 999999,
-  search?: string,
-) => {
-  const searchFilter = search
-    ? {
-        OR: [
-          { name: { contains: search, mode: "insensitive" as const } },
-          { description: { contains: search, mode: "insensitive" as const } },
-        ],
-      }
-    : {};
-
-  const where = {
-    category: category,
-    deletedAt: null,
-    price: { gte: min, lte: max },
-    ...searchFilter,
-  };
-  const totalNum = await prisma.product.count({
-    where,
-  });
-  const products = await prisma.product.findMany({
-    include: { user: { select: { name: true } } },
-    omit: { createdAt: true, deletedAt: true, updatedAt: true, userId: true },
-    where,
-    skip: (page - 1) * limit,
-    take: limit,
-  });
-  return { products: products, total: totalNum };
 };
 
 const findAllProductsWithSeller = async (
@@ -188,7 +154,6 @@ export {
   findAndEnableProduct,
   findAndUpdateProduct,
   findProduct,
-  findProductsByCategory,
   findProductsBySeller,
   findProductSeller,
 };

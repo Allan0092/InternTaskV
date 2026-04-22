@@ -10,7 +10,6 @@ import {
   findAndDeleteProduct,
   findAndDisableProduct,
   findAndUpdateProduct,
-  findProductsByCategory,
   findProductsBySeller,
 } from "@/service/Product.js";
 import { findUserByEmail } from "@/service/User.js";
@@ -56,23 +55,12 @@ const getAllProductsWithSeller = async (ctx: Context) => {
     const limit = Number(ctx.query.limit ?? 10);
     const min = Number(ctx.query.min ?? 0);
     const max = Number(ctx.query.max ?? 999999);
-    const category = ctx.query.category as Category;
+    const category = ctx.query.category as Category | undefined;
     const search = ctx.query.search as string;
 
     let products;
 
-    if (!category) {
-      products = await findAllProducts(page, limit, min, max, search);
-    } else {
-      products = await findProductsByCategory(
-        category,
-        page,
-        limit,
-        min,
-        max,
-        category,
-      );
-    }
+    products = await findAllProducts(page, limit, min, max, search, category);
 
     const maxPages = Math.ceil(products.total / limit);
 
