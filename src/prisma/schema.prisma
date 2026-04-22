@@ -132,6 +132,8 @@ model Order {
   status      OrderStatus @default(PENDING)
   paymentId   String?     @unique @db.Uuid
   payments    Payment?    @relation(fields: [paymentId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@map("order")
 }
