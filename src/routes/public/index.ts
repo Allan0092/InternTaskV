@@ -1,6 +1,7 @@
 import { paymentTest } from "@/controller/paymentController.js";
 import {
   getAllProductsWithSeller,
+  getProduct,
   getProductBySeller,
   getProductImage,
 } from "@/controller/productController.js";
@@ -28,6 +29,8 @@ publicRouter.get(
   validateQueryParams(productCategorySchema),
   getAllProductsWithSeller,
 );
+
+publicRouter.get("/products/:id", getProduct);
 
 // Get products sold by seller id
 publicRouter.get(

@@ -11,6 +11,7 @@ import {
   findAndDisableProduct,
   findAndUpdateProduct,
   findProductsBySeller,
+  findPublicProduct,
 } from "@/service/Product.js";
 import { findUserByEmail } from "@/service/User.js";
 import { AppError, CustomContext } from "@/types/index.js";
@@ -44,6 +45,25 @@ const getAllProducts = async (ctx: Context) => {
     ctx.response.status = e.status ?? 500;
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "Could not load products",
+    });
+    throw e;
+  }
+};
+
+const getProduct = async (ctx: Context) => {
+  try {
+    const id = parseInt(ctx.params.id);
+    const product = await findPublicProduct(id); // Error: error.code='P2025'
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Product retreived successfully.",
+      data: product,
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 404;
+    ctx.body = generateResponseBody({
+      message:
+        e instanceof AppError ? e.message : "Could not get product details",
     });
     throw e;
   }
@@ -294,6 +314,7 @@ export {
   getAllProducts,
   getAllProductsWithSeller,
   getAllSellerProducts,
+  getProduct,
   getProductBySeller,
   getProductImage,
   softDeleteProduct,
