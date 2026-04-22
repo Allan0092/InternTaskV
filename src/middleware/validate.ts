@@ -34,7 +34,6 @@ const validateQueryParams = <T extends yup.AnyObject>(
         return;
       }
 
-      // Let global error handler catch real crashes
       throw err;
     }
   };
@@ -44,12 +43,11 @@ const validateBody = <T extends yup.AnyObject>(schema: yup.ObjectSchema<T>) => {
   return async (ctx: Context, next: Next) => {
     try {
       const validated = await schema.validate(ctx.request.body, {
-        abortEarly: false, // collect ALL errors, not just first
-        stripUnknown: true, // remove unknown fields
-        strict: false, // allow coercion (recommended)
+        abortEarly: false,
+        stripUnknown: true,
+        strict: false,
       });
 
-      // Put validated (and cleaned) data back → safer than raw body
       ctx.request.body = validated;
 
       await next();
@@ -58,13 +56,10 @@ const validateBody = <T extends yup.AnyObject>(schema: yup.ObjectSchema<T>) => {
         ctx.status = 400;
         ctx.body = {
           message: "Validation failed",
-          details: err.errors, // array of messages
-          // or more detailed: err.inner.map(e => ({ path: e.path, message: e.message }))
         };
         return;
       }
 
-      // Let global error handler catch real crashes
       throw err;
     }
   };
@@ -121,6 +116,8 @@ const validateSellerAndOrderItem = async (ctx: Context, next: Next) => {
 
     const order = await findOrderByOrderItemId(orderItemId);
     if (!order) throw new AppError("Could not find order");
+
+    if (!order.paymentId) throw new AppError("Payment has not been made");
 
     ctx.state.order = order;
 

@@ -519,7 +519,6 @@ const HomePage = () => {
             ))}
           </div>
         )}
-        exportexport
         {/* Pagination */}
         {!loading && !error && (
           <div className="flex flex-wrap justify-center items-center gap-2 mt-10">

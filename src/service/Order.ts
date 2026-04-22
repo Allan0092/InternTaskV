@@ -40,7 +40,7 @@ const findOrdersByEmail = async (
     skip: (page - 1) * limit,
     take: limit,
     include: {
-      orderItems: true,
+      orderItems: { include: { product: { select: { name: true } } } },
       payments: { select: { status: true, id: true } },
     },
     omit: { paymentId: true },

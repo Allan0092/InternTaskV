@@ -117,14 +117,7 @@ const SellerOrdersPage = () => {
         { headers: { Authorization: `Bearer ${token}` } },
       )
       .then(() => {
-        setOrders((prev) =>
-          prev.map((order) => ({
-            ...order,
-            orderItems: order.orderItems.map((item) =>
-              item.id === orderItemId ? { ...item, status } : item,
-            ),
-          })),
-        );
+        fetchOrders(selectedStatus);
       })
       .catch(() => setError("Failed to update item status. Please try again."))
       .finally(() => setUpdatingItemId(null));
@@ -313,6 +306,7 @@ const SellerOrdersPage = () => {
                           const isMine =
                             item.product.user.email === user?.email;
                           const isUpdating = updatingItemId === item.id;
+                          const isPaid = order.paymentId !== null;
                           return (
                             <div
                               key={item.id}
@@ -366,48 +360,57 @@ const SellerOrdersPage = () => {
                                   >
                                     {item.status}
                                   </span>
-                                  {isMine && item.status === "PENDING" && (
-                                    <div className="flex gap-1">
+                                  {isMine && !isPaid && (
+                                    <span className="text-xs text-gray-400 italic">
+                                      Awaiting payment
+                                    </span>
+                                  )}
+                                  {isMine &&
+                                    isPaid &&
+                                    item.status === "PENDING" && (
+                                      <div className="flex gap-1">
+                                        <button
+                                          disabled={isUpdating}
+                                          onClick={() =>
+                                            handleUpdateItemStatus(
+                                              item.id,
+                                              "PROCESSING",
+                                            )
+                                          }
+                                          className="text-xs px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors disabled:opacity-50"
+                                        >
+                                          Process
+                                        </button>
+                                        <button
+                                          disabled={isUpdating}
+                                          onClick={() =>
+                                            handleUpdateItemStatus(
+                                              item.id,
+                                              "DECLINE",
+                                            )
+                                          }
+                                          className="text-xs px-2 py-0.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+                                        >
+                                          Decline
+                                        </button>
+                                      </div>
+                                    )}
+                                  {isMine &&
+                                    isPaid &&
+                                    item.status === "PROCESSING" && (
                                       <button
                                         disabled={isUpdating}
                                         onClick={() =>
                                           handleUpdateItemStatus(
                                             item.id,
-                                            "PROCESSING",
+                                            "SHIPPED",
                                           )
                                         }
-                                        className="text-xs px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors disabled:opacity-50"
+                                        className="text-xs px-2 py-0.5 rounded-lg bg-cyan-100 text-cyan-700 hover:bg-cyan-200 transition-colors disabled:opacity-50"
                                       >
-                                        Process
+                                        Mark Shipped
                                       </button>
-                                      <button
-                                        disabled={isUpdating}
-                                        onClick={() =>
-                                          handleUpdateItemStatus(
-                                            item.id,
-                                            "DECLINE",
-                                          )
-                                        }
-                                        className="text-xs px-2 py-0.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
-                                      >
-                                        Decline
-                                      </button>
-                                    </div>
-                                  )}
-                                  {isMine && item.status === "PROCESSING" && (
-                                    <button
-                                      disabled={isUpdating}
-                                      onClick={() =>
-                                        handleUpdateItemStatus(
-                                          item.id,
-                                          "SHIPPED",
-                                        )
-                                      }
-                                      className="text-xs px-2 py-0.5 rounded-lg bg-cyan-100 text-cyan-700 hover:bg-cyan-200 transition-colors disabled:opacity-50"
-                                    >
-                                      Mark Shipped
-                                    </button>
-                                  )}
+                                    )}
                                 </div>
                               </div>
                             </div>

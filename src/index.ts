@@ -17,6 +17,8 @@ app.use(loggerMiddleware);
 app.use(cors());
 app.use(parser());
 
+// TODO Socket
+
 app.use(serve(path.join(process.cwd(), "public")));
 
 app.use(router.routes());
