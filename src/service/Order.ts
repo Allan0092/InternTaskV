@@ -64,10 +64,7 @@ const findAllOrderItemStatus = async (orderId: number) => {
   return result;
 };
 
-const findSellersOrder = async (
-  email: string,
-  status: OrderStatus = OrderStatus.PENDING,
-) => {
+const findSellersOrder = async (email: string, status?: OrderStatus) => {
   const orders = await prisma.order.findMany({
     where: {
       status,

@@ -104,7 +104,7 @@ const getKhaltiUrl = async (ctx: Context) => {
       data: {
         return_url: "http://localhost:5173/payment",
         website_url: "http://localhost:5173/",
-        amount: order?.Total * 1000,
+        amount: order?.Total * 100,
         purchase_order_id: order?.sku,
         purchase_order_name: `Order ${order.id}`,
         customer_info: {

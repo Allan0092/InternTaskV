@@ -72,6 +72,9 @@ const getOrdersForSeller = async (ctx: Context) => {
   try {
     const email = ctx.state.user.email;
     const status = ctx.query.status as OrderStatus;
+    if (!Object.values(OrderStatus).includes(status))
+      throw new AppError("Invalid Order status", 401);
+
     const orders = await findSellersOrder(email, status);
 
     ctx.body = generateResponseBody({
