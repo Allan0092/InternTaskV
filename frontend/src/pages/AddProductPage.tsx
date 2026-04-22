@@ -126,7 +126,7 @@ const AddProductPage = () => {
     setUploadError(null);
     try {
       const fd = new FormData();
-      selectedFiles.forEach((f) => fd.append("images", f));
+      selectedFiles.forEach((f) => fd.append("photo", f));
       await api.put(`/api/products/${uploadProductId}/upload-images`, fd, {
         headers: {
           Authorization: `Bearer ${token}`,

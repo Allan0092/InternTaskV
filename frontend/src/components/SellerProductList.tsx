@@ -177,7 +177,7 @@ const SellerProductList = ({
     setUploadError(null);
     try {
       const fd = new FormData();
-      uploadFiles.forEach((f) => fd.append("images", f));
+      uploadFiles.forEach((f) => fd.append("photo", f));
       await api.put(`/api/products/${productId}/upload-images`, fd, {
         headers: {
           Authorization: `Bearer ${token}`,
