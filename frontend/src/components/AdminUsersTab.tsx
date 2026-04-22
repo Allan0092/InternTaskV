@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { type AdminUser, LIMIT_OPTIONS, roleBadgeColors } from "../constants";
+import {
+  type AdminUser,
+  type Role,
+  LIMIT_OPTIONS,
+  roleBadgeColors,
+} from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
 
@@ -14,7 +19,25 @@ const AdminUsersTab = () => {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [deletingUser, setDeletingUser] = useState<number | null>(null);
   const [restoringUser, setRestoringUser] = useState<number | null>(null);
+  const [disablingUser, setDisablingUser] = useState<number | null>(null);
   const [actionError, setActionError] = useState<Record<number, string>>({});
+  const [confirmModal, setConfirmModal] = useState<{
+    userId: number;
+    userName: string;
+    action: "delete" | "restore" | "disable";
+  } | null>(null);
+  const [editModal, setEditModal] = useState<AdminUser | null>(null);
+  const [editForm, setEditForm] = useState<{
+    name: string;
+    email: string;
+    role: Role;
+  }>({
+    name: "",
+    email: "",
+    role: "USER",
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const fetchUsers = () => {
     setLoading(true);
@@ -55,11 +78,33 @@ const AdminUsersTab = () => {
     }
   };
 
+  const handleDisableUser = async (userId: number) => {
+    setDisablingUser(userId);
+    setActionError((prev) => ({ ...prev, [userId]: "" }));
+    try {
+      await api.delete(`/api/admin/users/${userId}/deactivate`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, deletedAt: new Date().toISOString() } : u,
+        ),
+      );
+    } catch {
+      setActionError((prev) => ({
+        ...prev,
+        [userId]: "Could not disable user.",
+      }));
+    } finally {
+      setDisablingUser(null);
+    }
+  };
+
   const handleRestoreUser = async (userId: number) => {
     setRestoringUser(userId);
     setActionError((prev) => ({ ...prev, [userId]: "" }));
     try {
-      await api.patch(`/api/admin/users/${userId}`, null, {
+      await api.patch(`/api/admin/users/${userId}/enable`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers((prev) =>
@@ -73,6 +118,34 @@ const AdminUsersTab = () => {
     } finally {
       setRestoringUser(null);
     }
+  };
+
+  const handleEditUser = async () => {
+    if (!editModal) return;
+    setSavingEdit(true);
+    setEditError(null);
+    try {
+      await api.patch(`/api/admin/users/${editModal.id}`, editForm, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsers((prev) =>
+        prev.map((u) => (u.id === editModal.id ? { ...u, ...editForm } : u)),
+      );
+      setEditModal(null);
+    } catch {
+      setEditError("Could not update user. Please try again.");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleConfirm = () => {
+    if (!confirmModal) return;
+    if (confirmModal.action === "delete") handleDeleteUser(confirmModal.userId);
+    else if (confirmModal.action === "disable")
+      handleDisableUser(confirmModal.userId);
+    else handleRestoreUser(confirmModal.userId);
+    setConfirmModal(null);
   };
 
   return (
@@ -195,25 +268,75 @@ const AdminUsersTab = () => {
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-5 py-3.5 text-right">
-                    {user.deletedAt ? (
+                    <div className="flex items-center justify-end gap-2 flex-wrap">
+                      {/* Edit */}
                       <button
-                        onClick={() => handleRestoreUser(user.id)}
-                        disabled={restoringUser === user.id}
-                        className="px-3 py-1 rounded-lg bg-green-500 hover:bg-green-600 disabled:opacity-60 text-white text-xs font-medium transition-colors"
+                        onClick={() => {
+                          setEditModal(user);
+                          setEditForm({
+                            name: user.name,
+                            email: user.email,
+                            role: user.role,
+                          });
+                          setEditError(null);
+                        }}
+                        className="px-3 py-1 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors"
                       >
-                        {restoringUser === user.id ? "Restoring…" : "Restore"}
+                        Edit
                       </button>
-                    ) : (
-                      <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        disabled={deletingUser === user.id}
-                        className="px-3 py-1 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-xs font-medium transition-colors"
-                      >
-                        {deletingUser === user.id ? "Deleting…" : "Delete"}
-                      </button>
-                    )}
+
+                      {user.deletedAt ? (
+                        /* Restore */
+                        <button
+                          onClick={() =>
+                            setConfirmModal({
+                              userId: user.id,
+                              userName: user.name,
+                              action: "restore",
+                            })
+                          }
+                          disabled={restoringUser === user.id}
+                          className="px-3 py-1 rounded-lg bg-green-500 hover:bg-green-600 disabled:opacity-60 text-white text-xs font-medium transition-colors"
+                        >
+                          {restoringUser === user.id ? "Restoring…" : "Restore"}
+                        </button>
+                      ) : (
+                        <>
+                          {/* Disable */}
+                          <button
+                            onClick={() =>
+                              setConfirmModal({
+                                userId: user.id,
+                                userName: user.name,
+                                action: "disable",
+                              })
+                            }
+                            disabled={disablingUser === user.id}
+                            className="px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-xs font-medium transition-colors"
+                          >
+                            {disablingUser === user.id
+                              ? "Disabling…"
+                              : "Disable"}
+                          </button>
+                          {/* Delete */}
+                          <button
+                            onClick={() =>
+                              setConfirmModal({
+                                userId: user.id,
+                                userName: user.name,
+                                action: "delete",
+                              })
+                            }
+                            disabled={deletingUser === user.id}
+                            className="px-3 py-1 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-xs font-medium transition-colors"
+                          >
+                            {deletingUser === user.id ? "Deleting…" : "Delete"}
+                          </button>
+                        </>
+                      )}
+                    </div>
                     {actionError[user.id] && (
-                      <p className="text-red-500 text-xs mt-1">
+                      <p className="text-red-500 text-xs mt-1 text-right">
                         {actionError[user.id]}
                       </p>
                     )}
@@ -248,6 +371,133 @@ const AdminUsersTab = () => {
           >
             Next →
           </button>
+        </div>
+      )}
+      {/* Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+            <h3 className="text-base font-semibold text-gray-800 mb-2">
+              {confirmModal.action === "delete"
+                ? "Delete User"
+                : confirmModal.action === "disable"
+                  ? "Disable User"
+                  : "Restore User"}
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to{" "}
+              <span className="font-medium text-gray-700">
+                {confirmModal.action}
+              </span>{" "}
+              user{" "}
+              <span className="font-medium text-gray-700">
+                {confirmModal.userName}
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm}
+                className={`px-4 py-2 rounded-xl text-sm font-medium text-white transition-colors ${
+                  confirmModal.action === "delete"
+                    ? "bg-red-500 hover:bg-red-600"
+                    : confirmModal.action === "disable"
+                      ? "bg-amber-500 hover:bg-amber-600"
+                      : "bg-green-500 hover:bg-green-600"
+                }`}
+              >
+                {confirmModal.action === "delete"
+                  ? "Yes, Delete"
+                  : confirmModal.action === "disable"
+                    ? "Yes, Disable"
+                    : "Yes, Restore"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {editModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-base font-semibold text-gray-800 mb-4">
+              Edit User —{" "}
+              <span className="text-gray-500 font-normal">#{editModal.id}</span>
+            </h3>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, name: e.target.value }))
+                  }
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, email: e.target.value }))
+                  }
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Role
+                </label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, role: e.target.value as Role }))
+                  }
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                >
+                  <option value="USER">USER</option>
+                  <option value="SELLER">SELLER</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </div>
+            </div>
+
+            {editError && (
+              <p className="text-red-500 text-xs mt-3">{editError}</p>
+            )}
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setEditModal(null)}
+                disabled={savingEdit}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditUser}
+                disabled={savingEdit}
+                className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors disabled:opacity-60"
+              >
+                {savingEdit ? "Saving…" : "Save Changes"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

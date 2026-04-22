@@ -5,6 +5,7 @@ import {
   findAndDeleteUserbyId,
   findAndDisableUser,
   findAndEnableUser,
+  findAndUpdateUser,
   findUserByEmail,
   saveUser,
   updateUserbyEmail,
@@ -114,6 +115,7 @@ const registerUser = async (ctx: Context) => {
 const deleteUser = async (ctx: Context) => {
   try {
     const id = parseInt(ctx.params.id);
+
     const user = await findAndDeleteUserbyId(id);
     if (!user) throw new AppError("Could not find user", 404);
     ctx.body = generateResponseBody({
@@ -162,13 +164,13 @@ const enableUserAccount = async (ctx: Context) => {
   } catch (e: AppError | Error | any) {
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
-      message: e instanceof AppError ? e.message : "Could not register user",
+      message: e instanceof AppError ? e.message : "Could not enable user",
     });
     throw e;
   }
 };
 
-const editUser = async (ctx: Context) => {
+const editUserByEmail = async (ctx: Context) => {
   try {
     const data: UserUpdateInput = ctx.request.body as UserUpdateInput;
     const role = ctx.state.user.role;
@@ -190,9 +192,31 @@ const editUser = async (ctx: Context) => {
   }
 };
 
+const editUser = async (ctx: Context) => {
+  try {
+    const data: UserUpdateInput = ctx.request.body as UserUpdateInput;
+    const id = parseInt(ctx.params.id);
+
+    const user = await findAndUpdateUser(id, data);
+    if (!user) throw new Error();
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "User updated successfully",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not update user",
+    });
+    throw e;
+  }
+};
+
 export {
   deleteUser,
   editUser,
+  editUserByEmail,
   enableUserAccount,
   getUsers,
   login,

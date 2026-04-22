@@ -56,11 +56,17 @@ const updateUserbyEmail = async (email: string, data: UserUpdateInput) => {
   return user;
 };
 
+const findAndUpdateUser = async (id: number, data: UserUpdateInput) => {
+  const user = await prisma.user.update({ where: { id }, data });
+  return user;
+};
+
 export {
   findAllUsers,
   findAndDeleteUserbyId,
   findAndDisableUser,
   findAndEnableUser,
+  findAndUpdateUser,
   findUserByEmail,
   saveUser,
   updateUserbyEmail,

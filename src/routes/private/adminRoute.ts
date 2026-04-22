@@ -19,9 +19,10 @@ const adminRouter = new Router<any, Context>({ prefix: "/admin" });
 
 // Users
 adminRouter.get("/users", getUsers);
-adminRouter.delete("/users/:id", deleteUser);
-adminRouter.patch("/users/enable/:id", enableUserAccount);
+adminRouter.patch("/users/:id/enable", enableUserAccount);
 adminRouter.patch("/users/:id", editUser);
+adminRouter.delete("/users/:id", deleteUser);
+adminRouter.delete("/users/:id/deactivate", editUser);
 
 // Products
 adminRouter.get("/products", getAllProducts);
