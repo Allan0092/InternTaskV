@@ -1,4 +1,5 @@
 export const LIMIT_OPTIONS = [5, 10, 20, 50];
+export const IMG_BASE = "http://localhost:3000/uploads";
 export const CATEGORIES = [
   "ELECTRONICS",
   "FASHION",

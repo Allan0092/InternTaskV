@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { categoryColors } from "../constants";
+import { categoryColors, IMG_BASE } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
 
@@ -13,8 +13,6 @@ interface Product {
   quantity: number;
   images: string[];
 }
-
-const IMG_BASE = "http://localhost:3000/uploads";
 
 const getImgSrc = (product: Product, idx: number) => {
   const imgs = product.images.filter((img) => !!img);

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import {
+  CATEGORIES,
+  IMG_BASE,
   LIMIT_OPTIONS,
   type ProductsResponse,
   type PublicProduct,
 } from "../constants";
 import { useAuth } from "../context/AuthContext";
-import api from "../lib/Axios";
+import api, { isAxiosError } from "../lib/Axios";
 
 const AdminProductsTab = () => {
   const { token } = useAuth();
@@ -19,6 +21,77 @@ const AdminProductsTab = () => {
   const [total, setTotal] = useState(0);
   const [deletingProduct, setDeletingProduct] = useState<number | null>(null);
   const [actionError, setActionError] = useState<Record<number, string>>({});
+
+  // ── Edit modal ────────────────────────────────────────────────
+  const [editingProduct, setEditingProduct] = useState<PublicProduct | null>(
+    null,
+  );
+  const [editForm, setEditForm] = useState({
+    name: "",
+    price: "",
+    description: "",
+    category: "",
+    quantity: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editSuccess, setEditSuccess] = useState<string | null>(null);
+
+  const openEdit = (product: PublicProduct) => {
+    setEditingProduct(product);
+    setEditForm({
+      name: product.name,
+      price: String(product.price),
+      description: product.description,
+      category: product.category,
+      quantity: String(product.quantity),
+    });
+    setEditError(null);
+  };
+
+  const closeEdit = () => {
+    setEditingProduct(null);
+    setEditError(null);
+    setEditSuccess(null);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    setSaving(true);
+    setEditError(null);
+    setEditSuccess(null);
+    try {
+      const res = await api.patch<{ success: boolean; message: string }>(
+        `/api/admin/products/${editingProduct.id}`,
+        {
+          name: editForm.name,
+          price: Number(editForm.price),
+          description: editForm.description,
+          category: editForm.category,
+          quantity: Number(editForm.quantity),
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (res.data.success) {
+        setEditSuccess(res.data.message || "Product updated successfully.");
+        setTimeout(() => {
+          closeEdit();
+          fetchProducts();
+        }, 1500);
+      } else {
+        setEditError(res.data.message || "Failed to save changes.");
+      }
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.data?.message) {
+        setEditError(err.response.data.message);
+      } else {
+        setEditError("Failed to save changes. Please try again.");
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const fetchProducts = () => {
     setLoading(true);
@@ -128,14 +201,14 @@ const AdminProductsTab = () => {
               No products found.
             </div>
           )}
-          {products.map((product) => (
+          {products.map((product, index) => (
             <div
-              key={product.id}
+              key={product.id ?? index}
               className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-4"
             >
               {product.images?.[0] ? (
                 <img
-                  src={product.images[0]}
+                  src={`${IMG_BASE}/${product.images[0]}`}
                   alt={product.name}
                   className="h-14 w-14 rounded-lg object-cover shrink-0 bg-gray-100"
                 />
@@ -162,19 +235,28 @@ const AdminProductsTab = () => {
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5">
                   ID: {product.id} · Seller: {product.user?.name} · ₨
-                  {product.price.toLocaleString()} · Stock: {product.quantity}
+                  {(product.price ?? 0).toLocaleString()} · Stock:{" "}
+                  {product.quantity}
                 </p>
               </div>
-              <div className="shrink-0 text-right">
-                <button
-                  onClick={() => handleDeleteProduct(product.id)}
-                  disabled={deletingProduct === product.id}
-                  className="px-3 py-1 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-xs font-medium transition-colors"
-                >
-                  {deletingProduct === product.id ? "Deleting…" : "Delete"}
-                </button>
+              <div className="shrink-0 text-right flex flex-col items-end gap-1">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => openEdit(product)}
+                    className="px-3 py-1 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProduct(product.id)}
+                    disabled={deletingProduct === product.id}
+                    className="px-3 py-1 rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-xs font-medium transition-colors"
+                  >
+                    {deletingProduct === product.id ? "Deleting…" : "Delete"}
+                  </button>
+                </div>
                 {actionError[product.id] && (
-                  <p className="text-red-500 text-xs mt-1">
+                  <p className="text-red-500 text-xs">
                     {actionError[product.id]}
                   </p>
                 )}
@@ -205,6 +287,144 @@ const AdminProductsTab = () => {
             Next →
           </button>
         </div>
+      )}
+
+      {/* ── Edit Modal ── */}
+      {editingProduct && (
+        <>
+          <div className="fixed inset-0 bg-black/40 z-40" onClick={closeEdit} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-md">
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 className="text-base font-semibold text-gray-800">
+                  Edit Product
+                </h3>
+                <button
+                  onClick={closeEdit}
+                  className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEdit} className="p-6 space-y-4">
+                {editSuccess && (
+                  <div className="px-4 py-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm">
+                    {editSuccess}
+                  </div>
+                )}
+                {editError && (
+                  <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+                    {editError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editForm.name}
+                    onChange={(e) =>
+                      setEditForm((f) => ({ ...f, name: e.target.value }))
+                    }
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Price (₨)
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={0}
+                      step="0.01"
+                      value={editForm.price}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, price: e.target.value }))
+                      }
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Stock
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={0}
+                      value={editForm.quantity}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, quantity: e.target.value }))
+                      }
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={editForm.category}
+                    onChange={(e) =>
+                      setEditForm((f) => ({ ...f, category: e.target.value }))
+                    }
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={editForm.description}
+                    onChange={(e) =>
+                      setEditForm((f) => ({
+                        ...f,
+                        description: e.target.value,
+                      }))
+                    }
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-1">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white text-sm font-medium rounded-xl transition-colors"
+                  >
+                    {saving ? "Saving…" : "Save Changes"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeEdit}
+                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
