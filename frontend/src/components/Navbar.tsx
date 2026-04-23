@@ -250,6 +250,13 @@ const Navbar = () => {
                           {user.role}
                         </span>
                       </div>
+                      <Link
+                        to="/profile"
+                        onClick={() => setMenuOpen(false)}
+                        className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        My Profile
+                      </Link>
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"

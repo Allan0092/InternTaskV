@@ -13,6 +13,7 @@ import RegisterPage from "./pages/RegisterPage";
 import SearchPage from "./pages/SearchPage";
 import SellerOrdersPage from "./pages/SellerOrdersPage";
 import UserOrdersPage from "./pages/UserOrdersPage";
+import UserProfilePage from "./pages/UserProfilePage";
 
 const App = () => {
   return (
@@ -62,6 +63,14 @@ const App = () => {
             element={
               <ProtectedRoute allowedRoles={["USER"]}>
                 <PaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={["USER", "SELLER", "ADMIN"]}>
+                <UserProfilePage />
               </ProtectedRoute>
             }
           />
