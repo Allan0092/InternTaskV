@@ -82,11 +82,11 @@ const findAndUpdateProduct = async (
   productId: number,
   productData: ProductUpdateInput,
 ) => {
-  const product = await prisma.product.update({
+  const product = await prisma.product.updateMany({
     where: { id: productId },
     data: productData,
   });
-  return product;
+  return product.count !== 0;
 };
 
 const findAndDeleteProduct = async (productId: number) => {

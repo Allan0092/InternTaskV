@@ -13,7 +13,7 @@ const findAllOrders = async (
     orderBy: { orderDate: "desc" },
     skip: (page - 1) * limit,
     take: limit,
-    where: { Total: { gte: min, lte: max }, status },
+    where: { total: { gte: min, lte: max }, status },
     include: {
       orderItems: {
         select: {

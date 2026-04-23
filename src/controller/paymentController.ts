@@ -6,6 +6,7 @@ import {
 import { findAndUpdateOrder, findOrderBySku } from "@/service/Order.js";
 import {
   createPayment,
+  findAllPayments,
   findPaymentById,
   updatePaymentStatus,
 } from "@/service/Payment.js";
@@ -104,7 +105,7 @@ const getKhaltiUrl = async (ctx: Context) => {
       data: {
         return_url: "http://localhost:5173/payment",
         website_url: "http://localhost:5173/",
-        amount: order?.Total * 100,
+        amount: order?.total * 100,
         purchase_order_id: order?.sku,
         purchase_order_name: `Order ${order.id}`,
         customer_info: {
@@ -226,4 +227,44 @@ const checkKhaltiPaymentStatus = async (ctx: Context) => {
   }
 };
 
-export { checkKhaltiPaymentStatus, getKhaltiUrl, paymentTest };
+const getAllPayments = async (ctx: Context) => {
+  try {
+    const page = Number(ctx.query.page ?? 1);
+    const limit = Number(ctx.query.limit ?? 10);
+    const orderId = ctx.query.orderId ? Number(ctx.query.orderId) : undefined;
+    const status = ctx.query.status as PaymentStatus | undefined;
+    const from = ctx.query.from
+      ? new Date(ctx.query.from as string)
+      : undefined;
+    const until = ctx.query.until
+      ? new Date(ctx.query.until as string)
+      : undefined;
+
+    const payments = await findAllPayments({
+      page,
+      limit,
+      orderId,
+      status,
+      from,
+      until,
+    });
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Payments fetched successfully.",
+      data: payments,
+    });
+  } catch (e: AppError | any) {
+    ctx.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      success: false,
+      message:
+        e instanceof AppError
+          ? e.message
+          : "Could not fetch payments at this moment.",
+    });
+    throw e;
+  }
+};
+
+export { checkKhaltiPaymentStatus, getAllPayments, getKhaltiUrl, paymentTest };

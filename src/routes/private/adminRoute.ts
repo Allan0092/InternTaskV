@@ -1,5 +1,6 @@
 import { getAllCart } from "@/controller/cartController.js";
 import { getAllOrders, updateOrder } from "@/controller/orderController.js";
+import { getAllPayments } from "@/controller/paymentController.js";
 import {
   adminDeleteProduct,
   getAllProducts,
@@ -35,5 +36,8 @@ adminRouter.get("/carts", getAllCart);
 // Orders
 adminRouter.get("/orders", getAllOrders);
 adminRouter.patch("/orders/:id", updateOrder);
+
+// Payments
+adminRouter.get("/payments", getAllPayments);
 
 export default adminRouter;
