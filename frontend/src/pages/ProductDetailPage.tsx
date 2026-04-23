@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { categoryColors } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
@@ -33,6 +33,9 @@ const ProductDetailPage = () => {
   // Carousel
   const [activeIdx, setActiveIdx] = useState(0);
 
+  // Related products
+  const [related, setRelated] = useState<Product[]>([]);
+
   // Cart
   const [qty, setQty] = useState(1);
   const [adding, setAdding] = useState(false);
@@ -52,6 +55,24 @@ const ProductDetailPage = () => {
       .catch(() => setError("Could not load product. Please try again."))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!product) return;
+    api
+      .get<{ success: boolean; data: { products: Product[] } }>(
+        "/api/public/products",
+        { params: { category: product.category, page: 1, limit: 7 } },
+      )
+      .then((res) => {
+        const filtered = res.data.data.products.filter(
+          (p) => p.id !== product.id,
+        );
+        setRelated(filtered.slice(0, 6));
+      })
+      .catch(() => {
+        // silently ignore — recommendations are non-critical
+      });
+  }, [product?.id, product?.category]);
 
   const handleAddToCart = async () => {
     if (!user || !token) {
@@ -279,6 +300,50 @@ const ProductDetailPage = () => {
             </div>
           </div>
         </div>
+
+        {/* ── Related Products ─────────────────────────────────── */}
+        {related.length > 0 && (
+          <section className="mt-10">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">
+              More in {product.category}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+              {related.map((p) => (
+                <Link
+                  key={p.id}
+                  to={`/products/${p.id}`}
+                  className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-all group block"
+                >
+                  <div className="relative h-36 bg-gray-50">
+                    <img
+                      src={getImgSrc(p, 0)}
+                      alt={p.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {p.quantity === 0 && (
+                      <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                        Sold Out
+                      </span>
+                    )}
+                    {p.quantity > 0 && p.quantity <= 5 && (
+                      <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                        Only {p.quantity} left
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="font-semibold text-gray-800 text-sm line-clamp-1">
+                      {p.name}
+                    </p>
+                    <p className="text-blue-600 font-bold text-sm mt-1">
+                      ₨{p.price.toLocaleString()}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

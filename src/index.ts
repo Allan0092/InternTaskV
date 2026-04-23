@@ -27,7 +27,8 @@ app.use((ctx) => {
   ctx.status = 404;
   ctx.body = generateResponseBody({
     success: false,
-    message: "This URL does not exist. Please check your request.",
+    message:
+      "This URL does not exist. Please check your request and try again.",
   });
 });
 

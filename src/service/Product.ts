@@ -2,6 +2,7 @@ import { Category, User } from "@/generated/prisma/client.js";
 import {
   ProductCreateInput,
   ProductUpdateInput,
+  ProductWhereInput,
 } from "@/generated/prisma/models.js";
 import { prisma } from "@/prisma/prisma.js";
 
@@ -13,7 +14,7 @@ const findAllProducts = async (
   search?: string,
   category?: Category,
 ) => {
-  const searchFilter = search
+  const searchFilter: ProductWhereInput = search
     ? {
         OR: [
           { name: { contains: search, mode: "insensitive" as const } },
@@ -22,8 +23,9 @@ const findAllProducts = async (
       }
     : {};
 
-  const where = {
+  const where: ProductWhereInput = {
     deletedAt: null,
+    user: { deletedAt: null },
     category,
     price: { gte: min, lte: max },
     ...searchFilter,
