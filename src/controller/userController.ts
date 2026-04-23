@@ -212,7 +212,45 @@ const editUser = async (ctx: Context) => {
   }
 };
 
+const changePassword = async (ctx: Context) => {
+  try {
+    const email = ctx.state.user.email;
+    const user = await findUserByEmail(email);
+    if (!user) throw new AppError("Could not find user.");
+
+    const { currentPassword, newPassword, confirmNewPassword } = ctx.request
+      .body as {
+      currentPassword: string;
+      newPassword: string;
+      confirmNewPassword: string;
+    };
+    if (newPassword !== confirmNewPassword)
+      throw new AppError("Passwords do not match.");
+
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) throw new AppError("Current Password is incorrect.");
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const result = await updateUserbyEmail(email, { password: hashedPassword });
+
+    if (!result) throw Error;
+
+    ctx.body = generateResponseBody({
+      success: true,
+      message: "Password changed successfully.",
+    });
+  } catch (e: AppError | Error | any) {
+    ctx.response.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      message: e instanceof AppError ? e.message : "Could not change password.",
+    });
+    throw e;
+  }
+};
+
 export {
+  changePassword,
   deleteUser,
   editUser,
   editUserByEmail,

@@ -56,4 +56,26 @@ const adminUpdateUserSchema = yup
   })
   .strip();
 
-export { adminUpdateUserSchema, updateUserSchema };
+const changePasswordValidation = yup.object().shape({
+  currentPassword: yup.string().required(),
+  newPassword: yup
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password is too long")
+    .matches(/[a-z]/, "Must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Must contain at least one number")
+    .matches(/[^a-zA-Z0-9]/, "Must contain at least one special character")
+    .required(),
+  confirmNewPassword: yup
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password is too long")
+    .matches(/[a-z]/, "Must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Must contain at least one number")
+    .matches(/[^a-zA-Z0-9]/, "Must contain at least one special character")
+    .required(),
+});
+
+export { adminUpdateUserSchema, changePasswordValidation, updateUserSchema };

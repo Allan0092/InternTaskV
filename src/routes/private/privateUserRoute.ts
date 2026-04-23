@@ -16,11 +16,15 @@ import {
 } from "@/controller/paymentController.js";
 import { streamNotifications } from "@/controller/socketController.js";
 import {
+  changePassword,
   editUserByEmail,
   softDeleteUser,
 } from "@/controller/userController.js";
 import { validateBody, validateBuyerAndOrder } from "@/middleware/validate.js";
-import { updateUserSchema } from "@/validation/updateUserValidation.js";
+import {
+  changePasswordValidation,
+  updateUserSchema,
+} from "@/validation/updateUserValidation.js";
 import { Context } from "koa";
 import Router from "koa-router";
 
@@ -33,6 +37,11 @@ privateUserRouter.patch(
   "/users",
   validateBody(updateUserSchema),
   editUserByEmail,
+);
+privateUserRouter.patch(
+  "/users/change-password",
+  validateBody(changePasswordValidation),
+  changePassword,
 );
 
 // Cart

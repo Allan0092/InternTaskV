@@ -54,9 +54,11 @@ const validateBody = <T extends yup.AnyObject>(schema: yup.ObjectSchema<T>) => {
     } catch (err) {
       if (err instanceof yup.ValidationError) {
         ctx.status = 400;
-        ctx.body = {
-          message: "Validation failed",
-        };
+        ctx.body = generateResponseBody({
+          success: false,
+          message: `Request Body Validation failed.`,
+          data: err.errors,
+        });
         return;
       }
 
