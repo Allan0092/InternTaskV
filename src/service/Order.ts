@@ -148,7 +148,7 @@ const saveOrder = async (email: string, orderItems: any[]) => {
 
   const order = await prisma.order.create({
     data: {
-      Total: total,
+      total: total,
       status: OrderStatus.PENDING,
       user: { connect: { email } },
       orderItems: {

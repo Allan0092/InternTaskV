@@ -127,7 +127,7 @@ model Order {
   buyerUserId Int
   user        User        @relation(fields: [buyerUserId], references: [id], onDelete: Cascade)
   orderDate   DateTime    @default(now())
-  Total       Int
+  total       Int
   orderItems  OrderItem[]
   status      OrderStatus @default(PENDING)
   paymentId   String?     @unique @db.Uuid
