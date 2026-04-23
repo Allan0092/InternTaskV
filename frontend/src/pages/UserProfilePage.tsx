@@ -35,7 +35,14 @@ const UserProfilePage = () => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
       setInfoSuccess(true);
-      setTimeout(() => setInfoSuccess(false), 3000);
+      if (email !== user?.email) {
+        setTimeout(() => {
+          logout();
+          navigate("/login");
+        }, 1500);
+      } else {
+        setTimeout(() => setInfoSuccess(false), 3000);
+      }
     } catch (err) {
       if (isAxiosError(err) && err.response?.data?.message) {
         setInfoError(err.response.data.message);
@@ -75,7 +82,10 @@ const UserProfilePage = () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
-      setTimeout(() => setPasswordSuccess(false), 3000);
+      setTimeout(() => {
+        logout();
+        navigate("/login");
+      }, 1500);
     } catch (err) {
       if (isAxiosError(err) && err.response?.data?.message) {
         setPasswordError(err.response.data.message);
@@ -160,7 +170,9 @@ const UserProfilePage = () => {
 
                 {infoSuccess && (
                   <div className="mb-4 px-4 py-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm">
-                    Profile updated successfully.
+                    {email !== user?.email
+                      ? "Email updated. Signing you out…"
+                      : "Profile updated successfully."}
                   </div>
                 )}
                 {infoError && (
@@ -220,7 +232,7 @@ const UserProfilePage = () => {
 
                 {passwordSuccess && (
                   <div className="mb-4 px-4 py-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm">
-                    Password changed successfully.
+                    Password changed. Signing you out…
                   </div>
                 )}
                 {passwordError && (

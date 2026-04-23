@@ -58,7 +58,7 @@ const AdminOrdersTab = () => {
     setEditForm({
       buyerUserId: order.buyerUserId,
       orderDate: order.orderDate.slice(0, 10),
-      Total: order.Total,
+      total: order.total,
       status: order.status,
       orderItems: order.orderItems.map((item) => ({
         id: item.id,
@@ -110,7 +110,7 @@ const AdminOrdersTab = () => {
       const payload = {
         buyerUserId: editForm.buyerUserId,
         orderDate: new Date(editForm.orderDate).toISOString(),
-        Total: editForm.Total,
+        total: editForm.total,
         orderItems: editForm.orderItems,
       };
       await api.patch(`/api/admin/orders/${editingOrder.id}`, payload, {
@@ -123,7 +123,7 @@ const AdminOrdersTab = () => {
                 ...o,
                 buyerUserId: editForm.buyerUserId,
                 orderDate: new Date(editForm.orderDate).toISOString(),
-                Total: editForm.Total,
+                total: editForm.total,
                 orderItems: o.orderItems.map((item) => {
                   const updated = editForm.orderItems.find(
                     (fi) => fi.id === item.id,
@@ -278,7 +278,7 @@ const AdminOrdersTab = () => {
                       {new Date(order.orderDate).toLocaleDateString()}
                     </td>
                     <td className="px-5 py-3.5 text-gray-800 font-medium">
-                      ₨{order.Total.toLocaleString()}
+                      ₨{order.total.toLocaleString()}
                     </td>
                     <td className="px-5 py-3.5 text-gray-500 text-xs">
                       {order.orderItems.length} item
@@ -445,10 +445,10 @@ const AdminOrdersTab = () => {
                     </label>
                     <input
                       type="number"
-                      value={editForm.Total}
+                      value={editForm.total}
                       onChange={(e) =>
                         setEditForm((f) =>
-                          f ? { ...f, Total: Number(e.target.value) } : f,
+                          f ? { ...f, total: Number(e.target.value) } : f,
                         )
                       }
                       className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
