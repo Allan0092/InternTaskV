@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api, { isAxiosError } from "../lib/Axios";
 
@@ -55,6 +55,10 @@ const statusSteps: OrderStatus[] = [
 
 const UserOrdersPage = () => {
   const { token } = useAuth();
+  const [searchParams] = useSearchParams();
+  const newOrderId = searchParams.get("new")
+    ? Number(searchParams.get("new"))
+    : null;
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +79,16 @@ const UserOrdersPage = () => {
       .get<{ success: boolean; data: Order[] }>("/api/users/orders", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setOrders(res.data.data))
+      .then((res) => {
+        const data = res.data.data;
+        setOrders(data);
+        // Auto-expand: prefer the new order from query param, else the latest order
+        if (newOrderId && data.some((o) => o.id === newOrderId)) {
+          setExpandedId(newOrderId);
+        } else if (data.length > 0) {
+          setExpandedId(data[0].id);
+        }
+      })
       .catch(() => setError("Failed to load your orders. Please try again."))
       .finally(() => setLoading(false));
   };
@@ -241,6 +254,16 @@ const UserOrdersPage = () => {
         <p className="text-sm text-gray-400 mb-6">
           {orders.length} {orders.length === 1 ? "order" : "orders"}
         </p>
+
+        {newOrderId && (
+          <div className="mb-5 px-4 py-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-center gap-2">
+            <span>✓</span>
+            <span>
+              Order <span className="font-semibold">#{newOrderId}</span> placed
+              successfully!
+            </span>
+          </div>
+        )}
 
         <div className="space-y-3">
           {orders.map((order) => {

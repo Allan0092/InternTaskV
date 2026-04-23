@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
 
@@ -20,6 +20,7 @@ interface Cart {
 
 const CartPage = () => {
   const { token } = useAuth();
+  const navigate = useNavigate();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +44,6 @@ const CartPage = () => {
 
   const [removing, setRemoving] = useState<number | null>(null);
   const [placingOrder, setPlacingOrder] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState<number | null>(null);
   const [orderError, setOrderError] = useState<string | null>(null);
 
   const handlePlaceOrder = async () => {
@@ -60,8 +60,7 @@ const CartPage = () => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
       if (res.data.success && res.data.data.orderId) {
-        setOrderSuccess(res.data.data.orderId);
-        setCart((prev) => (prev ? { ...prev, cartProducts: [] } : prev));
+        navigate(`/my-orders?new=${res.data.data.orderId}`);
       } else {
         setOrderError(res.data.message ?? "Could not place order.");
       }
@@ -281,39 +280,6 @@ const CartPage = () => {
               </div>
             ))}
           </div>
-          {orderSuccess && (
-            <>
-              <div className="mb-3 px-4 py-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-start gap-3">
-                <svg
-                  className="w-5 h-5 shrink-0 mt-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <div>
-                  <p className="font-semibold">
-                    Order #{orderSuccess} placed successfully!
-                  </p>
-                  <p className="text-green-600 text-xs mt-0.5">
-                    Your order is pending payment. Go to My Orders to pay.
-                  </p>
-                </div>
-              </div>
-              <Link
-                to="/my-orders"
-                className="mb-3 flex items-center justify-center gap-2 w-full py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl text-sm transition-colors"
-              >
-                Pay Now
-              </Link>
-            </>
-          )}
           {orderError && (
             <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
               {orderError}
@@ -327,14 +293,10 @@ const CartPage = () => {
           </div>
           <button
             onClick={handlePlaceOrder}
-            disabled={placingOrder || !!orderSuccess}
+            disabled={placingOrder}
             className="mt-5 w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium rounded-xl text-sm transition-colors"
           >
-            {placingOrder
-              ? "Placing Order…"
-              : orderSuccess
-                ? "✓ Order Placed"
-                : "Proceed to Checkout"}
+            {placingOrder ? "Placing Order…" : "Proceed to Checkout"}
           </button>
           <Link
             to="/"
