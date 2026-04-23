@@ -1,12 +1,8 @@
 import { addClient, removeClient } from "@/service/Notification.js";
-import { AppError } from "@/types/index.js";
 import { Context } from "koa";
 
 const streamNotifications = async (ctx: Context) => {
-  const email = ctx.state.user?.email as string | undefined;
-  if (!email) {
-    throw new AppError("Unauthorized request", 401);
-  }
+  const email = ctx.state.user.email as string;
 
   const response = ctx.res;
 

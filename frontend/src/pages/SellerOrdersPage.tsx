@@ -1,75 +1,14 @@
 import { useEffect, useState } from "react";
+import {
+  itemStatusStyles,
+  STATUS_OPTIONS,
+  statusStyles,
+  type ItemStatus,
+  type Order,
+  type OrderStatus,
+} from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
-
-type OrderStatus =
-  | "PENDING"
-  | "PROCESSING"
-  | "SHIPPING"
-  | "COMPLETED"
-  | "DECLINED"
-  | "CANCELLED";
-
-type ItemStatus =
-  | "PENDING"
-  | "DECLINE"
-  | "PROCESSING"
-  | "SHIPPED"
-  | "COMPLETED";
-
-interface OrderItem {
-  id: number;
-  quantity: number;
-  price: number;
-  status: ItemStatus;
-  product: {
-    user: {
-      email: string;
-    };
-  };
-}
-
-interface Order {
-  id: number;
-  sku: string;
-  buyerUserId: number;
-  orderDate: string;
-  Total: number;
-  status: OrderStatus;
-  paymentId: string | null;
-  orderItems: OrderItem[];
-  user: {
-    name: string;
-    email: string;
-  };
-}
-
-const STATUS_OPTIONS: { label: string; value: OrderStatus | "ALL" }[] = [
-  { label: "All", value: "ALL" },
-  { label: "Pending", value: "PENDING" },
-  { label: "Processing", value: "PROCESSING" },
-  { label: "Shipping", value: "SHIPPING" },
-  { label: "Completed", value: "COMPLETED" },
-  { label: "Declined", value: "DECLINED" },
-  { label: "Cancelled", value: "CANCELLED" },
-];
-
-const statusStyles: Record<OrderStatus, string> = {
-  PENDING: "bg-yellow-100 text-yellow-700",
-  PROCESSING: "bg-purple-100 text-purple-700",
-  SHIPPING: "bg-cyan-100 text-cyan-700",
-  COMPLETED: "bg-green-100 text-green-700",
-  DECLINED: "bg-red-100 text-red-700",
-  CANCELLED: "bg-gray-100 text-gray-500",
-};
-
-const itemStatusStyles: Record<ItemStatus, string> = {
-  PENDING: "bg-yellow-100 text-yellow-700",
-  DECLINE: "bg-red-100 text-red-700",
-  PROCESSING: "bg-purple-100 text-purple-700",
-  SHIPPED: "bg-cyan-100 text-cyan-700",
-  COMPLETED: "bg-green-100 text-green-700",
-};
 
 const SellerOrdersPage = () => {
   const { token, user } = useAuth();
@@ -268,7 +207,7 @@ const SellerOrdersPage = () => {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-bold text-blue-600 text-base">
-                        ₨{order.Total.toLocaleString()}
+                        ₨{order.total.toLocaleString()}
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         {order.orderItems.length}{" "}
@@ -433,7 +372,7 @@ const SellerOrdersPage = () => {
                           )}
                         </div>
                         <p className="text-sm font-bold text-gray-800">
-                          Total: ₨{order.Total.toLocaleString()}
+                          Total: ₨{order.total.toLocaleString()}
                         </p>
                       </div>
                     </div>

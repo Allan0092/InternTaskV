@@ -25,7 +25,7 @@ interface Order {
   sku: string;
   buyerUserId: number;
   orderDate: string;
-  Total: number;
+  total: number;
   status: OrderStatus;
   //   paymentId: string | null;
   orderItems: OrderItem[];
@@ -283,7 +283,7 @@ const UserOrdersPage = () => {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-bold text-blue-600">
-                      ₨{order.Total.toLocaleString()}
+                      ₨{order.total.toLocaleString()}
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
                       {order.orderItems.length}{" "}

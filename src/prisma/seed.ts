@@ -396,7 +396,7 @@ for (const o of orderData) {
     data: {
       user: { connect: { id: user.id } },
       orderDate: new Date(),
-      Total: total,
+      total: total,
     },
   });
 

@@ -71,7 +71,7 @@ export interface AdminOrder {
   sku: string;
   buyerUserId: number;
   orderDate: string;
-  Total: number;
+  total: number;
   status: OrderStatus;
   paymentId: number | null;
   createdAt: string;
@@ -83,7 +83,7 @@ export interface AdminOrder {
 export interface EditOrderForm {
   buyerUserId: number;
   orderDate: string;
-  Total: number;
+  total: number;
   status: OrderStatus;
   orderItems: { id: number; price: number; quantity: number }[];
 }
@@ -111,3 +111,64 @@ export const ORDER_STATUSES: OrderStatus[] = [
   "DECLINED",
   "CANCELLED",
 ];
+
+export type ItemStatus =
+  | "PENDING"
+  | "DECLINE"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "COMPLETED";
+
+export interface OrderItemForSeller {
+  id: number;
+  quantity: number;
+  price: number;
+  status: ItemStatus;
+  product: {
+    user: {
+      email: string;
+    };
+  };
+}
+
+export interface Order {
+  id: number;
+  sku: string;
+  buyerUserId: number;
+  orderDate: string;
+  total: number;
+  status: OrderStatus;
+  paymentId: string | null;
+  orderItems: OrderItemForSeller[];
+  user: {
+    name: string;
+    email: string;
+  };
+}
+
+export const STATUS_OPTIONS: { label: string; value: OrderStatus | "ALL" }[] = [
+  { label: "All", value: "ALL" },
+  { label: "Pending", value: "PENDING" },
+  { label: "Processing", value: "PROCESSING" },
+  { label: "Shipping", value: "SHIPPING" },
+  { label: "Completed", value: "COMPLETED" },
+  { label: "Declined", value: "DECLINED" },
+  { label: "Cancelled", value: "CANCELLED" },
+];
+
+export const statusStyles: Record<OrderStatus, string> = {
+  PENDING: "bg-yellow-100 text-yellow-700",
+  PROCESSING: "bg-purple-100 text-purple-700",
+  SHIPPING: "bg-cyan-100 text-cyan-700",
+  COMPLETED: "bg-green-100 text-green-700",
+  DECLINED: "bg-red-100 text-red-700",
+  CANCELLED: "bg-gray-100 text-gray-500",
+};
+
+export const itemStatusStyles: Record<ItemStatus, string> = {
+  PENDING: "bg-yellow-100 text-yellow-700",
+  DECLINE: "bg-red-100 text-red-700",
+  PROCESSING: "bg-purple-100 text-purple-700",
+  SHIPPED: "bg-cyan-100 text-cyan-700",
+  COMPLETED: "bg-green-100 text-green-700",
+};
