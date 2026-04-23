@@ -4,7 +4,6 @@ import api from "../lib/Axios";
 
 type OrderStatus =
   | "PENDING"
-  | "PAID"
   | "PROCESSING"
   | "SHIPPING"
   | "COMPLETED"
@@ -48,7 +47,6 @@ interface Order {
 const STATUS_OPTIONS: { label: string; value: OrderStatus | "ALL" }[] = [
   { label: "All", value: "ALL" },
   { label: "Pending", value: "PENDING" },
-  { label: "Paid", value: "PAID" },
   { label: "Processing", value: "PROCESSING" },
   { label: "Shipping", value: "SHIPPING" },
   { label: "Completed", value: "COMPLETED" },
@@ -58,7 +56,6 @@ const STATUS_OPTIONS: { label: string; value: OrderStatus | "ALL" }[] = [
 
 const statusStyles: Record<OrderStatus, string> = {
   PENDING: "bg-yellow-100 text-yellow-700",
-  PAID: "bg-blue-100 text-blue-700",
   PROCESSING: "bg-purple-100 text-purple-700",
   SHIPPING: "bg-cyan-100 text-cyan-700",
   COMPLETED: "bg-green-100 text-green-700",

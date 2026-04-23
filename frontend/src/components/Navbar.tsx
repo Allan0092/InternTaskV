@@ -39,6 +39,12 @@ const Navbar = () => {
           >
             Home
           </Link>
+          <Link
+            to="/search"
+            className="text-blue-100 hover:text-white text-sm font-medium transition-colors px-2 py-1 rounded-lg hover:bg-blue-600"
+          >
+            Browse
+          </Link>
 
           {/* Cart icon for logged-in users */}
           {user && (

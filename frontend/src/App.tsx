@@ -8,7 +8,9 @@ import CartPage from "./pages/CartPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import PaymentPage from "./pages/PaymentPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import RegisterPage from "./pages/RegisterPage";
+import SearchPage from "./pages/SearchPage";
 import SellerOrdersPage from "./pages/SellerOrdersPage";
 import UserOrdersPage from "./pages/UserOrdersPage";
 
@@ -21,6 +23,8 @@ const App = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route
             path="/cart"
             element={
