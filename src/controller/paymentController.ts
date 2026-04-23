@@ -239,6 +239,7 @@ const getAllPayments = async (ctx: Context) => {
     const until = ctx.query.until
       ? new Date(ctx.query.until as string)
       : undefined;
+    const buyerId = ctx.query.buyerId ? Number(ctx.query.buyerId) : undefined;
 
     const payments = await findAllPayments({
       page,
@@ -247,6 +248,7 @@ const getAllPayments = async (ctx: Context) => {
       status,
       from,
       until,
+      buyerId,
     });
 
     ctx.body = generateResponseBody({

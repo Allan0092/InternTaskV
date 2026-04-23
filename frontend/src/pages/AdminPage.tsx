@@ -1,14 +1,16 @@
 import { useState } from "react";
 import AdminOrdersTab from "../components/AdminOrdersTab";
+import AdminPaymentsTab from "../components/AdminPaymentsTab";
 import AdminProductsTab from "../components/AdminProductsTab";
 import AdminUsersTab from "../components/AdminUsersTab";
 
-type Tab = "users" | "products" | "orders";
+type Tab = "users" | "products" | "orders" | "payments";
 
 const TAB_LABELS: Record<Tab, string> = {
   users: "Users",
   products: "Products",
   orders: "Orders",
+  payments: "Payments",
 };
 
 const AdminPage = () => {
@@ -45,6 +47,7 @@ const AdminPage = () => {
         {tab === "users" && <AdminUsersTab />}
         {tab === "products" && <AdminProductsTab />}
         {tab === "orders" && <AdminOrdersTab />}
+        {tab === "payments" && <AdminPaymentsTab />}
       </div>
     </div>
   );
