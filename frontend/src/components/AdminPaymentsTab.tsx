@@ -64,6 +64,8 @@ const AdminPaymentsTab = () => {
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | "">("");
   const [orderIdInput, setOrderIdInput] = useState("");
   const [appliedOrderId, setAppliedOrderId] = useState("");
+  const [buyerIdInput, setBuyerIdInput] = useState("");
+  const [appliedBuyerId, setAppliedBuyerId] = useState("");
   const [fromFilter, setFromFilter] = useState("");
   const [untilFilter, setUntilFilter] = useState("");
 
@@ -77,6 +79,7 @@ const AdminPaymentsTab = () => {
     const params: Record<string, string | number> = { page, limit };
     if (statusFilter) params.status = statusFilter;
     if (appliedOrderId) params.orderId = Number(appliedOrderId);
+    if (appliedBuyerId) params.buyerId = Number(appliedBuyerId);
     if (fromFilter) params.from = fromFilter;
     if (untilFilter) params.until = untilFilter;
 
@@ -96,10 +99,23 @@ const AdminPaymentsTab = () => {
   useEffect(() => {
     fetchPayments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, statusFilter, fromFilter, untilFilter, appliedOrderId]);
+  }, [
+    page,
+    limit,
+    statusFilter,
+    fromFilter,
+    untilFilter,
+    appliedOrderId,
+    appliedBuyerId,
+  ]);
 
   const handleApplyOrderId = () => {
     setAppliedOrderId(orderIdInput);
+    setPage(1);
+  };
+
+  const handleApplyBuyerId = () => {
+    setAppliedBuyerId(buyerIdInput);
     setPage(1);
   };
 
@@ -107,13 +123,19 @@ const AdminPaymentsTab = () => {
     setStatusFilter("");
     setOrderIdInput("");
     setAppliedOrderId("");
+    setBuyerIdInput("");
+    setAppliedBuyerId("");
     setFromFilter("");
     setUntilFilter("");
     setPage(1);
   };
 
   const hasActiveFilters =
-    !!statusFilter || !!appliedOrderId || !!fromFilter || !!untilFilter;
+    !!statusFilter ||
+    !!appliedOrderId ||
+    !!appliedBuyerId ||
+    !!fromFilter ||
+    !!untilFilter;
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
@@ -171,7 +193,7 @@ const AdminPaymentsTab = () => {
     <div>
       {/* ── Filters ── */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Status</label>
             <select
@@ -204,6 +226,26 @@ const AdminPaymentsTab = () => {
               />
               <button
                 onClick={handleApplyOrderId}
+                className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-xl transition-colors shrink-0"
+              >
+                Go
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Buyer ID</label>
+            <div className="flex gap-1">
+              <input
+                type="number"
+                value={buyerIdInput}
+                onChange={(e) => setBuyerIdInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleApplyBuyerId()}
+                placeholder="e.g. 11"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <button
+                onClick={handleApplyBuyerId}
                 className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-xl transition-colors shrink-0"
               >
                 Go

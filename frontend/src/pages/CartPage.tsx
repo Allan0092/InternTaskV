@@ -95,11 +95,10 @@ const CartPage = () => {
     }
   };
 
-  const total =
-    cart?.cartProducts.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
-      0,
-    ) ?? 0;
+  const total = (cart?.cartProducts ?? []).reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0,
+  );
 
   if (loading) {
     return (
