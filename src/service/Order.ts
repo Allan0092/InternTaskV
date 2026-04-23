@@ -165,6 +165,17 @@ const saveOrder = async (email: string, orderItems: any[]) => {
   return order.id;
 };
 
+const createEmptyOrder = async (email: string) => {
+  const order = await prisma.order.create({
+    data: {
+      total: 0,
+      status: OrderStatus.PENDING,
+      user: { connect: { email } },
+    },
+  });
+  return order;
+};
+
 const findOrderBySku = async (sku: string) => {
   const order = await prisma.order.findUnique({ where: { sku } });
   return order;
@@ -205,6 +216,7 @@ const findOrderByOrderItemId = async (id: number) => {
 };
 
 export {
+  createEmptyOrder,
   findAllOrderItemStatus,
   findAllOrders,
   findAndUpdateOrder,

@@ -3,11 +3,12 @@ import {
   findAndAddProductToCart,
   findAndRemoveProductFromCart,
   findCart,
+  findCartByEmail,
 } from "@/service/Cart.js";
 import { findProduct } from "@/service/Product.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
-import { Context } from "koa";
+import { Context, Next } from "koa";
 
 const getCart = async (ctx: Context) => {
   try {
@@ -46,6 +47,38 @@ const getAllCart = async (ctx: Context) => {
     ctx.body = generateResponseBody({
       success: false,
       message: e instanceof AppError ? e.message : "could not get cart",
+    });
+    throw e;
+  }
+};
+
+const checkCartProductInStock = async (ctx: Context, next: Next) => {
+  try {
+    const email = ctx.state.user.email;
+    const cart = await findCartByEmail(email);
+    if (!cart || cart.cartProducts.length === 0)
+      throw new AppError("Could not find cart");
+    ctx.state.cart = cart;
+
+    for (const cartItem of cart.cartProducts) {
+      const product = await findProduct(cartItem.product.id);
+      if (product.quantity <= 0)
+        throw new AppError(`"${product.name}" is out of stock`, 400);
+      if (product.quantity < cartItem.quantity)
+        throw new AppError(`Insufficient stock for "${product.name}"`, 400);
+    }
+
+    await next();
+
+    // ctx.body = generateResponseBody({
+    //   success: true,
+    //   message: "All items are in stock.",
+    // });
+  } catch (e: Error | AppError | any) {
+    ctx.status = e.status ?? 400;
+    ctx.body = generateResponseBody({
+      success: false,
+      message: e instanceof AppError ? e.message : "Could not check stock",
     });
     throw e;
   }
@@ -110,4 +143,10 @@ const removeProductFromCart = async (ctx: Context) => {
   }
 };
 
-export { addProductToCart, getAllCart, getCart, removeProductFromCart };
+export {
+  addProductToCart,
+  checkCartProductInStock,
+  getAllCart,
+  getCart,
+  removeProductFromCart,
+};

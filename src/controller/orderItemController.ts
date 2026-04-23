@@ -1,4 +1,3 @@
-import { Order } from "@/generated/prisma/client.js";
 import { OrderItemStatus } from "@/generated/prisma/enums.js";
 import { notifyUser } from "@/service/Notification.js";
 import { findOrderById } from "@/service/Order.js";
@@ -15,7 +14,6 @@ const updateOrderItemStatus = async (ctx: Context, next: Next) => {
       orderItemId: number;
     };
     // const orderItemId = parseInt(ctx.request.body.productId as {productId: string});
-
 
     const orderItem = await findOrderItem(orderItemId);
     if (!orderItem) throw new AppError("Could not find order item", 404);

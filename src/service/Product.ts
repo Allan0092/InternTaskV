@@ -146,12 +146,33 @@ const findPublicProduct = async (id: number) => {
   });
   return product;
 };
+
 const findProduct = async (id: number) => {
   const product = await prisma.product.findUniqueOrThrow({ where: { id } });
   return product;
 };
 
+// const checkProductStock = async (id: number, quantity: number) => {
+//   const product = await prisma.product.findUnique({ where: { id } });
+//   if (!product) return [false, "Could not find product"];
+
+//   const newStock = product?.quantity - quantity;
+//   if (newStock < 0) return [false, "Product stock is not enough"];
+
+//   return [true, "Product stock is enough"];
+// };
+
+const reduceProductStock = async (id: number, quantity: number) => {
+  const result = await prisma.product.updateMany({
+    where: { id, quantity: { gte: quantity } },
+    data: { quantity: { decrement: quantity } },
+  });
+
+  return result.count !== 0; // 0 rows affected, Product not found or stock not enough
+};
+
 export {
+  // checkProductStock,
   createProduct,
   findAllProducts,
   findAllProductsWithSeller,
@@ -164,4 +185,5 @@ export {
   findProductsBySeller,
   findProductSeller,
   findPublicProduct,
+  reduceProductStock,
 };

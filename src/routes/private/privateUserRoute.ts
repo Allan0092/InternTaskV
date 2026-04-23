@@ -1,5 +1,6 @@
 import {
   addProductToCart,
+  checkCartProductInStock,
   getCart,
   removeProductFromCart,
 } from "@/controller/cartController.js";
@@ -41,7 +42,7 @@ privateUserRouter.delete("/users/carts/:id", removeProductFromCart);
 
 // Order
 privateUserRouter.get("/users/orders", getOrders);
-privateUserRouter.post("/users/orders", placeOrder);
+privateUserRouter.post("/users/orders", checkCartProductInStock, placeOrder);
 
 privateUserRouter.delete(
   "/users/orders/:id",

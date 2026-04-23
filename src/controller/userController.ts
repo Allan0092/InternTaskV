@@ -173,8 +173,7 @@ const enableUserAccount = async (ctx: Context) => {
 const editUserByEmail = async (ctx: Context) => {
   try {
     const data: UserUpdateInput = ctx.request.body as UserUpdateInput;
-    const role = ctx.state.user.role;
-    const email = role === Role.ADMIN ? data.email : ctx.state.user.email;
+    const email = ctx.state.user.email;
 
     const user = await updateUserbyEmail(email, data);
     if (!user) throw new Error();

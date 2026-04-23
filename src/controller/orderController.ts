@@ -1,9 +1,10 @@
 import { OrderItem } from "@/generated/prisma/client.js";
 import { OrderItemStatus, OrderStatus } from "@/generated/prisma/enums.js";
-import { OrderUpdateInput } from "@/generated/prisma/models.js";
+import { CartGetPayload, OrderUpdateInput } from "@/generated/prisma/models.js";
 import { clearCart, findCartByEmail } from "@/service/Cart.js";
 import { notifyUser, notifyUsers } from "@/service/Notification.js";
 import {
+  createEmptyOrder,
   findAllOrders,
   findAndUpdateOrder,
   findOrderById,
@@ -12,6 +13,7 @@ import {
   findOrderSellers,
   findSellersOrder,
 } from "@/service/Order.js";
+import { reduceProductStock } from "@/service/Product.js";
 import { AppError } from "@/types/index.js";
 import {
   convertCartItemToOrderItem,
@@ -71,8 +73,9 @@ const getOrders = async (ctx: Context) => {
 const getOrdersForSeller = async (ctx: Context) => {
   try {
     const email = ctx.state.user.email;
-    const status = ctx.query.status as OrderStatus;
-    if (!Object.values(OrderStatus).includes(status))
+    const status = ctx.query.status as OrderStatus | undefined;
+
+    if (status && !Object.values(OrderStatus).includes(status))
       throw new AppError("Invalid Order status", 401);
 
     const orders = await findSellersOrder(email, status);
@@ -246,20 +249,14 @@ const placeOrder = async (ctx: Context) => {
     const email = ctx.state.user.email;
 
     // Get the user's cart
-    const cart = await findCartByEmail(email);
+    const cart: CartGetPayload<{ include: { cartProducts: true } }> =
+      ctx.state.cart ?? (await findCartByEmail(email));
     if (!cart || cart.cartProducts.length === 0) {
       throw new AppError("Cart is empty", 400);
     }
 
     // Create an empty order first
-    const { prisma } = await import("@/prisma/prisma.js");
-    const order = await prisma.order.create({
-      data: {
-        Total: 0,
-        status: OrderStatus.PENDING,
-        user: { connect: { email } },
-      },
-    });
+    const order = await createEmptyOrder(email);
 
     // Convert cart items to order items with order reference
     const orderItems = await convertCartItemToOrderItem(
@@ -273,18 +270,24 @@ const placeOrder = async (ctx: Context) => {
       0,
     );
 
-    await prisma.order.update({
-      where: { id: order.id },
-      data: {
-        Total: total,
-        orderItems: {
-          createMany: {
-            data: orderItems.map((item) => ({
-              productId: item.product?.connect?.id || 0,
-              quantity: item.quantity as number,
-              price: item.price as number,
-            })),
-          },
+    for (const orderItem of cart.cartProducts) {
+      const result = await reduceProductStock(
+        orderItem.productId,
+        orderItem.quantity,
+      );
+      if (!result)
+        throw new AppError("Product not found or stock not enough", 400);
+    }
+
+    await findAndUpdateOrder(order.id, {
+      total: total,
+      orderItems: {
+        createMany: {
+          data: orderItems.map((item) => ({
+            productId: item.product?.connect?.id || 0,
+            quantity: item.quantity as number,
+            price: item.price as number,
+          })),
         },
       },
     });
