@@ -158,8 +158,9 @@ model Payment {
   status  PaymentStatus  @default(PENDING)
   order   Order?
 
-  pidx       String
+  pidx       String    @unique
   expires_at DateTime?
 
+  @@index([pidx])
   @@map("payment")
 }

@@ -15,7 +15,7 @@ import { AppError } from "@/types/index.js";
 import { PaymentPlacement, PaymentVerification } from "@/types/khalti.js";
 import { generateResponseBody } from "@/utils/index.js";
 import axios from "axios";
-import "dotenv";
+import "dotenv/config";
 import { Context } from "koa";
 
 type Options = {
@@ -97,14 +97,15 @@ const getKhaltiUrl = async (ctx: Context) => {
 
     const response = await axios({
       method: "POST",
+      timeout: 10000,
       url: process.env.KHALTI_API,
       headers: {
         Authorization: process.env.KHALTI_KEY,
         "Content-Type": "application/json",
       },
       data: {
-        return_url: "http://localhost:5173/payment",
-        website_url: "http://localhost:5173/",
+        return_url: `${process.env.RETURN_URL}`,
+        website_url: process.env.FRONTEND_URL,
         amount: order?.total * 100,
         purchase_order_id: order?.sku,
         purchase_order_name: `Order ${order.id}`,
