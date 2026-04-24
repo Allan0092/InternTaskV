@@ -1,7 +1,7 @@
 import { Role } from "@/generated/prisma/enums.js";
 import { validateRole } from "@/middleware/validate.js";
 import { CustomContext } from "@/types/index.js";
-import "dotenv/config";
+import { config } from "@/validation/dotEnvValidation.js";
 import { Context } from "koa";
 import jwt from "koa-jwt";
 import Router from "koa-router";
@@ -13,7 +13,7 @@ const privateRouter = new Router<any, Context & CustomContext>();
 
 privateRouter.use(
   jwt({
-    secret: process.env.SECRET_KEY ?? "some-secret-key",
+    secret: config.secretKey ?? "some-secret-key",
     getToken: (ctx) => {
       const auth = ctx.headers.authorization;
       if (auth && auth.startsWith("Bearer ")) {

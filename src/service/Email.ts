@@ -1,5 +1,5 @@
 import { AppError } from "@/types/index.js";
-import "dotenv/config.js";
+import { config } from "@/validation/dotEnvValidation.js";
 import { createTransport } from "nodemailer";
 import {
   findOrderBySku,
@@ -8,12 +8,12 @@ import {
 } from "./Order.js";
 
 const transporter = createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || "587"),
+  host: config.email_host,
+  port: parseInt(config.email_port || "587"),
   secure: false,
   auth: {
-    user: process.env.EMAIL_USERNAME,
-    pass: process.env.EMAIL_PASSWORD,
+    user: config.email_username,
+    pass: config.email_password,
   },
 });
 

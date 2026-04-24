@@ -12,7 +12,6 @@ import {
   enableUserAccount,
   getUsers,
 } from "@/controller/userController.js";
-import "dotenv";
 import { Context } from "koa";
 import Router from "koa-router";
 

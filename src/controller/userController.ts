@@ -12,8 +12,8 @@ import {
 } from "@/service/User.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
+import { config } from "@/validation/dotEnvValidation.js";
 import bcrypt from "bcryptjs";
-import "dotenv";
 import jwt from "jsonwebtoken";
 import { Context } from "koa";
 
@@ -54,7 +54,7 @@ const login = async (ctx: Context) => {
     );
     if (!passwordMatch) throw new AppError("Invalid Credentials", 401);
 
-    const SECRET_KEY: string = process.env.SECRET_KEY ?? "my-secret-key";
+    const SECRET_KEY: string = config.secretKey ?? "my-secret-key";
     const token = jwt.sign(
       { name: user.name, email: user.email, role: user.role },
       SECRET_KEY,

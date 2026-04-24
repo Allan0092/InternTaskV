@@ -14,8 +14,8 @@ import { findUserByEmail } from "@/service/User.js";
 import { AppError } from "@/types/index.js";
 import { PaymentPlacement, PaymentVerification } from "@/types/khalti.js";
 import { generateResponseBody } from "@/utils/index.js";
+import { config } from "@/validation/dotEnvValidation.js";
 import axios from "axios";
-import "dotenv/config";
 import { Context } from "koa";
 
 type Options = {
@@ -41,9 +41,9 @@ type Options = {
 
 const options: Options = {
   method: "POST",
-  url: process.env.KHALTI_API!,
+  url: config.khalti_api!,
   headers: {
-    Authorization: process.env.KHALTI_KEY,
+    Authorization: config.khalti_key,
     "Content-Type": "application/json",
   },
   data: {
@@ -98,14 +98,14 @@ const getKhaltiUrl = async (ctx: Context) => {
     const response = await axios({
       method: "POST",
       timeout: 10000,
-      url: process.env.KHALTI_API,
+      url: config.khalti_api,
       headers: {
-        Authorization: process.env.KHALTI_KEY,
+        Authorization: config.khalti_key,
         "Content-Type": "application/json",
       },
       data: {
-        return_url: `${process.env.RETURN_URL}`,
-        website_url: process.env.FRONTEND_URL,
+        return_url: `${config.frontend_url}/payment`,
+        website_url: config.frontend_url,
         amount: order?.total * 100,
         purchase_order_id: order?.sku,
         purchase_order_name: `Order ${order.id}`,
@@ -176,9 +176,9 @@ const checkKhaltiPaymentStatus = async (ctx: Context) => {
     try {
       const response = await axios({
         method: "POST",
-        url: process.env.KHALTI_VERIFY_API,
+        url: config.khalti_verify_api,
         headers: {
-          Authorization: process.env.KHALTI_KEY,
+          Authorization: config.khalti_key,
           "Content-Type": "application/json",
         },
         data: {

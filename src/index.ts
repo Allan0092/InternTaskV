@@ -1,5 +1,4 @@
 import cors from "@koa/cors";
-import "dotenv/config";
 import Koa from "koa";
 import parser from "koa-bodyparser";
 import serve from "koa-static";
