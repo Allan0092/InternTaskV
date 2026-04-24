@@ -126,6 +126,7 @@ export interface OrderItemForSeller {
   price: number;
   status: ItemStatus;
   product: {
+    name: string;
     user: {
       email: string;
     };

@@ -92,7 +92,9 @@ const findSellersOrder = async (email: string, status?: OrderStatus) => {
       orderItems: {
         select: {
           id: true,
-          product: { select: { user: { select: { email: true } } } },
+          product: {
+            select: { user: { select: { email: true } }, name: true },
+          },
           status: true,
           quantity: true,
           price: true,

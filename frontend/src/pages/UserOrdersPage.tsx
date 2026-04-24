@@ -18,6 +18,10 @@ interface OrderItem {
   productId: number;
   quantity: number;
   price: number;
+  status: string;
+  product: {
+    name: string;
+  };
 }
 
 interface Order {
@@ -272,6 +276,9 @@ const UserOrdersPage = () => {
             const isCancelledOrDeclined =
               order.status === "CANCELLED" || order.status === "DECLINED";
             const activeStep = statusSteps.indexOf(order.status);
+            const hasDeclinedItems = order.orderItems.some(
+              (item) => item.status === "DECLINE",
+            );
 
             return (
               <div
@@ -397,6 +404,19 @@ const UserOrdersPage = () => {
                       </div>
                     )}
 
+                    {!isCancelledOrDeclined && hasDeclinedItems && (
+                      <div className="px-4 py-3 rounded-xl bg-orange-50 border border-orange-200 text-sm text-orange-700 flex items-start gap-2">
+                        <span className="mt-0.5 shrink-0">⚠️</span>
+                        <span>
+                          One or more items in this order were{" "}
+                          <span className="font-semibold">
+                            declined by the seller
+                          </span>
+                          . The remaining items will continue to be processed.
+                        </span>
+                      </div>
+                    )}
+
                     {/* Order items */}
                     <div>
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
@@ -425,8 +445,14 @@ const UserOrdersPage = () => {
                                 </svg>
                               </div>
                               <div>
-                                <p className="text-sm font-medium text-gray-700">
-                                  Product #{item.productId}
+                                <p className="text-sm font-medium text-gray-700 flex items-center gap-1.5 flex-wrap">
+                                  {item.product?.name ??
+                                    `Product #${item.productId}`}
+                                  {item.status === "DECLINE" && (
+                                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600">
+                                      Declined by seller
+                                    </span>
+                                  )}
                                 </p>
                                 <p className="text-xs text-gray-400">
                                   Qty: {item.quantity}

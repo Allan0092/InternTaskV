@@ -989,6 +989,7 @@ export const productData: Prisma.ProductCreateInput[] = [
     category: "ELECTRONICS",
     quantity: 6,
     user: { connect: { email: "user6@email.com" } },
+    images: ["552564.webp", "921963.webp"],
   },
 ];
 

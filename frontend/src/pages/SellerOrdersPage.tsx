@@ -266,7 +266,7 @@ const SellerOrdersPage = () => {
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-700">
-                                    Item #{item.id}
+                                    {item.product?.name ?? `Item #${item.id}`}
                                     {isMine && (
                                       <span className="ml-1.5 text-xs text-blue-500 font-normal">
                                         (yours)
