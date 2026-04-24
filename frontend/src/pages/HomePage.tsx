@@ -1,23 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { CATEGORIES, categoryColors } from "../constants";
+import {
+  CATEGORIES,
+  categoryColors,
+  IMG_BASE,
+  type ProductHomePage,
+} from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
 
-const IMG_BASE = "http://localhost:3000/uploads";
-
-interface Product {
-  id: number;
-  images: string[];
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  quantity: number;
-  user: { name: string };
-}
-
-const getImgSrc = (product: Product) => {
+const getImgSrc = (product: ProductHomePage) => {
   const img = product.images.find((i) => !!i);
   return img
     ? `${IMG_BASE}/${img}`
@@ -39,7 +31,7 @@ const HomePage = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
 
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductHomePage[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -49,10 +41,11 @@ const HomePage = () => {
 
   useEffect(() => {
     api
-      .get<{ success: boolean; data: { products: Product[] } }>(
-        "/api/public/products",
-        { params: { page: 1, limit: 50 } },
-      )
+      .get<{
+        success: boolean;
+        message: string;
+        data: { products: ProductHomePage[] };
+      }>("/api/public/products", { params: { page: 1, limit: 50 } })
       .then((res) => setProducts(res.data.data.products))
       .catch(() => setFetchError("Failed to load products."))
       .finally(() => setLoading(false));
@@ -95,7 +88,7 @@ const HomePage = () => {
       if (list.length > 0) acc[cat] = list.slice(0, 4);
       return acc;
     },
-    {} as Record<string, Product[]>,
+    {} as Record<string, ProductHomePage[]>,
   );
 
   const stockBadge = (qty: number) => {
@@ -114,7 +107,7 @@ const HomePage = () => {
     return null;
   };
 
-  const renderMiniCard = (product: Product) => (
+  const renderMiniCard = (product: ProductHomePage) => (
     <div
       key={product.id}
       className="w-52 shrink-0 bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all group"
@@ -160,7 +153,7 @@ const HomePage = () => {
     </div>
   );
 
-  const renderGridCard = (product: Product) => (
+  const renderGridCard = (product: ProductHomePage) => (
     <div
       key={product.id}
       className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-all group"

@@ -173,3 +173,27 @@ export const itemStatusStyles: Record<ItemStatus, string> = {
   SHIPPED: "bg-cyan-100 text-cyan-700",
   COMPLETED: "bg-green-100 text-green-700",
 };
+
+export interface ProductHomePage {
+  id: number;
+  images: string[];
+  name: string;
+  price: number;
+  description: string;
+  category: string;
+  quantity: number;
+  user: { name: string };
+}
+
+export interface Product {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  category: string;
+  quantity: number;
+  images: string[];
+  user?: {
+    name?: string;
+  };
+}

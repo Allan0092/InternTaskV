@@ -144,6 +144,7 @@ const findAndAddPhoto = async (id: number, photos: string[]) => {
 const findPublicProduct = async (id: number) => {
   const product = await prisma.product.findUniqueOrThrow({
     where: { id, deletedAt: null },
+    include: { user: { select: { name: true } } },
     omit: { createdAt: true, updatedAt: true, deletedAt: true, userId: true },
   });
   return product;

@@ -99,10 +99,29 @@ const updateOrder = async (ctx: Context) => {
   try {
     const orderId = parseInt(ctx.params.id);
     const data = ctx.request.body as OrderUpdateInput;
-    const result = findAndUpdateOrder(orderId, data);
+    const result = await findAndUpdateOrder(orderId, data);
 
     if (!result) throw new AppError("Could not update the order.");
 
+    notifyUser(result.user.email, {
+      type: "ORDER_STATUS_UPDATED",
+      message: `Your order #${result.id} is now ${result.status}.`,
+      data: {
+        orderId: result.id,
+        orderStatus: OrderStatus.PROCESSING,
+      },
+    });
+    notifyUsers(
+      result.orderItems.map((seller) => seller.product.user.email),
+      {
+        type: "NEW_ORDER_FOR_SELLER",
+        message: `Order #${orderId} status changed to ${result.status}.`,
+        data: {
+          orderId: orderId,
+          buyerEmail: result.user.email,
+        },
+      },
+    );
     ctx.body = generateResponseBody({
       success: true,
       message: "Order updated successfully.",

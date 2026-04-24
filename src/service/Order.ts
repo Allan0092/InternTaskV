@@ -52,7 +52,16 @@ const findOrdersByEmail = async (
 };
 
 const findAndUpdateOrder = async (orderId: number, data: OrderUpdateInput) => {
-  const order = await prisma.order.update({ where: { id: orderId }, data });
+  const order = await prisma.order.update({
+    where: { id: orderId },
+    data,
+    include: {
+      user: { select: { email: true } },
+      orderItems: {
+        select: { product: { select: { user: { select: { email: true } } } } },
+      },
+    },
+  });
   return order;
 };
 

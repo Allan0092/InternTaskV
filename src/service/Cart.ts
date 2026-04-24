@@ -24,7 +24,13 @@ const findCart = async (
         select: {
           id: true,
           product: {
-            select: { name: true, price: true, description: true },
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              description: true,
+              quantity: true,
+            },
           },
           quantity: true,
         },
@@ -37,11 +43,15 @@ const findCart = async (
   return cart;
 };
 
-const findAndAddProductToCart = async (
-  email: string,
-  productId: number,
-  quantityToAdd: number = 1,
-) => {
+const findAndAddProductToCart = async ({
+  email,
+  productId,
+  quantityToAdd = 1,
+}: {
+  email: string;
+  productId: number;
+  quantityToAdd?: number;
+}) => {
   let cart = await prisma.cart.findFirst({
     where: { user: { email } },
     select: { id: true },
@@ -69,7 +79,7 @@ const findAndAddProductToCart = async (
       quantity: quantityToAdd,
     },
     update: {
-      quantity: { increment: quantityToAdd },
+      quantity: quantityToAdd,
     },
   });
 

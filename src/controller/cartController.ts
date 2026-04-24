@@ -99,7 +99,11 @@ const addProductToCart = async (ctx: Context) => {
     if (product.quantity < quantity)
       throw new AppError("Insufficient products in stock.");
 
-    const result = await findAndAddProductToCart(email, productId, quantity);
+    const result = await findAndAddProductToCart({
+      email,
+      productId,
+      quantityToAdd: quantity,
+    });
     if (!result) throw new AppError("Could not add product to cart");
 
     ctx.body = generateResponseBody({

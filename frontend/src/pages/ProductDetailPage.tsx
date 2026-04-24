@@ -1,18 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { categoryColors, IMG_BASE } from "../constants";
+import { categoryColors, IMG_BASE, type Product } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  quantity: number;
-  images: string[];
-}
 
 const getImgSrc = (product: Product, idx: number) => {
   const imgs = product.images.filter((img) => !!img);
@@ -235,6 +225,16 @@ const ProductDetailPage = () => {
               <p className="text-sm text-gray-600 leading-relaxed">
                 {product.description}
               </p>
+
+              {/* Seller */}
+              {product.user?.name && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-500">Sold by:</span>
+                  <span className="font-medium text-gray-800">
+                    {product.user.name}
+                  </span>
+                </div>
+              )}
 
               {/* Stock */}
               <div className="flex items-center gap-2 text-sm">
