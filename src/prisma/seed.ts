@@ -1,6 +1,12 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma.js";
-import { cartData, orderData, productData, userData } from "./seed_data.js";
+import {
+  cartData,
+  orderData,
+  paymentData,
+  productData,
+  userData,
+} from "./seed_data.js";
 
 for (const user of userData) {
   const hashedPassword = await bcrypt.hash(user.password, 10);
@@ -71,7 +77,24 @@ for (const c of cartData) {
   console.log(`Seeded cart for ${c.email}`);
 }
 
-console.log(``);
+console.log(`-----------------------------------------------------`);
+
+for (const p of paymentData) {
+  const payment = await prisma.payment.upsert({
+    where: { pidx: p.pidx },
+    update: {},
+    create: {
+      pidx: p.pidx,
+      date: p.date,
+      geteway: p.geteway,
+      status: p.status,
+    },
+  });
+
+  console.log(`Upserted payment ${payment.id}`);
+}
+
+console.log(`-----------------------------------------------------`);
 
 for (const o of orderData) {
   const user = await prisma.user.findUnique({ where: { email: o.email } });
@@ -83,6 +106,10 @@ for (const o of orderData) {
       user: { connect: { id: user.id } },
       orderDate: new Date(),
       total: total,
+      status: o.status,
+      ...(o.payment
+        ? { payments: { connect: { pidx: o.payment.pidx } } }
+        : {}),
     },
   });
 

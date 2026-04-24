@@ -90,6 +90,13 @@ export const productData: Prisma.ProductCreateInput[] = [
     category: "ELECTRONICS",
     quantity: 5,
     user: { connect: { email: "user1@email.com" } },
+    images: [
+      "32340.webp",
+      "618271.webp",
+      "426537.webp",
+      "538557.webp",
+      "346744.webp",
+    ],
   },
   {
     name: "Smart Watch",
@@ -98,6 +105,15 @@ export const productData: Prisma.ProductCreateInput[] = [
     category: "ELECTRONICS",
     quantity: 50,
     user: { connect: { email: "user2@email.com" } },
+    images: [
+      "551769.webp",
+      "337205.webp",
+      "199221.webp",
+      "195389.webp",
+      "467710.webp",
+      "764666.webp",
+      "490587.webp",
+    ],
   },
   {
     name: "Cotton T-Shirt",
@@ -219,6 +235,7 @@ export const productData: Prisma.ProductCreateInput[] = [
     category: "ELECTRONICS",
     quantity: 16,
     user: { connect: { email: "user3@email.com" } },
+    images: ["405832.webp", "309091.webp", "726172.webp", "731486.webp"],
   },
   {
     name: "Casual Denim Jacket",
@@ -1028,7 +1045,7 @@ export const paymentData: PaymentCreateInput[] = [
     status: PaymentStatus.SUCCESS,
   },
   {
-    pidx: "WSvpb9DRigUTY2QJPnouch",
+    pidx: "WSvpb9DRigUTY2QJPnoudh",
     date: new Date("2025-12-02T12:01:00Z"),
     geteway: PaymentGateway.PAYPAL,
     status: PaymentStatus.SUCCESS,
@@ -1041,7 +1058,7 @@ export const paymentData: PaymentCreateInput[] = [
   },
   {
     pidx: "WSvpb9DRiaUTY2HJPnouch",
-    date: new Date("2024-11-32T12:01:00Z"),
+    date: new Date("2024-11-30T12:01:00Z"),
     geteway: PaymentGateway.PAYPAL,
     status: PaymentStatus.SUCCESS,
   },

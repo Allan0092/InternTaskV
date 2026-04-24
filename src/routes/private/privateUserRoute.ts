@@ -32,7 +32,6 @@ const privateUserRouter = new Router<any, Context>();
 
 // User Account
 privateUserRouter.delete("/users/account", softDeleteUser);
-privateUserRouter.get("/users/details"); //TODO For getting user's account details
 privateUserRouter.patch(
   "/users",
   validateBody(updateUserSchema),

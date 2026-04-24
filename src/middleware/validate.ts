@@ -9,6 +9,7 @@ import { findProductSeller } from "@/service/Product.js";
 import { AppError } from "@/types/index.js";
 import { generateResponseBody } from "@/utils/index.js";
 import { Context, Next } from "koa";
+import { MulterError } from "multer";
 import * as yup from "yup";
 
 const validateQueryParams = <T extends yup.AnyObject>(
@@ -103,7 +104,14 @@ const validateUserAndProduct = async (ctx: Context, next: Next) => {
     } else {
       throw new AppError("User not authorized for this action", 401);
     }
-  } catch (e: Error | AppError | any) {
+  } catch (e: Error | AppError | MulterError | any) {
+    if (e instanceof MulterError) {
+      ctx.response.status = 401;
+      ctx.body = generateResponseBody({
+        message: "Image upload limit of 12 exceeded.",
+      });
+      return;
+    }
     ctx.response.status = e.status ?? 400;
     ctx.body = generateResponseBody({
       message: e instanceof AppError ? e.message : "You are not authorised.",
