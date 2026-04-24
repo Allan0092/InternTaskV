@@ -249,7 +249,8 @@ const ProductDetailPage = () => {
               </div>
 
               {/* Quantity selector + Add to Cart */}
-              {product.quantity > 0 && (
+              {(product.quantity > 0 && !user) ||
+              (product.quantity > 0 && user?.role === "USER") ? (
                 <div className="flex flex-col gap-3 mt-2">
                   <div className="flex items-center gap-3">
                     <span className="text-sm text-gray-500">Qty:</span>
@@ -294,7 +295,7 @@ const ProductDetailPage = () => {
                     <p className="text-red-500 text-xs">{cartError}</p>
                   )}
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

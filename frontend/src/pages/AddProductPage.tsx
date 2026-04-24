@@ -47,6 +47,7 @@ const AddProductPage = () => {
     api
       .get<{ success: boolean; data: SellerProduct[] }>("/api/products/", {
         headers: { Authorization: `Bearer ${token}` },
+        params: { limit: 100 },
       })
       .then((res) => setMyProducts(res.data.data))
       .catch(() => setProductsError("Failed to load products."))

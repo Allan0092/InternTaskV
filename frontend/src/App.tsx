@@ -29,7 +29,7 @@ const App = () => {
           <Route
             path="/cart"
             element={
-              <ProtectedRoute allowedRoles={["USER", "SELLER", "ADMIN"]}>
+              <ProtectedRoute allowedRoles={["USER"]}>
                 <CartPage />
               </ProtectedRoute>
             }

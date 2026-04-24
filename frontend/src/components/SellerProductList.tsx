@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
+import { CATEGORIES } from "../constants";
 import api, { isAxiosError } from "../lib/Axios";
 
-const CATEGORIES = ["ELECTRONICS", "FASHION", "HOME", "TOYS", "BOOKS", "FOOD"];
 const LIMIT_OPTIONS = [6, 12, 24];
 
 const categoryColors: Record<string, string> = {
@@ -145,13 +145,13 @@ const SellerProductList = ({
     setEditSaving(true);
     setEditError(null);
     try {
-      const body: Record<string, string | number> = {};
-      if (editForm.name.trim()) body.name = editForm.name.trim();
-      if (editForm.description.trim())
-        body.description = editForm.description.trim();
-      if (editForm.price !== "") body.price = Number(editForm.price);
-      if (editForm.quantity !== "") body.quantity = Number(editForm.quantity);
-      if (editForm.category) body.category = editForm.category;
+      const body = {
+        name: editForm.name.trim(),
+        description: editForm.description.trim(),
+        price: Number(editForm.price),
+        quantity: Number(editForm.quantity),
+        category: editForm.category,
+      };
 
       await api.patch(`/api/products/${productId}`, body, {
         headers: { Authorization: `Bearer ${token}` },

@@ -34,6 +34,7 @@ const updateProductSchema = yup.object().shape({
     .max(30, "Product name should be less than 30 characters"),
   price: yup.number().positive(),
   description: yup.string().min(10).max(300),
+  quantity: yup.number(),
   category: yup
     .string()
     .oneOf(

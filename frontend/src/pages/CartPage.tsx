@@ -6,9 +6,11 @@ import api from "../lib/Axios";
 interface CartProduct {
   id: number;
   product: {
+    id: number;
     name: string;
     price: number;
     description: string;
+    quantity: number;
   };
   quantity: number;
 }
@@ -43,6 +45,8 @@ const CartPage = () => {
   }, [token]);
 
   const [removing, setRemoving] = useState<number | null>(null);
+  const [updatingQty, setUpdatingQty] = useState<number | null>(null);
+  const [qtyError, setQtyError] = useState<Record<number, string>>({});
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
 
@@ -91,6 +95,40 @@ const CartPage = () => {
       // silently ignore; user can retry
     } finally {
       setRemoving(null);
+    }
+  };
+
+  const handleUpdateQuantity = async (item: CartProduct, nextQty: number) => {
+    const maxQty = Math.max(1, item.product.quantity);
+    const safeQty = Math.max(1, Math.min(nextQty, maxQty));
+    if (safeQty === item.quantity) return;
+
+    setUpdatingQty(item.id);
+    setQtyError((prev) => ({ ...prev, [item.id]: "" }));
+
+    try {
+      await api.patch(
+        `/api/users/carts/${item.product.id}`,
+        { quantity: safeQty },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setCart((prev) =>
+        prev
+          ? {
+              ...prev,
+              cartProducts: prev.cartProducts.map((cp) =>
+                cp.id === item.id ? { ...cp, quantity: safeQty } : cp,
+              ),
+            }
+          : prev,
+      );
+    } catch {
+      setQtyError((prev) => ({
+        ...prev,
+        [item.id]: "Could not update quantity. Please try again.",
+      }));
+    } finally {
+      setUpdatingQty(null);
     }
   };
 
@@ -226,11 +264,44 @@ const CartPage = () => {
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-400">Qty:</span>
-                    <span className="text-sm font-semibold text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-lg">
-                      {item.quantity}
-                    </span>
+                    <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() =>
+                          handleUpdateQuantity(item, item.quantity - 1)
+                        }
+                        disabled={updatingQty === item.id || item.quantity <= 1}
+                        className="px-2.5 py-0.5 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+                        aria-label="Decrease quantity"
+                      >
+                        -
+                      </button>
+                      <span className="px-3 py-0.5 text-sm font-semibold text-gray-700 border-x border-gray-200 min-w-10 text-center">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          handleUpdateQuantity(item, item.quantity + 1)
+                        }
+                        disabled={
+                          updatingQty === item.id ||
+                          item.quantity >= Math.max(1, item.product.quantity)
+                        }
+                        className="px-2.5 py-0.5 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Available stock: {item.product.quantity}
+                </p>
+                {qtyError[item.id] && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {qtyError[item.id]}
+                  </p>
+                )}
               </div>
 
               <div className="text-right shrink-0 flex flex-col items-end gap-2">

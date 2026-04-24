@@ -47,7 +47,7 @@ const Navbar = () => {
           </Link>
 
           {/* Cart icon for logged-in users */}
-          {user && (
+          {user?.role === "USER" && (
             <Link
               to="/cart"
               className="relative text-blue-100 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-blue-600"

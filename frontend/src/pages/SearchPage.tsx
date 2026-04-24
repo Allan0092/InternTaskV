@@ -557,37 +557,39 @@ const SearchPage = () => {
                       {cartError[product.id]}
                     </p>
                   )}
-                  <div className="mt-3 flex gap-2">
-                    <input
-                      type="number"
-                      min={1}
-                      max={product.quantity || 1}
-                      value={getQty(product.id)}
-                      onChange={(e) =>
-                        setQty((prev) => ({
-                          ...prev,
-                          [product.id]: Math.max(1, Number(e.target.value)),
-                        }))
-                      }
-                      disabled={product.quantity === 0}
-                      className="w-16 border border-gray-200 rounded-xl px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-40"
-                    />
-                    <button
-                      onClick={() => handleAddToCart(product.id)}
-                      disabled={
-                        product.quantity === 0 || addingTo === product.id
-                      }
-                      className="flex-1 py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors"
-                    >
-                      {addedTo === product.id
-                        ? "✓ Added!"
-                        : addingTo === product.id
-                          ? "Adding…"
-                          : user
-                            ? "Add to Cart"
-                            : "Sign in to buy"}
-                    </button>
-                  </div>
+                  {(!user || user.role === "USER") && (
+                    <div className="mt-3 flex gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        max={product.quantity || 1}
+                        value={getQty(product.id)}
+                        onChange={(e) =>
+                          setQty((prev) => ({
+                            ...prev,
+                            [product.id]: Math.max(1, Number(e.target.value)),
+                          }))
+                        }
+                        disabled={product.quantity === 0}
+                        className="w-16 border border-gray-200 rounded-xl px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-40"
+                      />
+                      <button
+                        onClick={() => handleAddToCart(product.id)}
+                        disabled={
+                          product.quantity === 0 || addingTo === product.id
+                        }
+                        className="flex-1 py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors"
+                      >
+                        {addedTo === product.id
+                          ? "✓ Added!"
+                          : addingTo === product.id
+                            ? "Adding…"
+                            : user
+                              ? "Add to Cart"
+                              : "Sign in to buy"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

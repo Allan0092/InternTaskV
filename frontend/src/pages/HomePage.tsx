@@ -136,19 +136,21 @@ const HomePage = () => {
         {cartError[product.id] && (
           <p className="text-red-500 text-xs mt-1">{cartError[product.id]}</p>
         )}
-        <button
-          onClick={() => handleAddToCart(product.id)}
-          disabled={product.quantity === 0 || addingTo === product.id}
-          className="mt-2 w-full py-1.5 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-medium transition-colors"
-        >
-          {addedTo === product.id
-            ? "✓ Added!"
-            : addingTo === product.id
-              ? "Adding…"
-              : product.quantity === 0
-                ? "Sold Out"
-                : "Add to Cart"}
-        </button>
+        {user?.role === "USER" && (
+          <button
+            onClick={() => handleAddToCart(product.id)}
+            disabled={product.quantity === 0 || addingTo === product.id}
+            className="mt-2 w-full py-1.5 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-medium transition-colors"
+          >
+            {addedTo === product.id
+              ? "✓ Added!"
+              : addingTo === product.id
+                ? "Adding…"
+                : product.quantity === 0
+                  ? "Sold Out"
+                  : "Add to Cart"}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -183,19 +185,21 @@ const HomePage = () => {
           <span className="text-blue-600 font-bold">
             ₨{product.price.toLocaleString()}
           </span>
-          <button
-            onClick={() => handleAddToCart(product.id)}
-            disabled={product.quantity === 0 || addingTo === product.id}
-            className="px-3 py-1.5 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-medium transition-colors"
-          >
-            {addedTo === product.id
-              ? "✓"
-              : addingTo === product.id
-                ? "…"
-                : product.quantity === 0
-                  ? "×"
-                  : "+ Add"}
-          </button>
+          {user?.role === "USER" && (
+            <button
+              onClick={() => handleAddToCart(product.id)}
+              disabled={product.quantity === 0 || addingTo === product.id}
+              className="px-3 py-1.5 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-medium transition-colors"
+            >
+              {addedTo === product.id
+                ? "✓"
+                : addingTo === product.id
+                  ? "…"
+                  : product.quantity === 0
+                    ? "×"
+                    : "+ Add"}
+            </button>
+          )}
         </div>
         {cartError[product.id] && (
           <p className="text-red-500 text-xs mt-1">{cartError[product.id]}</p>
