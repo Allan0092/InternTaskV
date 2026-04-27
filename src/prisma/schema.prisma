@@ -74,6 +74,8 @@ model User {
   cart     Cart?
   orders   Order[]
 
+  last_password String?
+
   @@map("user")
 }
 
