@@ -54,7 +54,7 @@ const login = async (ctx: Context) => {
     );
     if (!passwordMatch) throw new AppError("Invalid Credentials", 401);
 
-    const SECRET_KEY: string = config.secretKey ?? "my-secret-key";
+    const SECRET_KEY: string = config.secretKey;
     const token = jwt.sign(
       { name: user.name, email: user.email, role: user.role },
       SECRET_KEY,

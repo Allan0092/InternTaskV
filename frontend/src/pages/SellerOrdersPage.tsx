@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-  itemStatusStyles,
-  STATUS_OPTIONS,
-  statusStyles,
-  type ItemStatus,
-  type Order,
-  type OrderStatus,
-} from "../constants";
+import { itemStatusStyles, STATUS_OPTIONS, statusStyles } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
+import type { ItemStatus, Order, OrderStatus } from "../types/Order";
 
 const SellerOrdersPage = () => {
   const { token, user } = useAuth();

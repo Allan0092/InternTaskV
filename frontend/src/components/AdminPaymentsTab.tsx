@@ -1,44 +1,11 @@
 import { useEffect, useState } from "react";
-import { LIMIT_OPTIONS } from "../constants";
+import { LIMIT_OPTIONS, PAYMENT_STATUS_OPTIONS } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
-
-type PaymentStatus =
-  | "PENDING"
-  | "SUCCESS"
-  | "FAILED"
-  | "REFUNDED"
-  | "CANCELLED";
-
-interface PaymentOrder {
-  id: number;
-  total: number;
-  user: {
-    id: number;
-    email: string;
-  };
-}
-
-interface Payment {
-  id: string;
-  geteway: string;
-  date: string;
-  status: PaymentStatus;
-  pidx: string;
-  expires_at: string | null;
-  order: PaymentOrder;
-}
+import type { Payment, PaymentStatus } from "../types/Payment";
 
 type SortField = "date" | "total" | "status" | "gateway";
 type SortDir = "asc" | "desc";
-
-const STATUS_OPTIONS: PaymentStatus[] = [
-  "PENDING",
-  "SUCCESS",
-  "FAILED",
-  "REFUNDED",
-  "CANCELLED",
-];
 
 const statusColors: Record<PaymentStatus, string> = {
   PENDING: "bg-yellow-100 text-yellow-700",
@@ -205,7 +172,7 @@ const AdminPaymentsTab = () => {
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">All statuses</option>
-              {STATUS_OPTIONS.map((s) => (
+              {PAYMENT_STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>
                   {s}
                 </option>

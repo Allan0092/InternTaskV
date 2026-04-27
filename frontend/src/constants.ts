@@ -1,3 +1,6 @@
+import type { ItemStatus, OrderStatus } from "./types/Order";
+import type { PaymentStatus } from "./types/Payment";
+
 export const LIMIT_OPTIONS = [5, 10, 20, 50];
 export const IMG_BASE = "http://localhost:3000/uploads";
 export const CATEGORIES = [
@@ -19,82 +22,6 @@ export const categoryColors: Record<string, string> = {
   OTHER: "bg-gray-100 text-gray-700",
 };
 
-// ── Admin types ──────────────────────────────────────────────────────────────
-
-export type Role = "USER" | "SELLER" | "ADMIN";
-
-export interface AdminUser {
-  id: number;
-  name: string;
-  email: string;
-  role: Role;
-  createdAt: string;
-  deletedAt: string | null;
-}
-
-export interface PublicProduct {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  quantity: number;
-  images: string[];
-  userId: number;
-  user: { name: string };
-}
-
-export interface ProductsResponse {
-  products: PublicProduct[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
-
-export type OrderStatus =
-  | "PENDING"
-  | "PROCESSING"
-  | "SHIPPING"
-  | "COMPLETED"
-  | "DECLINED"
-  | "CANCELLED";
-
-export interface OrderItem {
-  id: number;
-  product: { id: number; name: string };
-  price: number;
-  quantity: number;
-  status: OrderStatus;
-}
-
-export interface AdminOrder {
-  id: number;
-  sku: string;
-  buyerUserId: number;
-  orderDate: string;
-  total: number;
-  status: OrderStatus;
-  paymentId: number | null;
-  createdAt: string;
-  updatedAt: string;
-  orderItems: OrderItem[];
-  payments: null | unknown;
-}
-
-export interface EditOrderForm {
-  buyerUserId: number;
-  orderDate: string;
-  total: number;
-  status: OrderStatus;
-  orderItems: { id: number; price: number; quantity: number }[];
-}
-
-export const roleBadgeColors: Record<Role, string> = {
-  USER: "bg-blue-100 text-blue-700",
-  SELLER: "bg-green-100 text-green-700",
-  ADMIN: "bg-red-100 text-red-700",
-};
-
 export const orderStatusColors: Record<OrderStatus, string> = {
   PENDING: "bg-yellow-100 text-yellow-700",
   PROCESSING: "bg-blue-100 text-blue-700",
@@ -113,40 +40,13 @@ export const ORDER_STATUSES: OrderStatus[] = [
   "CANCELLED",
 ];
 
-export type ItemStatus =
-  | "PENDING"
-  | "DECLINE"
-  | "PROCESSING"
-  | "SHIPPED"
-  | "COMPLETED";
-
-export interface OrderItemForSeller {
-  id: number;
-  quantity: number;
-  price: number;
-  status: ItemStatus;
-  product: {
-    name: string;
-    user: {
-      email: string;
-    };
-  };
-}
-
-export interface Order {
-  id: number;
-  sku: string;
-  buyerUserId: number;
-  orderDate: string;
-  total: number;
-  status: OrderStatus;
-  paymentId: string | null;
-  orderItems: OrderItemForSeller[];
-  user: {
-    name: string;
-    email: string;
-  };
-}
+export const PAYMENT_STATUS_OPTIONS: PaymentStatus[] = [
+  "PENDING",
+  "SUCCESS",
+  "FAILED",
+  "REFUNDED",
+  "CANCELLED",
+];
 
 export const STATUS_OPTIONS: { label: string; value: OrderStatus | "ALL" }[] = [
   { label: "All", value: "ALL" },
@@ -174,27 +74,3 @@ export const itemStatusStyles: Record<ItemStatus, string> = {
   SHIPPED: "bg-cyan-100 text-cyan-700",
   COMPLETED: "bg-green-100 text-green-700",
 };
-
-export interface ProductHomePage {
-  id: number;
-  images: string[];
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  quantity: number;
-  user: { name: string };
-}
-
-export interface Product {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  quantity: number;
-  images: string[];
-  user?: {
-    name?: string;
-  };
-}

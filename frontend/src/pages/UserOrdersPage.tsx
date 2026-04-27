@@ -2,44 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api, { isAxiosError } from "../lib/Axios";
+import type { BuyerOrder, BuyerOrderStatus } from "../types/Order";
 
-type OrderStatus =
-  | "PENDING"
-  | "PAID"
-  | "PROCESSING"
-  | "SHIPPING"
-  | "COMPLETED"
-  | "DECLINED"
-  | "CANCELLED";
-
-interface OrderItem {
-  id: number;
-  orderId: number;
-  productId: number;
-  quantity: number;
-  price: number;
-  status: string;
-  product: {
-    name: string;
-  };
-}
-
-interface Order {
-  id: number;
-  sku: string;
-  buyerUserId: number;
-  orderDate: string;
-  total: number;
-  status: OrderStatus;
-  //   paymentId: string | null;
-  orderItems: OrderItem[];
-  payments: {
-    id: string;
-    status: "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED" | "CANCELLED";
-  } | null;
-}
-
-const statusStyles: Record<OrderStatus, string> = {
+const statusStyles: Record<BuyerOrderStatus, string> = {
   PENDING: "bg-yellow-100 text-yellow-700",
   PAID: "bg-blue-100 text-blue-700",
   PROCESSING: "bg-purple-100 text-purple-700",
@@ -49,7 +14,7 @@ const statusStyles: Record<OrderStatus, string> = {
   CANCELLED: "bg-gray-100 text-gray-500",
 };
 
-const statusSteps: OrderStatus[] = [
+const statusSteps: BuyerOrderStatus[] = [
   "PENDING",
   "PAID",
   "PROCESSING",
@@ -63,7 +28,7 @@ const UserOrdersPage = () => {
   const newOrderId = searchParams.get("new")
     ? Number(searchParams.get("new"))
     : null;
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<BuyerOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -80,7 +45,7 @@ const UserOrdersPage = () => {
     setLoading(true);
     setError(null);
     api
-      .get<{ success: boolean; data: Order[] }>("/api/users/orders", {
+      .get<{ success: boolean; data: BuyerOrder[] }>("/api/users/orders", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {

@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-  type AdminUser,
-  type Role,
-  LIMIT_OPTIONS,
-  roleBadgeColors,
-} from "../constants";
+import { LIMIT_OPTIONS } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
+import { roleBadgeColors, type AdminUser, type Role } from "../types/User";
 
 const AdminUsersTab = () => {
   const { token } = useAuth();
@@ -57,7 +53,6 @@ const AdminUsersTab = () => {
 
   useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit]);
 
   const handleDeleteUser = async (userId: number) => {

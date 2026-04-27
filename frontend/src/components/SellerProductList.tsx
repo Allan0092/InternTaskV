@@ -1,10 +1,12 @@
+import "dotenv";
 import { useRef, useState } from "react";
 import { CATEGORIES } from "../constants";
 import api, { isAxiosError } from "../lib/Axios";
+import type { Category, SellerProduct } from "../types/Product";
 
 const LIMIT_OPTIONS = [6, 12, 24];
 
-const categoryColors: Record<string, string> = {
+const categoryColors: Record<Category, string> = {
   ELECTRONICS: "bg-blue-100 text-blue-700",
   FASHION: "bg-pink-100 text-pink-700",
   HOME: "bg-yellow-100 text-yellow-700",
@@ -12,18 +14,6 @@ const categoryColors: Record<string, string> = {
   BOOKS: "bg-orange-100 text-orange-700",
   FOOD: "bg-green-100 text-green-700",
 };
-
-export interface SellerProduct {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  quantity: number;
-  images: string[];
-  createdAt: string;
-  userId: number;
-}
 
 interface Props {
   products: SellerProduct[];
@@ -48,7 +38,7 @@ const SellerProductList = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [minInput, setMinInput] = useState("");
   const [maxInput, setMaxInput] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [appliedMin, setAppliedMin] = useState<number | undefined>(undefined);
   const [appliedMax, setAppliedMax] = useState<number | undefined>(undefined);
   const [appliedCategories, setAppliedCategories] = useState<string[]>([]);
@@ -84,7 +74,7 @@ const SellerProductList = ({
     (appliedMax !== undefined ? 1 : 0) +
     appliedCategories.length;
 
-  const toggleCategory = (cat: string) => {
+  const toggleCategory = (cat: Category) => {
     setSelectedCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
     );
@@ -325,8 +315,8 @@ const SellerProductList = ({
                 >
                   <input
                     type="checkbox"
-                    checked={selectedCategories.includes(cat)}
-                    onChange={() => toggleCategory(cat)}
+                    checked={selectedCategories.includes(cat as Category)}
+                    onChange={() => toggleCategory(cat as Category)}
                     className="w-4 h-4 rounded border-gray-300 accent-blue-500 cursor-pointer"
                   />
                   <span className="text-sm text-gray-700 group-hover:text-blue-500 transition-colors">

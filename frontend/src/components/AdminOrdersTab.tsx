@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-  type AdminOrder,
-  type EditOrderForm,
-  LIMIT_OPTIONS,
-  ORDER_STATUSES,
-  type OrderStatus,
-  orderStatusColors,
-} from "../constants";
+import { LIMIT_OPTIONS, ORDER_STATUSES, orderStatusColors } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
+import type { AdminOrder, EditOrderForm, OrderStatus } from "../types/Order";
 
 const AdminOrdersTab = () => {
   const { token } = useAuth();

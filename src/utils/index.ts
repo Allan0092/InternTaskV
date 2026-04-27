@@ -1,24 +1,17 @@
-import { Product, User } from "@/generated/prisma/browser.js";
 import { CartItem } from "@/generated/prisma/client.js";
 import { OrderItemCreateInput } from "@/generated/prisma/models.js";
 import { findProduct } from "@/service/Product.js";
-import { AppError } from "@/types/index.js";
+import { AppError, ResponseBody } from "@/types/index.js";
 import multer, { File } from "@koa/multer";
 import { IncomingMessage } from "node:http";
 
 const photoStorage = multer.memoryStorage();
 
-interface ResponseBody {
-  success: Boolean;
-  message: string;
-  data?: User[] | User | Product[] | Product | null | "";
-}
-
 const generateResponseBody = ({
   success = false,
   message = "An error occured",
   data = {},
-} = {}) => {
+} = {}): ResponseBody => {
   return { success: success, message: message, data: data };
 };
 

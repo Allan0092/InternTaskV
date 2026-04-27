@@ -1,3 +1,4 @@
+import { Product, User } from "@/generated/prisma/client.js";
 import { File } from "@koa/multer";
 
 class AppError extends Error {
@@ -27,4 +28,10 @@ interface CustomImageFile extends File {
   photo: File[];
 }
 
-export { AppError, CustomContext, CustomImageFile, MulterFiles };
+type ResponseBody = {
+  success: Boolean;
+  message: string;
+  data?: User[] | User | Product[] | Product | null | "" | {} | any;
+};
+
+export { AppError, CustomContext, CustomImageFile, MulterFiles, ResponseBody };

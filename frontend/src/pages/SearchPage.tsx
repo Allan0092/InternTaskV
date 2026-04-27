@@ -3,26 +3,20 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CATEGORIES, categoryColors, LIMIT_OPTIONS } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/Axios";
+import type { ProductSearch, ProductsSearchResponse } from "../types/Product";
 
-interface Product {
-  id: number;
-  images: string[];
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  quantity: number;
-  createdAt: string;
-  userId: number;
-  user: { name: string };
-}
-
-interface ProductsResponse {
-  products: Product[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
+// interface ProductSearch {
+//   id: number;
+//   images: string[];
+//   name: string;
+//   price: number;
+//   description: string;
+//   category: string;
+//   quantity: number;
+//   createdAt: string;
+//   userId: number;
+//   user: { name: string };
+// }
 
 const SearchPage = () => {
   const { user, token } = useAuth();
@@ -31,7 +25,7 @@ const SearchPage = () => {
 
   const initialCategory = searchParams.get("category") ?? "";
 
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductSearch[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
@@ -48,13 +42,13 @@ const SearchPage = () => {
   // Carousel state
   const [carouselIdx, setCarouselIdx] = useState<Record<number, number>>({});
   const getImgIdx = (id: number) => carouselIdx[id] ?? 0;
-  const getImgSrc = (product: Product, idx: number) => {
+  const getImgSrc = (product: ProductSearch, idx: number) => {
     const imgs = product.images.filter((img) => !!img);
     if (imgs.length === 0)
       return `https://placehold.co/400x300/e2e8f0/94a3b8?text=${encodeURIComponent(product.name)}`;
     return `http://localhost:3000/uploads/${imgs[idx % imgs.length]}`;
   };
-  const getRealImages = (product: Product) =>
+  const getRealImages = (product: ProductSearch) =>
     product.images.filter((img) => !!img);
 
   // Cart state
@@ -151,7 +145,7 @@ const SearchPage = () => {
     if (appliedSearch !== "") params.search = appliedSearch;
 
     api
-      .get<{ success: boolean; data: ProductsResponse }>(
+      .get<{ success: boolean; data: ProductsSearchResponse }>(
         "/api/public/products",
         { params },
       )

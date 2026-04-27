@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-  CATEGORIES,
-  IMG_BASE,
-  LIMIT_OPTIONS,
-  type ProductsResponse,
-  type PublicProduct,
-} from "../constants";
+import { CATEGORIES, IMG_BASE, LIMIT_OPTIONS } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import api, { isAxiosError } from "../lib/Axios";
+import type { ProductsResponse, PublicProduct } from "../types/Product";
 
 const AdminProductsTab = () => {
   const { token } = useAuth();
